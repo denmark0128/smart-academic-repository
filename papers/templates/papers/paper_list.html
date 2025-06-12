@@ -1,0 +1,53 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Paper List{% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">Academic Papers</h1>
+<form action="{% url 'paper_list' %}" method="get" class="mb-4" >
+    <input type="search" class="w-full p-2 border border-gray-300 rounded-md mb-4" placeholder="Search papers" name="q" value="{{ request.GET.q }}">
+    <button type="submit" class="px-4 py-2 bg-red-300 text-white rounded hover:bg-blue-700">Search</button>
+</form>
+
+<a href="{% url 'paper_upload' %}" class="inline-block mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Upload New Paper</a>
+
+<table class="min-w-full border border-gray-300 bg-white shadow-sm rounded-xl overflow-hidden">
+  <thead class="bg-gray-100">
+    <tr>
+      <th class="border px-4 py-2 text-left">Title</th>
+      <th class="border px-4 py-2 text-left">Author</th>
+      <th class="border px-4 py-2 text-left">Uploaded At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in results %}
+    <tr class="hover:bg-gray-50">
+      <td class="border px-4 py-2">
+        <a href="{% url 'paper_detail' item.paper.pk %}" class="text-blue-600 hover:underline">
+          {{ item.paper.title }}
+        </a>
+        {% if item.snippet %}
+          <p class="text-gray-500 text-sm mt-1">… {{ item.snippet|safe }} …</p>
+        {% endif %}
+    
+        {% if item.tags %}
+          <div class="mt-2 space-x-2 text-xs">
+            {% for tag in item.tags %}
+              <span class="inline-block bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                {{ tag }}
+              </span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </td>
+      <td class="border px-4 py-2">{{ item.paper.author }}</td>
+      <td class="border px-4 py-2">{{ item.paper.uploaded_at|date:"M d, Y H:i" }}</td>
+    </tr>
+    
+{% endfor %}
+
+  </tbody>
+</table>
+
+{% endblock %}

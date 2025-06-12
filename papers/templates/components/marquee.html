@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Plain CSS Marquee with Alpine.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <style>
+    /* Container styles */
+    .marquee-container {
+      position: relative;
+      overflow: hidden;
+      background-color: white;
+      padding: 2rem 0;
+    }
+
+    /* Marquee track wrapper */
+    .marquee-track {
+      display: flex;
+      white-space: nowrap;
+      animation: scroll-left 20s linear infinite;
+    }
+
+    /* Marquee animation */
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    /* Gradient overlays */
+    .marquee-overlay-left,
+    .marquee-overlay-right {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 8rem;
+      z-index: 10;
+    }
+
+    .marquee-overlay-left {
+      left: 0;
+      background: linear-gradient(to right, white, transparent);
+    }
+
+    .marquee-overlay-right {
+      right: 0;
+      background: linear-gradient(to left, white, transparent);
+    }
+
+    /* Marquee item style */
+    .marquee-list {
+      display: flex;
+      gap: 4rem;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body class="bg-white text-black">
+
+<div
+  x-data="{
+    pauseOnHover: false,
+    init() {
+      this.$nextTick(() => {
+        const clone = this.$refs.marqueeList.cloneNode(true);
+        this.$refs.marqueeTrack.appendChild(clone);
+      });
+    }
+  }"
+  class="marquee-container"
+>
+  <!-- Gradient Overlays -->
+  <div class="marquee-overlay-left" aria-hidden="true"></div>
+  <div class="marquee-overlay-right" aria-hidden="true"></div>
+
+  <!-- Marquee Track -->
+  <div
+    x-ref="marqueeTrack"
+    class="marquee-track"
+    :class="{ 'paused': pauseOnHover }"
+    @mouseenter="if(pauseOnHover) $el.style.animationPlayState='paused'"
+    @mouseleave="if(pauseOnHover) $el.style.animationPlayState='running'"
+  >
+    <!-- Marquee List -->
+    <div x-ref="marqueeList" class="marquee-list">
+      <h1>RESEARCH PAPERS</h1>
+      <h1>RESEARCH PAPERS</h1>
+      <h1>RESEARCH PAPERS</h1>
+      <h1>RESEARCH PAPERS</h1>
+      <h1>RESEARCH PAPERS</h1>
+      <h1>RESEARCH PAPERS</h1>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

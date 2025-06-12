@@ -1,0 +1,11 @@
+<nav class="bg-gray-800 p-4 text-white">
+  <div class="container mx-auto flex justify-between items-center">
+    <a href="/" class="font-bold text-xl">Academic Repo</a>
+    <ul class="flex space-x-4">
+      <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
+      <li><a href="{% url 'paper_list' %}" class="hover:underline">Papers</a></li>
+      <li><a href="{% url 'paper_upload' %}" class="hover:underline">Upload</a></li>
+      <!-- Add more links as needed -->
+    </ul>
+  </div>
+</nav>
