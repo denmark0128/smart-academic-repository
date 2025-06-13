@@ -19,11 +19,16 @@ from django.urls import path, include
 from papers.views import home
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+from django.shortcuts import redirect
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', lambda request: redirect('/accounts/login/')),
     path('', home, name='home'),  # Root path (homepage)
     path('papers/', include('papers.urls')),
+     path('accounts/', include('allauth.urls')),
 ]
 
 if settings.DEBUG:

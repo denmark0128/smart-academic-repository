@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-
+{% load crispy_forms_tags %}
 {% block title %}Upload New Paper{% endblock %}
 
 {% block content %}
@@ -34,7 +34,7 @@
       <div class="space-y-6">
         <!-- Form fields will be styled by Django, but we can add custom wrapper styling -->
         <div class="form-section">
-          {{ form.as_p }}
+          {{ form|crispy }}
         </div>
       </div>
 

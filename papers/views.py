@@ -12,6 +12,11 @@ def home(request):
     return render(request, 'home.html', {'name': 'John'})
 
 
+def papers_view(request):
+    if request.headers.get('Hx-Request') == 'true':
+        return render(request, "partials/papers.html")  # just content
+    return render(request, "papers.html")  # full layout
+
 def extract_matching_snippet(text, query):
     # Split text into sentences or paragraphs
     paragraphs = re.split(r'(?<=[.!?])\s+|\n+', text)
