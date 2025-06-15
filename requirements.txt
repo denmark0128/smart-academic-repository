@@ -1,0 +1,6 @@
+pymupdf
+faiss-cpu
+langchain
+sentence-transformers
+torch
+numpy

@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from .utils.nlp import extract_tags
 from django.db.models import Q
 import re
+from utils.semantic_search import semantic_search
 
 
 def home(request):
@@ -34,17 +35,30 @@ def paper_list(request):
     papers = Paper.objects.all()
 
     if query:
-        papers = Paper.objects.filter(
-            Q(title__icontains=query) | Q(abstract__icontains=query)
-        )
-        for paper in papers:
-            snippet = extract_matching_snippet(paper.abstract, query)
-            tags = extract_tags(paper.abstract or "")  # Extract tags from abstract
-            results.append({
-                'paper': paper,
-                'snippet': snippet,
-                'tags': tags,
-            })
+        # Use semantic search pipeline
+        try:
+            search_results = semantic_search(query, top_k=5, min_score=0.25)
+            for res in search_results:
+                results.append({
+                    'paper': Paper.objects.filter(title=res['title'], author=res['author']).first(),
+                    'snippet': res['text'],
+                    'tags': [],
+                    'score': f"{res['score']:.3f}",
+                    'page': res.get('page'),
+                })
+        except Exception as e:
+            # fallback to default search if index not built
+            papers = Paper.objects.filter(
+                Q(title__icontains=query) | Q(abstract__icontains=query)
+            )
+            for paper in papers:
+                snippet = extract_matching_snippet(paper.abstract, query)
+                tags = extract_tags(paper.abstract or "")
+                results.append({
+                    'paper': paper,
+                    'snippet': snippet,
+                    'tags': tags,
+                })
     else:
         for paper in papers:
             tags = extract_tags(paper.abstract or "")
@@ -69,7 +83,11 @@ def paper_upload(request):
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            paper = form.save(commit=False)
+            # Extract tags from abstract and save
+            tags = extract_tags(paper.abstract or "")
+            paper.tags = tags
+            paper.save()
             return redirect('paper_list')
     else:
         form = PaperForm()

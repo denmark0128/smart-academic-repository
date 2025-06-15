@@ -18,6 +18,8 @@
       <th class="border px-4 py-2 text-left">Title</th>
       <th class="border px-4 py-2 text-left">Author</th>
       <th class="border px-4 py-2 text-left">Uploaded At</th>
+      <th class="border px-4 py-2 text-left">Score</th>
+      <th class="border px-4 py-2 text-left">Page</th>
     </tr>
   </thead>
   <tbody>
@@ -43,6 +45,8 @@
       </td>
       <td class="border px-4 py-2">{{ item.paper.author }}</td>
       <td class="border px-4 py-2">{{ item.paper.uploaded_at|date:"M d, Y H:i" }}</td>
+      <td class="border px-4 py-2">{{ item.score|default:"-" }}</td>
+      <td class="border px-4 py-2">{{ item.page|default:"-" }}</td>
     </tr>
     
 {% endfor %}

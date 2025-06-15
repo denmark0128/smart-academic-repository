@@ -7,6 +7,7 @@ class Paper(models.Model):
     abstract = models.TextField()
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='papers/')
+    tags = models.JSONField(default=list, blank=True)  # Store tags as a list of strings
 
     def __str__(self):
         return self.title
