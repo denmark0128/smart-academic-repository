@@ -120,12 +120,20 @@ def semantic_search(query, top_k=5, min_score=0.25):
     metadata = load_metadata()
     query_emb = model.encode([query], convert_to_numpy=True)
     faiss.normalize_L2(query_emb)
-    D, I = index.search(query_emb, top_k)
+    D, I = index.search(query_emb, top_k * 10)  # Search more to allow filtering
     results = []
+    seen_titles = {}
     for score, idx in zip(D[0], I[0]):
         if idx < len(metadata) and score >= min_score:
             meta = metadata[idx].copy()
-            meta['score'] = float(score)
-            meta['text'] = highlight_query(meta['text'], query)
-            results.append(meta)
+            title = meta.get('title', '')
+            if title not in seen_titles or score > seen_titles[title]['score']:
+                meta['score'] = float(score)
+                meta['text'] = highlight_query(meta['text'], query)
+                seen_titles[title] = meta
+        if len(seen_titles) >= top_k:
+            break
+    results = list(seen_titles.values())
+    # Optionally, sort by score descending
+    results.sort(key=lambda x: x['score'], reverse=True)
     return results
