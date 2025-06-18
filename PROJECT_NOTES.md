@@ -21,6 +21,8 @@ This notepad documents all major changes, features, and improvements made to the
 - Tags are displayed for each paper in the list.
 - Introduction chunk logic was added and later removed per user request (no introduction chunk in current version).
 - Score and Page columns in the paper list table are commented out (hidden by default).
+- Paper list: changed the ui from table to whole 
+- Navbar: changed the style to white bg and black text.
 
 ## 4. Management & Maintenance
 - Provided instructions for running management commands to update tags.
