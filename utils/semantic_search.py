@@ -137,3 +137,23 @@ def semantic_search(query, top_k=5, min_score=0.25):
     # Optionally, sort by score descending
     results.sort(key=lambda x: x['score'], reverse=True)
     return results
+
+def keyword_search(query, top_k=5):
+    """
+    Simple case-insensitive keyword search across all fields (text, title, author).
+    Returns up to top_k unique papers (highest match per title).
+    """
+    metadata = load_metadata()
+    query_lower = query.lower()
+    seen_titles = {}
+    for meta in metadata:
+        haystack = f"{meta.get('text','')} {meta.get('title','')} {meta.get('author','')}".lower()
+        if query_lower in haystack:
+            title = meta.get('title', '')
+            if title not in seen_titles:
+                meta_copy = meta.copy()
+                meta_copy['match_type'] = 'keyword'
+                seen_titles[title] = meta_copy
+            if len(seen_titles) >= top_k:
+                break
+    return list(seen_titles.values())

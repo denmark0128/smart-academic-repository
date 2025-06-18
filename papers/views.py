@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from .utils.nlp import extract_tags
 from django.db.models import Q
 import re
-from utils.semantic_search import semantic_search
+from utils.semantic_search import semantic_search, keyword_search
 
 
 def home(request):
@@ -35,15 +35,19 @@ def paper_list(request):
     papers = Paper.objects.all()
 
     if query:
-        # Use semantic search pipeline
+        # Use keyword search first
         try:
-            search_results = semantic_search(query, top_k=5, min_score=0.25)
+            search_results = keyword_search(query, top_k=5)
+            if not search_results:
+                # Fallback to semantic search if keyword search returns nothing
+                search_results = semantic_search(query, top_k=5, min_score=0.25)
             for res in search_results:
                 results.append({
                     'paper': Paper.objects.filter(title=res['title'], author=res['author']).first(),
-                    'snippet': res['text'],
+                    'snippet': res.get('text', ''),
                     'tags': [],
-                    'score': f"{res['score']:.3f}",
+                    'score': f"{res.get('score', '-')}",
+
                     'page': res.get('page'),
                 })
         except Exception as e:

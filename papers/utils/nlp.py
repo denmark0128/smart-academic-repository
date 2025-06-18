@@ -52,7 +52,14 @@ def load_bank_of_words(path='bank_of_words.txt'):
         pass
     return bank
 
-BANK_OF_WORDS = load_bank_of_words()
+# Add general topic tags
+GENERAL_TOPICS = [
+    "computer science", "environmental science", "psychology", "medicine", "biology",
+    "physics", "mathematics", "engineering", "chemistry", "social science", "economics",
+    "education", "political science", "philosophy", "history", "art", "literature"
+]
+
+BANK_OF_WORDS = load_bank_of_words().union(set(GENERAL_TOPICS))
 
 def extract_tags(text, top_n=8):
     # Use the bank of words as tag candidates
