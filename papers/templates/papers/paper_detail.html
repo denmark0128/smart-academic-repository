@@ -5,6 +5,17 @@
 {% block content %}
 
 <div class="max-w-4xl mx-auto p-6 bg-white">
+  <div 
+  x-data="savePaper({{ paper.pk }}, {{ paper in user.saved_papers.all.values_list('paper', flat=True)|yesno:'true,false' }})"
+  class="mt-2"
+>
+  <button 
+    x-text="isSaved ? 'Unsave Paper' : 'Save Paper'"
+    @click="toggleSave"
+    class="px-4 py-2 rounded text-white font-semibold transition"
+    :class="isSaved ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'"
+  ></button>
+</div>
   <!-- Header Section -->
   <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-100">
     <h1 class="text-3xl font-bold text-gray-900 mb-3 leading-tight">{{ paper.title }}</h1>
@@ -80,4 +91,8 @@
   </div>
 </div>
 
+
+
 {% endblock %}
+
+         

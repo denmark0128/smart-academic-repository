@@ -18,7 +18,7 @@
     <style>
         /* Optional: customize color and thickness */
         #nprogress .bar {
-            background: #000000; /* Tailwind's blue-600 */
+            background: #000000; 
             height: 3px;
         }
     </style>
@@ -61,6 +61,38 @@
         });
     });
     </script>
+    <script>
+    function saveController(paperId, initiallySaved) {
+    return {
+        isSaved: initiallySaved,
+        async toggleSave() {
+        const url = this.isSaved
+            ? `/papers/${paperId}/unsave/`
+            : `/papers/${paperId}/save/`;
+
+        try {
+            const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            });
+
+            if (response.ok) {
+            this.isSaved = !this.isSaved;
+            } else {
+            alert('Something went wrong while saving.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to connect to server.');
+        }
+        }
+    }
+    }
+    </script>
+
 
 </body>
 </html>

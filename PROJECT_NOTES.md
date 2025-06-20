@@ -21,14 +21,17 @@ This notepad documents all major changes, features, and improvements made to the
 - Tags are displayed for each paper in the list.
 - Introduction chunk logic was added and later removed per user request (no introduction chunk in current version).
 - Score and Page columns in the paper list table are commented out (hidden by default).
-- Paper list: changed the ui from table to whole 
-- Navbar: changed the style to white bg and black text.
+- Paper list: changed the ui from table to whole (June 18)
+- Navbar: changed the style to white bg and black text. (June 18)
 
 ## 4. Management & Maintenance
 - Provided instructions for running management commands to update tags.
 - Provided guidance for reverting changes and best practices for server restarts after code edits.
 
----
+## 5. Profile Page
+- Added profile page skeleton (June 18)
+- Saving papers wip 
+
 
 ## How to Use This Notepad
 - Add a new section for each new feature, bugfix, or major edit.
@@ -36,5 +39,5 @@ This notepad documents all major changes, features, and improvements made to the
 - Use this as a running log to continue your work in future sessions or new chats.
 
 ---
-
-_Last updated: June 17, 2025_
+_Created at: June 17, 2025_
+_Last updated: June 18, 2025_

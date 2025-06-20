@@ -4,13 +4,18 @@
 
 {% block content %}
 <div class="flex flex-col items-start min-h-[60vh]">
+  {% if query %}
+    <h2 class="text-lg font-semibold mb-4">
+      {{ results|length }} result{{ results|length|pluralize }} for “<span class="text-black">{{ query }}</span>”
+    </h2>
+  {% endif %}
   <div class="w-full max-w-5xl px-4">
 
     <!-- Search Results -->
     {% for item in results %}
       <div class="mb-8 border-b border-gray-200 pb-4">
         <!-- Title -->
-        <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl text-blue-700 font-semibold hover:underline">
+        <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl text-blue-800 font-semibold hover:underline">
           {{ item.paper.title }}
         </a>
 
@@ -51,7 +56,7 @@
         {% endif %}
       </div>
     {% empty %}
-      <div class="text-center text-gray-500 mt-12">No results found.</div>
+      <div class="text-center text-gray-500 mt-12">No results found. </div>
     {% endfor %}
 
   </div>

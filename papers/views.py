@@ -1,12 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Paper
+from .models import Paper, SavedPaper
 from .forms import PaperForm
 #from .models import AcademicPaper
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .utils.nlp import extract_tags
 from django.db.models import Q
 import re
 from utils.semantic_search import semantic_search, keyword_search
+from django.contrib.auth.decorators import login_required
 
 
 def home(request):
@@ -43,6 +44,7 @@ def paper_list(request):
                 search_results = semantic_search(query, top_k=5, min_score=0.25)
             for res in search_results:
                 results.append({
+                    'query': query, 
                     'paper': Paper.objects.filter(title=res['title'], author=res['author']).first(),
                     'snippet': res.get('text', ''),
                     'tags': [],
@@ -59,6 +61,7 @@ def paper_list(request):
                 snippet = extract_matching_snippet(paper.abstract, query)
                 tags = extract_tags(paper.abstract or "")
                 results.append({
+                    'query': query,
                     'paper': paper,
                     'snippet': snippet,
                     'tags': tags,
@@ -67,6 +70,7 @@ def paper_list(request):
         for paper in papers:
             tags = extract_tags(paper.abstract or "")
             results.append({
+                'query': query,
                 'paper': paper,
                 'snippet': "",
                 'tags': tags,
@@ -96,3 +100,24 @@ def paper_upload(request):
     else:
         form = PaperForm()
     return render(request, 'papers/paper_upload.html', {'form': form})
+
+@login_required
+def profile_page(request):
+    return render(request, 'profile/show.html', {'user': request.user})
+
+@login_required
+def save_paper(request, pk):
+    paper = get_object_or_404(Paper, pk=pk)
+    SavedPaper.objects.get_or_create(user=request.user, paper=paper)
+    return JsonResponse({'status': 'saved'})
+
+@login_required
+def unsave_paper(request, pk):
+    paper = get_object_or_404(Paper, pk=pk)
+    SavedPaper.objects.filter(user=request.user, paper=paper).delete()
+    return JsonResponse({'status': 'unsaved'})
+
+@login_required
+def saved_papers_list(request):
+    saved_papers = SavedPaper.objects.filter(user=request.user).select_related('paper')
+    return render(request, 'profile/saved_papers.html', {'saved_papers': saved_papers})

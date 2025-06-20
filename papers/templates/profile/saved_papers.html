@@ -1,0 +1,13 @@
+{% extends 'layouts/base.html' %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">Saved Papers</h2>
+<ul class="space-y-2">
+  {% for item in saved_papers %}
+    <li>
+      <a href="{% url 'paper_detail' item.paper.pk %}" class="text-blue-700 hover:underline">{{ item.paper.title }}</a>
+    </li>
+  {% empty %}
+    <li>No saved papers yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

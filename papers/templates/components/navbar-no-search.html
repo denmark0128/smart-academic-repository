@@ -10,7 +10,8 @@
       <li><a href="{% url 'paper_list' %}" class="hover:underline">Papers</a></li>
       <li><a href="{% url 'paper_upload' %}" class="hover:underline">Upload</a></li>
       {% if user.is_authenticated %}
-        <li class="text-black font-semibold">Hi, {{ user.username }}</li>
+      <li><a href="{% url 'profile_page' %}" class="hover:underline">Hi, {{ user.username }}</a></li>
+
         <li><a href="{% url 'account_logout' %}" class="hover:underline">Logout</a></li>
       {% else %}
         <li><a href="{% url 'account_login' %}" class="hover:underline">Login</a></li>
