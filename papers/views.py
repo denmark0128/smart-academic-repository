@@ -6,6 +6,8 @@ from django.http import HttpResponse, JsonResponse
 from .utils.nlp import extract_tags
 from django.db.models import Q
 import re
+from django.conf import settings
+from django.utils.http import urlencode
 from utils.semantic_search import semantic_search, keyword_search
 from django.contrib.auth.decorators import login_required
 
@@ -80,12 +82,18 @@ def paper_list(request):
 
 def paper_detail(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
-    tags = extract_tags(paper.abstract or paper.content or "")  # Adjust field as needed
+    tags = extract_tags(paper.abstract or paper.content or "")
+    
+    # Absolute URL for PDF
+    pdf_url = request.build_absolute_uri(paper.file.url)
+    viewer_url = f"{settings.STATIC_URL}pdfjs/web/viewer.html?{urlencode({'file': pdf_url})}"
 
     return render(request, 'papers/paper_detail.html', {
         'paper': paper,
         'tags': tags,
+        'viewer_url': viewer_url,
     })
+
 
 def paper_upload(request):
     if request.method == 'POST':
@@ -121,3 +129,9 @@ def unsave_paper(request, pk):
 def saved_papers_list(request):
     saved_papers = SavedPaper.objects.filter(user=request.user).select_related('paper')
     return render(request, 'profile/saved_papers.html', {'saved_papers': saved_papers})
+
+def pdf_viewer(request, pk):
+    paper = get_object_or_404(Paper, pk=pk)
+    return render(request, 'papers/pdf_reader.html', {
+        'pdf_url': paper.pdf_file.url  # e.g., "/media/papers/sample.pdf"
+    })
