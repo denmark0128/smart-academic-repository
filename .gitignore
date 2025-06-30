@@ -1,0 +1,15 @@
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore local configs and OS files
+.DS_Store
+*.sqlite3
+
+# VSCode and PyCharm folders
+.vscode/
+.idea/
