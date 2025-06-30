@@ -1,18 +1,35 @@
-<nav class="bg-gray-800 p-4 text-white">
-  <div class="container mx-auto flex justify-between items-center">
+<nav class="bg-white p-4 text-black">
+  <div class="container mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <!-- Logo -->
     <a href="/" class="font-bold text-xl">Academic Repo</a>
-    <ul class="flex space-x-4">
+
+    <!-- Search -->
+    <form action="{% url 'paper_list' %}" method="get" class="flex flex-1 flex-col sm:flex-row items-center gap-2">
+      <input
+        type="search"
+        name="q"
+        placeholder="Search papers, authors, or topics..."
+        value="{{ request.GET.q }}"
+        class="flex-1 p-2 rounded-md border-[1px] border-b  lack focus:ring-2 focus:ring-black focus:outline-none transition"
+      >
+      <button type="submit" class="px-4 py-2 text-black bg-white border-black border-[1px] rounded-md font-semibold hover:bg-black hover:text-white hover:border-white transition">
+        Search
+      </button>
+    </form>
+
+
+    <!-- Nav Links -->
+    <ul class="flex flex-wrap justify-center sm:justify-end items-center gap-4 text-sm">
       <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
       <li><a href="{% url 'paper_list' %}" class="hover:underline">Papers</a></li>
       <li><a href="{% url 'paper_upload' %}" class="hover:underline">Upload</a></li>
       {% if user.is_authenticated %}
-        <li class="text-gray-300">Hi, {{ user.username }}</li>
+        <li><a href="{% url 'profile_page' %}" class="hover:underline">Hi, {{ user.username }}</a></li>
         <li><a href="{% url 'account_logout' %}" class="hover:underline">Logout</a></li>
       {% else %}
         <li><a href="{% url 'account_login' %}" class="hover:underline">Login</a></li>
         <li><a href="{% url 'account_signup' %}" class="hover:underline">Register</a></li>
       {% endif %}
-      <!-- Add more links as needed -->
     </ul>
   </div>
 </nav>

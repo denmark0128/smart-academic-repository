@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Academic Repo{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+    <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"
+    ></script>
+  
+  <!-- Alpine Core -->
+    <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
+    <style>
+        /* Optional: customize color and thickness */
+        #nprogress .bar {
+            background: #2563eb; /* Tailwind's blue-600 */
+            height: 3px;
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+    {% include 'components/navbar-no-search.html' %}
+</head>
+<body class="bg-gray-100">
+    {% include 'components/marquee.html' %}
+    <div id="main-content" class="container mx-auto p-6">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+    <!-- NProgress JS -->
+    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+    <script>
+    // Start progress on page navigation
+    window.addEventListener('beforeunload', () => {
+        NProgress.start();
+    });
+
+    // Optional: stop progress if navigation is interrupted or error
+    window.addEventListener('load', () => {
+        NProgress.done();
+    });
+
+    // Optional: also trigger on form submits
+    document.addEventListener('DOMContentLoaded', () => {
+        const forms = document.querySelectorAll("form");
+        forms.forEach(form => {
+        form.addEventListener("submit", () => {
+            NProgress.start();
+        });
+        });
+    });
+    </script>
+</body>
+</html>

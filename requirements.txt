@@ -1,0 +1,7 @@
+Django==5.2.2
+pymupdf
+faiss-cpu
+langchain
+sentence-transformers
+torch
+numpy

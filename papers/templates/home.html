@@ -1,10 +1,28 @@
-{% extends 'layouts/base.html' %}
+{% extends 'layouts/home.html' %}
 
 {% block content %}
+<div class="flex flex-col items-center justify-center min-h-[60vh]">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">Welcome to the Academic Paper Repository</h1>
+  <div class="w-full items-center justify-center max-w-2x ">
+    
+    <form action="{% url 'paper_list' %}" method="get"
+      class="w-full flex flex-col gap-2 items-center justify-center mb-4">
+        <input type="search"
+                name="q"
+                class="w-full sm:w-2/3 p-3 border-[1px] border-black rounded-md focus:ring-1 focus:ring-black focus:outline-none transition"
+                placeholder="Search papers, authors, or topics..."
+                value="{{ request.GET.q }}">
+                
+        <button type="submit"
+                class="w-[100px] sm:w-2/3 px-6 py-2 bg-black text-white rounded-md font-semibold border-[1px] hover:border-black hover:bg-white hover:text-black transition">
+            Search
+        </button>
+    </form>
 
-
-<form action="{% url 'paper_list' %}" method="get" class="mb-4 flex-col justify-center items-center" >
-    <input type="search" class="w-full p-2 border border-gray-300 rounded-md mb-4" placeholder="Search papers" name="q" value="{{ request.GET.q }}">
-    <button type="submit" class="px-4 py-2 bg-red-300 text-white rounded hover:bg-blue-700 items-center justify-center">Search</button>
-</form>
+    <div class="mt-6 flex flex-col gap-2 text-center">
+      <a href="{% url 'paper_upload' %}" class="text-black hover:underline font-medium">Upload a Paper</a>
+      <a href="{% url 'paper_list' %}" class="text-black hover:underline font-medium">Browse All Papers</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

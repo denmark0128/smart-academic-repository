@@ -1,37 +1,68 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block title %}{{ paper.title }}{% endblock %}
 
 {% block content %}
+<div class="max-w-6xl mx-auto p-6 bg-white space-y-6">
 
-<div class="max-w-4xl mx-auto p-6 bg-white">
-  <!-- Header Section -->
-  <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-100">
-    <h1 class="text-3xl font-bold text-gray-900 mb-3 leading-tight">{{ paper.title }}</h1>
-    <div class="flex items-center text-gray-600 mb-4">
+  <!-- Title + Author -->
+  <div class="border-b pb-4">
+    <h1 class="text-3xl font-bold text-gray-900 leading-tight">{{ paper.title }}</h1>
+    <div class="flex items-center text-gray-600 mt-2">
       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
       </svg>
       <span class="font-medium">{{ paper.author }}</span>
     </div>
   </div>
 
-  <!-- Abstract Section -->
-  <div class="bg-gray-50 rounded-lg p-6 mb-8 border border-gray-200">
-    <h2 class="text-xl font-semibold text-gray-900 mb-3 flex items-center">
-      <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-      </svg>
-      Abstract
-    </h2>
-    <p class="text-gray-700 leading-relaxed">{{ paper.abstract }}</p>
+  <!-- Save Button -->
+  <div 
+    x-data="savePaper({{ paper.pk }}, {{ is_saved|yesno:'true,false' }})"
+    class="mt-2"
+  >
+    <button 
+      x-text="isSaved ? 'Unsave Paper' : 'Save Paper'"
+      @click="toggleSave"
+      class="px-4 py-2 rounded text-white font-semibold transition"
+      :class="isSaved ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'"
+    ></button>
   </div>
 
-  <!-- Tags Section -->
-  <div class="mb-8">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+  <!-- Grid: Abstract (Left) and Actions (Right) -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Abstract -->
+    <div class="md:col-span-2 bg-gray-50 rounded-lg p-6 border border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900 mb-3 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Abstract
+      </h2>
+      <p class="text-gray-700 leading-relaxed">{{ paper.abstract }}</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="space-y-4">
+      <a href="{{ paper.file.url }}" 
+         download 
+         class="block w-full text-center px-4 py-3 bg-black text-white border-[1px] font-medium rounded-lg hover:bg-white hover:text-black hover:border-black transition">
+        Download PDF
+      </a>
+      <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ paper.file.url }}" 
+         target="_blank"
+         class="block w-full text-center px-4 py-3 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 transition">
+        View in PDF Viewer
+      </a>
+        <!-- Tags -->
+  <div>
+    <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
       <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
       </svg>
       Tags
     </h3>
@@ -47,37 +78,10 @@
       {% endfor %}
     </div>
   </div>
-
-  <!-- Download Button -->
-  <div class="mb-8">
-    <a href="{{ paper.file.url }}" 
-       download 
-       class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md hover:shadow-lg">
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-      </svg>
-      Download PDF
-    </a>
-  </div>
-
-  <!-- PDF Viewer Section -->
-  <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-    <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-        <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-        </svg>
-        Document Preview
-      </h3>
-    </div>
-    <div class="p-1">
-      <embed src="{{ paper.file.url }}" 
-             width="100%" 
-             height="700px" 
-             type="application/pdf"
-             class="rounded border border-gray-100" />
     </div>
   </div>
+
+
+
 </div>
-
 {% endblock %}
