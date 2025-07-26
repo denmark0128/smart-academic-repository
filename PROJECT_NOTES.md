@@ -9,10 +9,12 @@ This notepad documents all major changes, features, and improvements made to the
 - Added logic to return only the highest-scoring chunk per paper title in search results.
 - Added fallback to keyword search (case-insensitive, across text, title, and author) if semantic search returns no results.
 - Switched priority: keyword search is now used first, then semantic search as fallback.
+- Search result now include tags (July 20)
 
 ## 2. Tag Extraction
 - Tag extraction uses a bank of words and now includes general academic topics (e.g., computer science, medicine, biology, etc.).
 - Added a management command to re-extract and update tags for all existing papers.
+- Tag extraction now includes the title (July 20)
 
 ## 3. UI/UX Enhancements
 - Home and paper list pages restyled for academic, elegant look using Tailwind CSS and Alpine.js.

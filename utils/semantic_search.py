@@ -64,16 +64,35 @@ def index_paper(pdf_path, title, author):
     pages = extract_text_from_pdf(pdf_path)
     chunks = chunk_text(pages)
     embeddings = embed_chunks(chunks)
-    index = build_faiss_index(embeddings)
-    save_index(index)
-    # Add metadata
-    metadata = []
+
+    # Try to load existing index and metadata
+    try:
+        index = load_index()
+        metadata = load_metadata()
+    except Exception:
+        index = None
+        metadata = []
+
+    if index is not None and len(metadata) > 0:
+        # Append to existing index and metadata
+        faiss.normalize_L2(embeddings)
+        index.add(embeddings)
+        save_index(index)
+        offset = len(metadata)
+    else:
+        # Create new index and metadata
+        index = build_faiss_index(embeddings)
+        save_index(index)
+        offset = 0
+        metadata = []
+
+    # Add new metadata with correct chunk_id
     for i, chunk in enumerate(chunks):
         metadata.append({
             'title': title,
             'author': author,
             'page': chunk['page'],
-            'chunk_id': i,
+            'chunk_id': offset + i,
             'text': chunk['text'],
         })
     save_metadata(metadata)

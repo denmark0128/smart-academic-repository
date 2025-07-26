@@ -10,10 +10,8 @@
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
-    <script
-    defer
-    src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
     <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
     <style>
         /* Optional: customize color and thickness */
@@ -62,36 +60,27 @@
     });
     </script>
     <script>
-    function saveController(paperId, initiallySaved) {
+  function savePaper(paperId, initialState) {
     return {
-        isSaved: initiallySaved,
-        async toggleSave() {
-        const url = this.isSaved
-            ? `/papers/${paperId}/unsave/`
-            : `/papers/${paperId}/save/`;
-
+      isSaved: initialState,
+      async toggleSave() {
+        const url = this.isSaved ? `/unsave/${paperId}/` : `/save/${paperId}/`;
         try {
-            const response = await fetch(url, {
-            method: 'POST',
+          const response = await fetch(url, {
+            method: "POST",
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
+              "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
             },
-            });
+          });
+          if (response.ok) this.isSaved = !this.isSaved;
+        } catch (e) {
+          console.error(e);
+        }
+      },
+    };
+  }
+</script>
 
-            if (response.ok) {
-            this.isSaved = !this.isSaved;
-            } else {
-            alert('Something went wrong while saving.');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Failed to connect to server.');
-        }
-        }
-    }
-    }
-    </script>
 
 
 </body>

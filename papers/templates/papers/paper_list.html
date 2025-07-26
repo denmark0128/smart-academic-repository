@@ -12,17 +12,22 @@
   <div class="w-full max-w-5xl px-4">
 
     <!-- Search Results -->
-    {% for item in results %}
+    {% for item in page_obj %}
       <div class="mb-8 border-b border-gray-200 pb-4">
         <!-- Title -->
-        <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl text-blue-800 font-semibold hover:underline">
-          {{ item.paper.title }}
-        </a>
+        {% if item.paper %}
+          <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl text-blue-800 font-semibold hover:underline">
+            {{ item.paper.title }}
+          </a>
+        {% else %}
+          <span class="text-xl text-gray-400 font-semibold">[Paper not found]</span>
+        {% endif %}
 
         <!-- Author and Upload Date -->
         <div class="text-sm text-gray-500 mt-1">
           By {{ item.paper.author }} • {{ item.paper.uploaded_at|date:"M d, Y H:i" }}
         </div>
+
 
         <!-- Snippet -->
         <div x-data="{ expanded: false }" class="mt-2 text-gray-600 text-sm leading-relaxed">
@@ -41,7 +46,14 @@
             {% else %}
                {{ item.snippet|safe }} 
             {% endif %}
+        </div>
+
+        {% if item.paper.summary %}
+          <div class="mt-2 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+            <span class="font-semibold text-yellow-800">Summary:</span>
+            <span class="text-gray-800">{{ item.paper.summary }}</span>
           </div>
+        {% endif %}
 
 
         <!-- Tags -->
@@ -59,6 +71,24 @@
       <div class="text-center text-gray-500 mt-12">No results found. </div>
     {% endfor %}
 
+    <!-- Pagination Controls -->
+    <div class="mt-8 flex justify-center">
+      <nav class="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 rounded-l-md">Previous</a>
+        {% else %}
+          <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-l-md cursor-not-allowed">Previous</span>
+        {% endif %}
+
+        <span class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-700">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 rounded-r-md">Next</a>
+        {% else %}
+          <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-r-md cursor-not-allowed">Next</span>
+        {% endif %}
+      </nav>
+    </div>
   </div>
 </div>
 {% endblock %}

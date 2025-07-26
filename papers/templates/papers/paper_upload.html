@@ -4,6 +4,17 @@
 
 {% block content %}
 
+<!-- Status Modal -->
+{% if status == 'success' %}
+<div x-data="{ open: true }" x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-grey-200 bg-opacity-20">
+  <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
+    <h2 class="text-xl font-bold mb-2 text-green-700">File Uploaded &amp; Indexed</h2>
+    <p class="text-gray-700 mb-4">Your paper was successfully uploaded and indexed for search.</p>
+    <button @click="open = false" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Close</button>
+  </div>
+</div>
+{% endif %}
+
 <div class="max-w-2xl mx-auto p-6">
   <!-- Header Section -->
   <div class="text-center mb-8">
@@ -27,7 +38,7 @@
       </h2>
     </div>
     
-    <form class="p-6 space-y-6" method="POST" enctype="multipart/form-data">
+    <form id="upload-form" class="p-6 space-y-6" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       
       <!-- Custom Form Styling -->
@@ -53,6 +64,22 @@
           </svg>
           Upload Paper
         </button>
+    </form>
+
+    <!-- Processing Spinner/Message -->
+    <div id="processing-spinner" style="display:none;" class="flex flex-col items-center justify-center mt-8">
+      <svg class="animate-spin h-8 w-8 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+      <p class="text-blue-700 font-semibold">Processing your paper. This may take up to a few minutes. Please do not close this page...</p>
+    </div>
+
+    <script>
+      document.getElementById('upload-form').addEventListener('submit', function() {
+        document.getElementById('processing-spinner').style.display = 'flex';
+      });
+    </script
       </div>
     </form>
   </div>

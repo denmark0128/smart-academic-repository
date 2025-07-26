@@ -7,5 +7,5 @@ urlpatterns = [
     path('upload/', views.paper_upload, name='paper_upload'),
     path('profile/', views.profile_page, name='profile_page'),
     path('papers/<int:pk>/save/', views.save_paper, name='save_paper'),
-    path('profile/saved/', views.saved_papers_list, name='saved_papers'),
+    path('saved/', views.saved_papers_view, name='saved_papers'),
 ]

@@ -26,6 +26,7 @@ data mining
 natural language processing
 database
 web development
+systems development
 cybersecurity
 computer vision
 data structures

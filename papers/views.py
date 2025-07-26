@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.paginator import Paginator
 from .models import Paper, SavedPaper
 from .forms import PaperForm
 #from .models import AcademicPaper
@@ -8,7 +9,7 @@ from django.db.models import Q
 import re
 from django.conf import settings
 from django.utils.http import urlencode
-from utils.semantic_search import semantic_search, keyword_search
+from utils.semantic_search import semantic_search, keyword_search, index_paper
 from django.contrib.auth.decorators import login_required
 
 
@@ -45,13 +46,13 @@ def paper_list(request):
                 # Fallback to semantic search if keyword search returns nothing
                 search_results = semantic_search(query, top_k=5, min_score=0.25)
             for res in search_results:
+                paper_obj = Paper.objects.filter(title=res['title'], author=res['author']).first()
                 results.append({
                     'query': query, 
-                    'paper': Paper.objects.filter(title=res['title'], author=res['author']).first(),
+                    'paper': paper_obj,
                     'snippet': res.get('text', ''),
-                    'tags': [],
+                    'tags': paper_obj.tags if paper_obj else [],
                     'score': f"{res.get('score', '-')}",
-
                     'page': res.get('page'),
                 })
         except Exception as e:
@@ -61,28 +62,29 @@ def paper_list(request):
             )
             for paper in papers:
                 snippet = extract_matching_snippet(paper.abstract, query)
-                tags = extract_tags(paper.abstract or "")
                 results.append({
                     'query': query,
                     'paper': paper,
                     'snippet': snippet,
-                    'tags': tags,
+                    'tags': paper.tags,
                 })
     else:
         for paper in papers:
-            tags = extract_tags(paper.abstract or "")
             results.append({
                 'query': query,
                 'paper': paper,
                 'snippet': "",
-                'tags': tags,
+                'tags': paper.tags,
         })
+            
+    paginator = Paginator(results, 3)  # Show 10 items per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
 
-    return render(request, 'papers/paper_list.html', {'results': results, 'query': query})
+    return render(request, 'papers/paper_list.html', {'results': results, 'query': query , 'page_obj': page_obj})
 
 def paper_detail(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
-    tags = extract_tags(paper.abstract or paper.content or "")
     
     # Absolute URL for PDF
     pdf_url = request.build_absolute_uri(paper.file.url)
@@ -90,7 +92,7 @@ def paper_detail(request, pk):
 
     return render(request, 'papers/paper_detail.html', {
         'paper': paper,
-        'tags': tags,
+        'tags': paper.tags,
         'viewer_url': viewer_url,
     })
 
@@ -100,24 +102,51 @@ def paper_upload(request):
         form = PaperForm(request.POST, request.FILES)
         if form.is_valid():
             paper = form.save(commit=False)
-            # Extract tags from abstract and save
-            tags = extract_tags(paper.abstract or "")
+            paper.is_indexed = False  # Initially set to False
+
+            # Extract tags from abstract
+            tags = extract_tags((paper.title or "") + " " + (paper.abstract or "") + " " + (paper.summary or ""))
             paper.tags = tags
             paper.save()
-            return redirect('paper_list')
+
+            # Auto-generate summary and embed for semantic search
+            if paper.file:
+                try:
+                    # --- Auto-summary ---
+                    from utils.summarize import extract_text_from_pdf, summarize_text
+                    text = extract_text_from_pdf(paper.file.path)
+                    print(f"[DEBUG] Extracted text length: {len(text)}")
+                    summary = summarize_text(text)
+                    print(f"[DEBUG] Summary: {summary}")
+                    paper.summary = summary
+                    paper.save(update_fields=['summary'])
+                except Exception as e:
+                    import traceback
+                    print(f"[Summary Error] {e}")
+                    traceback.print_exc()
+                try:
+                    index_paper(paper.file.path, paper.title, paper.author)
+                    paper.is_indexed = True  # Set to True after successful indexing
+                    paper.save(update_fields=['is_indexed'])
+                except Exception as e:
+                    print(f"[Embedding Error] {e}")
+
+            return redirect('/papers/upload?status=success')
     else:
         form = PaperForm()
-    return render(request, 'papers/paper_upload.html', {'form': form})
+    status = request.GET.get('status')
+    return render(request, 'papers/paper_upload.html', {'form': form, 'status': status})
+
 
 @login_required
 def profile_page(request):
     return render(request, 'profile/show.html', {'user': request.user})
 
 @login_required
-def save_paper(request, pk):
-    paper = get_object_or_404(Paper, pk=pk)
+def save_paper(request, paper_id):
+    paper = get_object_or_404(Paper, id=paper_id)
     SavedPaper.objects.get_or_create(user=request.user, paper=paper)
-    return JsonResponse({'status': 'saved'})
+    return redirect(request.META.get('HTTP_REFERER', 'paper_list'))
 
 @login_required
 def unsave_paper(request, pk):
@@ -126,9 +155,9 @@ def unsave_paper(request, pk):
     return JsonResponse({'status': 'unsaved'})
 
 @login_required
-def saved_papers_list(request):
-    saved_papers = SavedPaper.objects.filter(user=request.user).select_related('paper')
-    return render(request, 'profile/saved_papers.html', {'saved_papers': saved_papers})
+def saved_papers_view(request):
+    saved = SavedPaper.objects.filter(user=request.user).select_related('paper')
+    return render(request, 'papers/saved_papers.html', {'saved_papers': saved})
 
 def pdf_viewer(request, pk):
     paper = get_object_or_404(Paper, pk=pk)

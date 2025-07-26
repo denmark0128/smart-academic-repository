@@ -7,7 +7,7 @@
 <div class="max-w-6xl mx-auto p-6 bg-white space-y-6">
 
   <!-- Title + Author -->
-  <div class="border-b pb-4">
+  <div class="pb-4">
     <h1 class="text-3xl font-bold text-gray-900 leading-tight">{{ paper.title }}</h1>
     <div class="flex items-center text-gray-600 mt-2">
       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -18,16 +18,16 @@
     </div>
   </div>
 
-  <!-- Save Button -->
+  <!-- Save/Unsave Button -->
   <div 
     x-data="savePaper({{ paper.pk }}, {{ is_saved|yesno:'true,false' }})"
-    class="mt-2"
+    class="mt-2 flex gap-2 p-4 rounded-lg shadow-sm bg-white border border-gray-200"
   >
     <button 
       x-text="isSaved ? 'Unsave Paper' : 'Save Paper'"
       @click="toggleSave"
-      class="px-4 py-2 rounded text-white font-semibold transition"
-      :class="isSaved ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'"
+      class="px-4 py-2 rounded font-semibold transition border border-gray-300"
+      :class="isSaved ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-green-600 text-white hover:bg-green-700'"
     ></button>
   </div>
 
@@ -43,6 +43,17 @@
         Abstract
       </h2>
       <p class="text-gray-700 leading-relaxed">{{ paper.abstract }}</p>
+      {% if paper.summary %}
+        <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+          <h3 class="text-lg font-semibold text-yellow-800 mb-2 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01" />
+            </svg>
+            Summary
+          </h3>
+          <div class="text-gray-800">{{ paper.summary }}</div>
+        </div>
+      {% endif %}
     </div>
 
     <!-- Actions -->
