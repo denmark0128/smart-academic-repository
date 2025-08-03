@@ -32,14 +32,25 @@ This notepad documents all major changes, features, and improvements made to the
 
 ## 5. Profile Page
 - Added profile page skeleton (June 18)
-- Saving papers wip 
+- Saving papers wip  
 
+## 6. Citation Matching System (August 3)
+- Implemented citation matching using the same SentenceTransformer model (`all-MiniLM-L6-v2`) for title similarity.
+- Combined title similarity, author surname overlap, and year match to calculate a final similarity score.
+- Matching formula:  
+  `Final Score = 0.7 * Title Similarity + 0.2 * Author Overlap + 0.1 * Year Match`  
+- Added citation match threshold (≥ 0.75) to minimize false positives.
+- Extracted citations now attempt to auto-match against existing theses in the repository.
+- Each paper now shows:
+  - References it cites (Matched Citations)
+  - Other papers that cite it (Cited By)
 
-## How to Use This Notepad
-- Add a new section for each new feature, bugfix, or major edit.
-- Note the date and a short summary of what was changed or added.
-- Use this as a running log to continue your work in future sessions or new chats.
+## 7. Paper Model Author Refactor (August 3)
+- Changed `authors` field in the `Paper` model to a many-to-many relationship with a new `Author` model.
+- Added Select2 tagging widget in the admin and form for easier author selection and creation.
+- Supports multiple authors with autocomplete and manual entry.
 
 ---
-_Created at: June 17, 2025_
-_Last updated: June 18, 2025_
+
+_Created at: June 17, 2025_  
+_Last updated: August 4, 2025_

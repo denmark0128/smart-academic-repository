@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
-from .models import Paper, SavedPaper
+from .models import Paper, SavedPaper, MatchedCitation
 from .forms import PaperForm
 #from .models import AcademicPaper
 from django.http import HttpResponse, JsonResponse
@@ -46,7 +46,17 @@ def paper_list(request):
                 # Fallback to semantic search if keyword search returns nothing
                 search_results = semantic_search(query, top_k=5, min_score=0.25)
             for res in search_results:
-                paper_obj = Paper.objects.filter(title=res['title'], author=res['author']).first()
+                author_name = res.get('authors')  # make sure this is a string like "Cervantes"
+                title = res.get('title')
+                year = res.get('year')
+                
+                paper_qs = Paper.objects.filter(title=title)
+                
+                if author_name:
+                    paper_qs = paper_qs.filter(authors__full_name__icontains=author_name)
+
+                paper_obj = paper_qs.first()
+
                 results.append({
                     'query': query, 
                     'paper': paper_obj,
@@ -89,10 +99,19 @@ def paper_detail(request, pk):
     # Absolute URL for PDF
     pdf_url = request.build_absolute_uri(paper.file.url)
     viewer_url = f"{settings.STATIC_URL}pdfjs/web/viewer.html?{urlencode({'file': pdf_url})}"
+    matched_citations = paper.matched_citations.select_related("matched_paper")
+    matched_citation_count = matched_citations.count()
+    citations_pointing_here = MatchedCitation.objects.filter(matched_paper=paper).select_related("source_paper")
+    citation_count = citations_pointing_here.count()
+
 
     return render(request, 'papers/paper_detail.html', {
         'paper': paper,
         'tags': paper.tags,
+        'citations_pointing_here': citations_pointing_here,
+        'citation_count': citation_count,
+        'matched_citations': matched_citations,
+        'matched_citation_count': matched_citation_count,
         'viewer_url': viewer_url,
     })
 
@@ -125,7 +144,7 @@ def paper_upload(request):
                     print(f"[Summary Error] {e}")
                     traceback.print_exc()
                 try:
-                    index_paper(paper.file.path, paper.title, paper.author)
+                    index_paper(paper.file.path, paper.title, [a.full_name for a in paper.authors.all()])
                     paper.is_indexed = True  # Set to True after successful indexing
                     paper.save(update_fields=['is_indexed'])
                 except Exception as e:

@@ -23,12 +23,18 @@
           <span class="text-xl text-gray-400 font-semibold">[Paper not found]</span>
         {% endif %}
 
-        <!-- Author and Upload Date -->
-        <div class="text-sm text-gray-500 mt-1">
-          By {{ item.paper.author }} • {{ item.paper.uploaded_at|date:"M d, Y H:i" }}
-        </div>
-
-
+      <!-- Author and Upload Date -->
+        {% with paper=item.paper %}
+          {% if paper.authors.exists %}
+            <div>
+              {% for author in paper.authors.all %}
+                {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+              - {{ paper.year }}
+            </div>
+          {% endif %}
+        {% endwith %}
+      
         <!-- Snippet -->
         <div x-data="{ expanded: false }" class="mt-2 text-gray-600 text-sm leading-relaxed">
             {% if item.snippet|length > 180 %}

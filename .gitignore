@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 
+# Ignore uploaded papers
+/media/papers/
+
 # Ignore environment files
 .env
 *.env
@@ -13,3 +16,5 @@ __pycache__/
 # VSCode and PyCharm folders
 .vscode/
 .idea/
+
+

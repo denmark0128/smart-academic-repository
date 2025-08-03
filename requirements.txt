@@ -1,7 +1,19 @@
-Django==5.2.2
-pymupdf
-faiss-cpu
-langchain
+# Core Django packages
+Django==5.2.4
+django-allauth
+django-crispy-forms
+crispy-tailwind
+psycopg2-binary  # Needed for PostgreSQL support
+
+# NLP and semantic search
+spacy
 sentence-transformers
 torch
 numpy
+faiss-cpu
+langchain
+
+# PDF and text extraction
+pymupdf  # For PDF parsing (aka fitz)
+
+# Optional: pip install -r requirements.txt

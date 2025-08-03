@@ -14,7 +14,17 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
       </svg>
-      <span class="font-medium">{{ paper.author }}</span>
+      <div class="text-sm text-gray-500 mt-1">
+        {% if paper.authors.exists %}
+          {% for author in paper.authors.all %}
+            {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+         - {{ paper.year }}
+        {% else %}
+          No authors listed.
+        {% endif %}
+      </div>
+
     </div>
   </div>
 
@@ -95,4 +105,65 @@
 
 
 </div>
+
+{% if matched_citations or citations_pointing_here %}
+  <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Matched Citations (Left Column) -->
+    <div class="bg-indigo-50 border border-indigo-200 p-6 rounded-lg shadow-sm">
+      <h2 class="text-xl font-semibold text-indigo-900 mb-4 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 11h10M7 15h6" />
+        </svg>
+        Matched Citations ({{ matched_citation_count }})
+      </h2>
+      {% if matched_citations %}
+        <ul class="space-y-4">
+          {% for match in matched_citations %}
+            <li class="bg-white p-4 rounded border border-indigo-100">
+              <p class="italic text-sm text-indigo-700 mb-1">"{{ match.raw_citation }}"</p>
+              {% if match.matched_paper %}
+                <a href="{% url 'paper_detail' match.matched_paper.pk %}" class="block font-medium text-indigo-900 hover:text-indigo-600 underline">
+                  → {{ match.matched_paper.title }}
+                </a>
+              {% else %}
+                <span class="text-gray-500 italic">No matched paper</span>
+              {% endif %}
+              <div class="text-xs text-gray-500 mt-1">Score: {{ match.score|floatformat:2 }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-gray-500 italic">No matched citations found.</p>
+      {% endif %}
+    </div>
+
+    <!-- Cited By (Right Column) -->
+    <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.586a1 1 0 01.707 1.707l-8.586 8.586a1 1 0 01-1.414 0L3.707 12.707a1 1 0 011.414-1.414L12 18.586 19.293 11.293a1 1 0 00-.707-1.707H14V3h-4v7z" />
+        </svg>
+        Cited By ({{ paper.citation_count }})
+      </h2>
+      {% if citations_pointing_here %}
+        <ul class="space-y-4">
+          {% for cite in citations_pointing_here %}
+            <li class="bg-white p-4 rounded border border-gray-100">
+              <div class="text-sm text-gray-800">
+                <strong>{{ cite.source_paper.title }}</strong> cited this paper.
+                <div class="text-xs text-gray-500 mt-1">Score: {{ cite.score|floatformat:3 }}</div>
+              </div>
+              <a href="{% url 'paper_detail' cite.source_paper.pk %}" class="text-blue-600 underline text-sm hover:text-blue-800 mt-1 block">
+                View citing paper →
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-gray-500 italic">No citations pointing to this paper.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
 {% endblock %}

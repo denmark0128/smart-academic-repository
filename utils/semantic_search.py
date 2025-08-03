@@ -60,7 +60,7 @@ def load_metadata(path=META_PATH):
         return json.load(f)
 
 
-def index_paper(pdf_path, title, author):
+def index_paper(pdf_path, title, authors):
     pages = extract_text_from_pdf(pdf_path)
     chunks = chunk_text(pages)
     embeddings = embed_chunks(chunks)
@@ -90,7 +90,7 @@ def index_paper(pdf_path, title, author):
     for i, chunk in enumerate(chunks):
         metadata.append({
             'title': title,
-            'author': author,
+            'authors': authors,
             'page': chunk['page'],
             'chunk_id': offset + i,
             'text': chunk['text'],
@@ -112,7 +112,7 @@ def build_full_index(papers):
             all_chunks.append(chunk['text'])
             all_metadata.append({
                 'title': paper['title'],
-                'author': paper['author'],
+                'authors': paper['authors'],  
                 'page': chunk['page'],
                 'chunk_id': len(all_metadata),
                 'text': chunk['text'],
@@ -166,7 +166,12 @@ def keyword_search(query, top_k=5):
     query_lower = query.lower()
     seen_titles = {}
     for meta in metadata:
-        haystack = f"{meta.get('text','')} {meta.get('title','')} {meta.get('author','')}".lower()
+        authors = meta.get('authors', [])
+        if isinstance(authors, list):
+            author_str = ' '.join(authors)
+        else:
+            author_str = str(authors)
+        haystack = f"{meta.get('text','')} {meta.get('title','')} {author_str}".lower()
         if query_lower in haystack:
             title = meta.get('title', '')
             if title not in seen_titles:

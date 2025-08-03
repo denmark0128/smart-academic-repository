@@ -38,12 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'papers',
-    'django.contrib.sites',  # ✅ important
+    'django.contrib.sites', 
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'crispy_forms',
     'crispy_tailwind',
+    'django_select2',
     
 ]
 SITE_ID = 1
