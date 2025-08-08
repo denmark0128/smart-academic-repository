@@ -5,7 +5,7 @@ from sentence_transformers import SentenceTransformer, util
 import torch
 
 nlp = spacy.load("en_core_web_sm")
-mpnet_model = SentenceTransformer("all-mpnet-base-v2")
+mpnet_model = SentenceTransformer("allenai/specter2_base")
 
 EXTRA_STOPWORDS = {
     "this paper", "our approach", "application", "approach", "paper", "study", "result", "method", "methods", "conclusion", "introduction", "discussion", "analysis", "effect", "effects", "data", "research", "author", "authors", "review", "evidence", "findings", "outcome", "outcomes", "association", "associations", "risk", "risks", "group", "groups", "disease", "diseases", "patients", "participant", "participants", "use", "impact", "impacts", "role", "case", "cases", "model", "models", "process", "processes", "result", "results", "study", "studies", "conclusion", "conclusions", "objective", "objectives", "aim", "aims", "background", "purpose", "summary", "evidence", "review", "meta-analysis", "systematic review", "this set", "this work", "their correspondence", "english-speaking audiences", "large-language model", "new russian", "other russian sites", "other russian", "other outcomes", "any health outcome", "any health outcomes", "any adult population", "all settings", "all countries", "all cause mortality", "all available studies", "reference lists", "potential biases", "existing evidence", "observed associations", "observational research", "observational studies", "interventional research", "interventional studies", "systematic reviews", "summary estimates", "umbrella review", "umbrella reviews", "meta-analyses", "meta analyses", "systematic review registration"

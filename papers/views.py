@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from .models import Paper, SavedPaper, MatchedCitation
 from .forms import PaperForm
@@ -7,10 +8,14 @@ from django.http import HttpResponse, JsonResponse
 from .utils.nlp import extract_tags
 from django.db.models import Q
 import re
+import os
+import fitz
 from django.conf import settings
 from django.utils.http import urlencode
 from utils.semantic_search import semantic_search, keyword_search, index_paper
+from utils.metadata_extractor import extract_metadata as extract_metadata_from_pdf
 from django.contrib.auth.decorators import login_required
+
 
 
 def home(request):
@@ -183,3 +188,38 @@ def pdf_viewer(request, pk):
     return render(request, 'papers/pdf_reader.html', {
         'pdf_url': paper.pdf_file.url  # e.g., "/media/papers/sample.pdf"
     })
+
+def extract_metadata(request):
+    if request.method == "POST":
+        uploaded_file = request.FILES.get("file")
+
+        if not uploaded_file:
+            return JsonResponse({"success": False, "error": "No file uploaded"}, status=400)
+
+        # Save the uploaded file temporarily
+        temp_path = os.path.join(settings.MEDIA_ROOT, "temp_upload.pdf")
+        with open(temp_path, "wb+") as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        try:
+            # Extract structured metadata instead of raw text
+            metadata = extract_metadata_from_pdf(temp_path)
+
+            return JsonResponse({
+                "success": True,
+                "metadata": metadata
+            })
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "error": str(e)
+            }, status=500)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    return JsonResponse({
+        "success": False,
+        "error": "Only POST method allowed"
+    }, status=405)

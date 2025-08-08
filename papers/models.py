@@ -4,7 +4,9 @@ from django.contrib.auth.models import User
 class Paper(models.Model):
     title = models.CharField(max_length=200)
     authors = models.JSONField(default=list) 
-    abstract = models.TextField()
+    abstract = models.TextField(blank=True, null=True)
+    college = models.CharField(max_length=100, blank=True, null=True)
+    program = models.CharField(max_length=100, blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='papers/')

@@ -17,15 +17,7 @@
 
 <div class="max-w-2xl mx-auto p-6">
   <!-- Header Section -->
-  <div class="text-center mb-8">
-    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-      <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-      </svg>
-    </div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Upload New Paper</h1>
-    <p class="text-gray-600">Share your research with the academic community</p>
-  </div>
+
 
   <!-- Upload Form -->
   <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
@@ -79,9 +71,47 @@
       document.getElementById('upload-form').addEventListener('submit', function() {
         document.getElementById('processing-spinner').style.display = 'flex';
       });
+
+      document.getElementById('id_file').addEventListener('change', function () {
+    const fileInput = this;
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/papers/extract-metadata/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            const meta = data.metadata;
+
+            document.getElementById('id_title').value = meta.title || '';
+            document.getElementById('id_year').value = meta.year || '';
+            document.getElementById('id_authors').value = (meta.authors || []).join(' ');
+            document.getElementById('id_abstract').value = meta.abstract || '';
+            document.getElementById('id_college').value = meta.college || '';
+            document.getElementById('id_program').value = meta.program || '';
+        } else {
+            alert("Failed to extract metadata: " + data.error);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error uploading file.");
+    });
+});
+
     </script
+
       </div>
-    </form>
+  </form>
   </div>
 
   <!-- Help Section -->
@@ -159,5 +189,6 @@
   @apply mb-1;
 }
 </style>
+
 
 {% endblock %}

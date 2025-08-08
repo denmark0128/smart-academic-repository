@@ -8,4 +8,5 @@ urlpatterns = [
     path('profile/', views.profile_page, name='profile_page'),
     path('papers/<int:pk>/save/', views.save_paper, name='save_paper'),
     path('saved/', views.saved_papers_view, name='saved_papers'),
+    path('extract-metadata/', views.extract_metadata, name='extract_metadata'),
 ]
