@@ -2,6 +2,7 @@ import os
 import json
 import fitz  # PyMuPDF
 import faiss
+import re
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 
@@ -17,8 +18,26 @@ def extract_text_from_pdf(pdf_path):
     text = []
     for page_num, page in enumerate(doc):
         text.append(page.get_text())
-    return text  # list of page texts
+    return text  # list of page text
 
+def is_reference_heading(line):
+    return re.match(r"^\s*(references|bibliography|works cited)\s*$", line.strip(), re.IGNORECASE)
+
+def remove_references(pages):
+    clean_pages = []
+    found_references = False
+    for page_text in pages:
+        if found_references:
+            break
+        lines = page_text.split("\n")
+        filtered_lines = []
+        for line in lines:
+            if is_reference_heading(line):
+                found_references = True
+                break
+            filtered_lines.append(line)
+        clean_pages.append("\n".join(filtered_lines))
+    return clean_pages
 
 def chunk_text(pages, chunk_size=2000, chunk_overlap=200):
     splitter = RecursiveCharacterTextSplitter(
@@ -60,7 +79,7 @@ def load_metadata(path=META_PATH):
         return json.load(f)
 
 
-def index_paper(pdf_path, title, authors):
+def index_paper(pdf_path, title, authors, paper_id=None):
     pages = extract_text_from_pdf(pdf_path)
     chunks = chunk_text(pages)
     embeddings = embed_chunks(chunks)
@@ -89,8 +108,8 @@ def index_paper(pdf_path, title, authors):
     # Add new metadata with correct chunk_id
     for i, chunk in enumerate(chunks):
         metadata.append({
-            'title': title,
-            'authors': authors,
+            'paper_id': paper_id,
+            'title': title.strip(),
             'page': chunk['page'],
             'chunk_id': offset + i,
             'text': chunk['text'],
@@ -106,7 +125,7 @@ def build_full_index(papers):
     all_chunks = []
     all_metadata = []
     for paper in papers:
-        pages = extract_text_from_pdf(paper['pdf_path'])
+        pages = remove_references(extract_text_from_pdf(paper['pdf_path']))
         chunks = chunk_text(pages)
         for i, chunk in enumerate(chunks):
             all_chunks.append(chunk['text'])

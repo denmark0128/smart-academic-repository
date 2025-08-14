@@ -9,4 +9,5 @@ urlpatterns = [
     path('papers/<int:pk>/save/', views.save_paper, name='save_paper'),
     path('saved/', views.saved_papers_view, name='saved_papers'),
     path('extract-metadata/', views.extract_metadata, name='extract_metadata'),
+    path('insights/', views.paper_insights, name='paper_insights'),
 ]

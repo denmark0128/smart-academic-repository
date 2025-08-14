@@ -119,3 +119,38 @@ if __name__ == "__main__":
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
+# metadata_utils.py
+
+COLLEGE_MAPPING = {
+    "college of computer studies": "ccs",
+    "college of business and accountancy": "cba",
+    "college of arts and sciences": "cas",
+    "college of engineering": "coe",
+    "college of education": "ced",
+    "college of nursing": "con",
+    # Add more as needed
+}
+
+PROGRAM_MAPPING = {
+    "bachelor of science in computer science": "bscs",
+    "bachelor of science in information technology": "bsit",
+    "bachelor of science in business administration": "bsba",
+    "bachelor of secondary education": "bse",
+    "bachelor of elementary education": "bee",
+    "bachelor of science in accountancy": "bsa",
+    "bachelor of science in civil engineering": "bsce",
+    "bachelor of science in nursing": "bsn",
+    # Add more as needed
+}
+
+def normalize_college(text):
+    if not text:
+        return None
+    text = text.lower().strip()
+    return COLLEGE_MAPPING.get(text, None)
+
+def normalize_program(text):
+    if not text:
+        return None
+    text = text.lower().strip()
+    return PROGRAM_MAPPING.get(text, None)

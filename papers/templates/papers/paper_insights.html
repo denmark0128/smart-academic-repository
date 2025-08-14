@@ -1,0 +1,48 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mx-auto py-8">
+  <h1 class="text-3xl font-bold mb-6">Paper Insights: Trending Topics</h1>
+  <div class="bg-white rounded shadow p-6">
+    <h2 class="text-xl font-semibold mb-4">Trending Topics (Tags)</h2>
+    <div class="flex flex-col md:flex-row gap-8">
+      <div class="md:w-1/2">
+        <canvas id="tagsPieChart" class="w-full h-auto rounded border"></canvas>
+      </div>
+      <div class="md:w-1/2">
+        <ul class="list-disc pl-6">
+          {% for tag, count in tag_counts.items %}
+            <li class="mb-2"><a href="?tag={{ tag|urlencode }}" class="text-blue-600 hover:underline">{{ tag }}</a>: {{ count }}</span></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const tagLabels = {{ tag_labels_json|safe }};
+    const tagDataValues = {{ tag_values_json|safe }};
+    const tagData = {
+      labels: tagLabels,
+      datasets: [{
+        data: tagDataValues,
+        backgroundColor: [
+          '#60a5fa', '#fbbf24', '#34d399', '#f87171', '#a78bfa', '#f472b6', '#facc15', '#38bdf8', '#4ade80', '#fca5a5', '#c084fc', '#fb7185', '#fde68a', '#818cf8', '#2dd4bf'
+        ],
+      }]
+    };
+    const ctx = document.getElementById('tagsPieChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'pie',
+      data: tagData,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          title: { display: true, text: 'Trending Topics (Tags)' }
+        }
+      }
+    });
+  </script>
+</div>
+{% endblock %}

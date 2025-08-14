@@ -9,56 +9,53 @@
   <!-- Title + Author -->
   <div class="pb-4">
     <h1 class="text-3xl font-bold text-gray-900 leading-tight">{{ paper.title }}</h1>
-    <div class="flex items-center text-gray-600 mt-2">
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-      </svg>
-      <div class="text-sm text-gray-500 mt-1">
-        {% if paper.authors.exists %}
-          {% for author in paper.authors.all %}
-            {{ author.full_name }}{% if not forloop.last %}, {% endif %}
-          {% endfor %}
-         - {{ paper.year }}
-        {% else %}
-          No authors listed.
-        {% endif %}
-      </div>
+<div class="flex items-center text-gray-600 mt-2">
+  <div class="mt-4 text-sm text-gray-700 space-y-2">
 
+  <!-- Authors -->
+  {% if paper.authors %}
+    <div class="flex flex-wrap gap-2">
+      {% for author in paper.authors %}
+        <span class="p-1 bg-grey-300 text-green-900">
+          {{ author }}
+        </span>
+      {% endfor %}
     </div>
+  {% else %}
+    <div class="text-gray-400 italic">No authors listed.</div>
+  {% endif %}
+
+  <!-- Year, College, Program -->
+  <div class="flex items-center flex-wrap gap-4 mt-2">
+    {% if paper.year %}
+      <span class="text-lg font-bold text-black">{{ paper.year }}</span>
+    {% endif %}
+    {% if paper.college %}
+      <span class="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{{ paper.college }}</span>
+    {% endif %}
+    {% if paper.program %}
+      <span class="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded">{{ paper.program }}</span>
+    {% endif %}
   </div>
 
-  <!-- Save/Unsave Button -->
-  <div 
-    x-data="savePaper({{ paper.pk }}, {{ is_saved|yesno:'true,false' }})"
-    class="mt-2 flex gap-2 p-4 rounded-lg shadow-sm bg-white border border-gray-200"
-  >
-    <button 
-      x-text="isSaved ? 'Unsave Paper' : 'Save Paper'"
-      @click="toggleSave"
-      class="px-4 py-2 rounded font-semibold transition border border-gray-300"
-      :class="isSaved ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-green-600 text-white hover:bg-green-700'"
-    ></button>
+      <!-- DOI -->
+      {% if paper.local_doi %}
+        <div class="mt-2 text-sm text-gray-500">
+          <span>DOI:</span> <a href="" class="text-blue-grey-600 hover:underline">{{ paper.local_doi }}</a>
+        </div>
+      {% endif %}
   </div>
+</div>
 
+</div>
   <!-- Grid: Abstract (Left) and Actions (Right) -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <!-- Abstract -->
-    <div class="md:col-span-2 bg-gray-50 rounded-lg p-6 border border-gray-200">
-      <h2 class="text-xl font-semibold text-gray-900 mb-3 flex items-center">
-        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        Abstract
-      </h2>
-      <p class="text-gray-700 leading-relaxed">{{ paper.abstract }}</p>
+    <div class="md:col-span-2 rounded-lg">
+      <p class="text-gray-700">{{ paper.abstract }}</p>
       {% if paper.summary %}
-        <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+        <div class="mt-6 p-4 bg-yellow-50 border-yellow-400 rounded">
           <h3 class="text-lg font-semibold text-yellow-800 mb-2 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01" />
-            </svg>
             Summary
           </h3>
           <div class="text-gray-800">{{ paper.summary }}</div>
@@ -78,6 +75,20 @@
          class="block w-full text-center px-4 py-3 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 transition">
         View in PDF Viewer
       </a>
+
+        <!-- Save/Unsave Button -->
+      <div 
+        x-data="savePaper({{ paper.pk }}, {{ is_saved|yesno:'true,false' }})"
+        class="mt-2 gap-2 flex justify-center border-gray-200"
+      >
+        <button 
+          x-cloak
+          x-text="isSaved ? 'Unsave Paper' : 'Save Paper'"
+          @click="toggleSave"
+          class="px-4 py-2 rounded font-semibold transition border border-gray-300 w-full"
+          :class="isSaved ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-green-600 text-white hover:bg-green-700'"
+        ></button>
+      </div>
         <!-- Tags -->
   <div>
     <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
@@ -101,9 +112,6 @@
   </div>
     </div>
   </div>
-
-
-
 </div>
 
 {% if matched_citations or citations_pointing_here %}
@@ -165,5 +173,8 @@
     </div>
   </div>
 {% endif %}
+
+<h3>Related Papers</h3>
+
 
 {% endblock %}

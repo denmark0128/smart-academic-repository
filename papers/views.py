@@ -14,8 +14,11 @@ from django.conf import settings
 from django.utils.http import urlencode
 from utils.semantic_search import semantic_search, keyword_search, index_paper
 from utils.metadata_extractor import extract_metadata as extract_metadata_from_pdf
+from utils.metadata_extractor import normalize_college, normalize_program
+from utils.related import find_related_papers
 from django.contrib.auth.decorators import login_required
-
+from collections import Counter
+import json
 
 
 def home(request):
@@ -53,12 +56,11 @@ def paper_list(request):
             for res in search_results:
                 author_name = res.get('authors')  # make sure this is a string like "Cervantes"
                 title = res.get('title')
-                year = res.get('year')
                 
                 paper_qs = Paper.objects.filter(title=title)
                 
                 if author_name:
-                    paper_qs = paper_qs.filter(authors__full_name__icontains=author_name)
+                    paper_qs = paper_qs.filter(authors__icontains=author_name)
 
                 paper_obj = paper_qs.first()
 
@@ -92,11 +94,14 @@ def paper_list(request):
                 'tags': paper.tags,
         })
             
-    paginator = Paginator(results, 3)  # Show 10 items per page
+    paginator = Paginator(results, 10)  # Show 10 items per page
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'papers/paper_list.html', {'results': results, 'query': query , 'page_obj': page_obj})
+    return render(request, 'papers/paper_list.html', {
+        'results': results,
+        'query': query ,
+        'page_obj': page_obj})
 
 def paper_detail(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
@@ -109,12 +114,13 @@ def paper_detail(request, pk):
     citations_pointing_here = MatchedCitation.objects.filter(matched_paper=paper).select_related("source_paper")
     citation_count = citations_pointing_here.count()
 
-
     return render(request, 'papers/paper_detail.html', {
         'paper': paper,
         'tags': paper.tags,
         'citations_pointing_here': citations_pointing_here,
         'citation_count': citation_count,
+        'college': paper.college,
+        'program': paper.program,
         'matched_citations': matched_citations,
         'matched_citation_count': matched_citation_count,
         'viewer_url': viewer_url,
@@ -206,6 +212,12 @@ def extract_metadata(request):
             # Extract structured metadata instead of raw text
             metadata = extract_metadata_from_pdf(temp_path)
 
+            raw_college = metadata.get("college", "")
+            raw_program = metadata.get("program", "")
+
+            metadata["college"] = normalize_college(raw_college)
+            metadata["program"] = normalize_program(raw_program)
+
             return JsonResponse({
                 "success": True,
                 "metadata": metadata
@@ -223,3 +235,20 @@ def extract_metadata(request):
         "success": False,
         "error": "Only POST method allowed"
     }, status=405)
+
+    
+
+def paper_insights(request):
+    papers = Paper.objects.all()
+    tags = [tag for paper in papers for tag in paper.tags]
+    tag_counts = dict(Counter(tags))
+
+    tag_labels = list(tag_counts.keys())
+    tag_values = list(tag_counts.values())
+
+    return render(request, 'papers/paper_insights.html', {
+        'tag_counts': tag_counts,
+        'tag_labels_json': json.dumps(tag_labels),
+        'tag_values_json': json.dumps(tag_values)
+    })
+

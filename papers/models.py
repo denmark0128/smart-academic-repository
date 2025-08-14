@@ -1,17 +1,37 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+COLLEGE_CHOICES = [
+    ('ccs', 'College of Computer Studies'),
+    ('cba', 'College of Business and Accountancy'),
+    ('cas', 'College of Arts and Sciences'),
+    ('coe', 'College of Engineering'),
+    ('cihm','College of International Hospitality Management'),
+    # add more as needed
+]
+
+PROGRAM_CHOICES = [
+    ('bsit', 'BS in Information Technology'),
+    ('bscs', 'BS in Computer Science'),
+    ('bsba', 'BS in Business Administration'),
+    ('bse', 'BS in Secondary Education'),
+    ('bsa', 'BS in Accountancy'),
+    # add more as needed
+]
+
 class Paper(models.Model):
+    local_doi = models.CharField(max_length=100, unique=True, null=True, blank=True)
     title = models.CharField(max_length=200)
     authors = models.JSONField(default=list) 
     abstract = models.TextField(blank=True, null=True)
-    college = models.CharField(max_length=100, blank=True, null=True)
-    program = models.CharField(max_length=100, blank=True, null=True)
+    college = models.CharField(max_length=100, blank=True, null=True, choices=COLLEGE_CHOICES)
+    program = models.CharField(max_length=100, blank=True, null=True, choices=PROGRAM_CHOICES)
     summary = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='papers/')
     tags = models.JSONField(default=list, blank=True)
     is_indexed = models.BooleanField(default=False)
+    is_registered = models.BooleanField(default=False)
 
     year = models.PositiveIntegerField(null=True, blank=True) 
 
