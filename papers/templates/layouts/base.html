@@ -6,7 +6,8 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
@@ -49,16 +50,23 @@
         NProgress.done();
     });
 
-    // Optional: also trigger on form submits
-    document.addEventListener('DOMContentLoaded', () => {
-        const forms = document.querySelectorAll("form");
-        forms.forEach(form => {
-        form.addEventListener("submit", () => {
-            NProgress.start();
-        });
-        });
+    
+
+    // Attach CSRF token for all HTMX requests
+ 
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        const token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        event.detail.headers['X-CSRFToken'] = token;
     });
-    </script>
+
+
+    // Optional: also trigger on form submits
+
+</script>
+
+<!-- Toast container -->
+<div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
+
     <script>
   function savePaper(paperId, initialState) {
     return {
@@ -85,4 +93,7 @@
 
 
 </body>
+<footer>
+    {% include 'components/footer.html' %}
+</footer>
 </html>

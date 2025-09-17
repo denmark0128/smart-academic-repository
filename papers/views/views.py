@@ -20,6 +20,8 @@ from django.contrib.auth.decorators import login_required
 from collections import Counter
 import json
 
+from utils.single_paper_rag import query_rag
+
 
 def home(request):
     return render(request, 'home.html', {'name': 'John'})
@@ -54,15 +56,27 @@ def paper_list(request):
                 # Fallback to semantic search if keyword search returns nothing
                 search_results = semantic_search(query, top_k=5, min_score=0.25)
             for res in search_results:
-                author_name = res.get('authors')  # make sure this is a string like "Cervantes"
-                title = res.get('title')
-                
-                paper_qs = Paper.objects.filter(title=title)
-                
-                if author_name:
-                    paper_qs = paper_qs.filter(authors__icontains=author_name)
-
-                paper_obj = paper_qs.first()
+                paper_obj = None
+                # Try to match by paper_id if available
+                paper_id = res.get('paper_id')
+                if paper_id:
+                    paper_obj = Paper.objects.filter(pk=paper_id).first()
+                # Fallback to title and author matching
+                if not paper_obj:
+                    title = res.get('title')
+                    author_name = res.get('authors')
+                    paper_qs = Paper.objects.filter(title=title)
+                    if author_name:
+                        # If author_name is a list, check for any author in the list
+                        from django.db.models import Q
+                        if isinstance(author_name, list):
+                            author_filter = Q()
+                            for a in author_name:
+                                author_filter |= Q(authors__icontains=a)
+                            paper_qs = paper_qs.filter(author_filter)
+                        else:
+                            paper_qs = paper_qs.filter(authors__icontains=author_name)
+                    paper_obj = paper_qs.first()
 
                 results.append({
                     'query': query, 
@@ -105,14 +119,17 @@ def paper_list(request):
 
 def paper_detail(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
-    
-    # Absolute URL for PDF
+
+    # PDF viewer
     pdf_url = request.build_absolute_uri(paper.file.url)
-    viewer_url = f"{settings.STATIC_URL}pdfjs/web/viewer.html?{urlencode({'file': pdf_url})}"
+    viewer_url = f"{settings.STATIC_URL}pdfjs/web/viewer.html?file={pdf_url}"
+
+    # Citations & saved state
     matched_citations = paper.matched_citations.select_related("matched_paper")
     matched_citation_count = matched_citations.count()
     citations_pointing_here = MatchedCitation.objects.filter(matched_paper=paper).select_related("source_paper")
     citation_count = citations_pointing_here.count()
+    is_saved = SavedPaper.objects.filter(user=request.user, paper=paper).exists()
 
     return render(request, 'papers/paper_detail.html', {
         'paper': paper,
@@ -124,7 +141,24 @@ def paper_detail(request, pk):
         'matched_citations': matched_citations,
         'matched_citation_count': matched_citation_count,
         'viewer_url': viewer_url,
+        'is_saved': is_saved,
     })
+
+def paper_query(request, pk):
+    """HTMX endpoint for paper Q&A chatbot"""
+    if request.method == "POST":
+        paper = get_object_or_404(Paper, pk=pk)
+        user_query = request.POST.get("query", "").strip()
+        if not user_query:
+            return JsonResponse({"error": "Empty query"}, status=400)
+
+        # Use prototype query_rag
+        answer = query_rag(user_query, top_k=3)
+
+        # Return HTMX snippet
+        return render(request, "papers/partials/answer.html", {"answer": answer})
+
+    return JsonResponse({"error": "POST required"}, status=400)
 
 
 def paper_upload(request):
@@ -155,7 +189,8 @@ def paper_upload(request):
                     print(f"[Summary Error] {e}")
                     traceback.print_exc()
                 try:
-                    index_paper(paper.file.path, paper.title, [a.full_name for a in paper.authors.all()])
+                    # Pass paper.id as paper_id for correct metadata
+                    index_paper(paper.file.path, paper.title, paper.authors, paper.id)
                     paper.is_indexed = True  # Set to True after successful indexing
                     paper.save(update_fields=['is_indexed'])
                 except Exception as e:
@@ -176,18 +211,37 @@ def profile_page(request):
 def save_paper(request, paper_id):
     paper = get_object_or_404(Paper, id=paper_id)
     SavedPaper.objects.get_or_create(user=request.user, paper=paper)
-    return redirect(request.META.get('HTTP_REFERER', 'paper_list'))
+    
+    if request.htmx:  # htmx request
+        return render(request, 'partials/_save_button.html', {
+            'paper': paper,
+            'is_saved': True
+        })
+    return redirect(request.META.get('HTTP_REFERER', 'paper_detail', pk=paper_id))
+
 
 @login_required
 def unsave_paper(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
     SavedPaper.objects.filter(user=request.user, paper=paper).delete()
+    
+    if request.htmx:
+        return render(request, 'partials/_save_button.html', {
+            'paper': paper,
+            'is_saved': False
+        })
     return JsonResponse({'status': 'unsaved'})
 
 @login_required
-def saved_papers_view(request):
+def toast(request):
+    message = request.GET.get('message', '')
+    return render(request, 'partials/_toast.html', {'message': message})
+
+
+@login_required
+def saved_papers(request):
     saved = SavedPaper.objects.filter(user=request.user).select_related('paper')
-    return render(request, 'papers/saved_papers.html', {'saved_papers': saved})
+    return render(request, 'profile/saved_papers.html', {'saved_papers': saved})
 
 def pdf_viewer(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
@@ -252,3 +306,12 @@ def paper_insights(request):
         'tag_values_json': json.dumps(tag_values)
     })
 
+
+def upload_tab(request):
+    return render(request, "papers/partials/uploads/upload_form.html")
+
+def processing_tab(request):
+    return render(request, "papers/partials/uploads/processing_tab.html")
+
+def review_tab(request):
+    return render(request, "papers/partials/uploads/review_tab.html")

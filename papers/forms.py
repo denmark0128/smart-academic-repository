@@ -3,6 +3,7 @@ from .models import Paper
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Field
 from crispy_forms.layout import Fieldset, Div
+from django.forms import ClearableFileInput
 
 class PaperForm(forms.ModelForm):
     authors = forms.CharField(
@@ -13,6 +14,18 @@ class PaperForm(forms.ModelForm):
             'rows': 3
         })
     )
+
+
+    class Meta:
+        model = Paper
+        fields = ['file', 'title', 'abstract', 'college', 'program', 'year', 'authors']
+        widgets = {
+            'file': ClearableFileInput(attrs={
+                'class': 'custom-file-input',
+                'id': 'file-upload',
+                'accept': '.pdf,.docx',  # optional: restrict file types
+            })
+        }
 
     title = forms.CharField(
         widget=forms.Textarea(attrs={

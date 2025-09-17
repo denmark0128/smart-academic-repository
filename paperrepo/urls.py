@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from papers.views import home
@@ -29,6 +30,8 @@ urlpatterns = [
     path('login/', lambda request: redirect('/accounts/login/')),
     path('', home, name='home'),  # Root path (homepage)
     path('papers/', include('papers.urls')),
+    path('api-auth/', include('rest_framework.urls')),
+    path('staff/', include('staff.urls')),  # Include staff URLs
      path('accounts/', include('allauth.urls')),
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='registration/password_change_form.html'), name='password_change'),
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'), name='password_change_done'),

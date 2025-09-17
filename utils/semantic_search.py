@@ -4,12 +4,12 @@ import fitz  # PyMuPDF
 import faiss
 import re
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, util
 
 INDEX_PATH = os.path.join('media', 'indices', 'paragraphs.index')
 META_PATH = os.path.join('media', 'indices', 'paragraphs_metadata.json')
-EMBED_MODEL = 'all-MiniLM-L6-v2'  # or 'allenai-specter'
-
+EMBED_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'  # or 'allenai-specter'
+MODEL = SentenceTransformer(EMBED_MODEL)
 model = SentenceTransformer(EMBED_MODEL)
 
 
@@ -39,6 +39,80 @@ def remove_references(pages):
         clean_pages.append("\n".join(filtered_lines))
     return clean_pages
 
+def merge_small_by_similarity(paragraphs, min_tokens=25, max_tokens=500, similarity_threshold=0.3):
+    merged = []
+    buffer = ""
+    buffer_emb = None
+    for para in paragraphs:
+        if not para.strip():
+            continue
+        emb = MODEL.encode(para, convert_to_tensor=True)
+        if not buffer:
+            buffer = para
+            buffer_emb = emb
+            continue
+        score = util.cos_sim(buffer_emb, emb).item()
+        if score >= similarity_threshold and len(buffer.split()) + len(para.split()) <= max_tokens:
+            buffer += " " + para
+            buffer_emb = MODEL.encode(buffer, convert_to_tensor=True)
+        else:
+            merged.append(buffer.strip())
+            buffer = para
+            buffer_emb = emb
+    if buffer:
+        merged.append(buffer.strip())
+    return merged
+
+
+def extract_and_chunk(pdf_path, min_size=100, max_size=500):
+    doc = fitz.open(pdf_path)
+    # Step 1: get page texts
+    page_texts = [page.get_text("text").replace("\r","").strip() for page in doc]
+
+    # Step 2: process each page separately to preserve page numbers
+    all_chunks = []
+    for page_num, text in enumerate(page_texts, start=1):
+        # Merge paragraphs within the page
+        raw_paragraphs = re.split(r"\n\s*\n", text)
+        paragraphs = [re.sub(r"\s+", " ", re.sub(r"\n(?!\n)", " ", p)).strip() for p in raw_paragraphs if p.strip()]
+
+        # Merge short headers
+        merged_paragraphs = []
+        skip_next = False
+        for i, para in enumerate(paragraphs):
+            if skip_next:
+                skip_next = False
+                continue
+            if len(para.split()) <= 3 and i + 1 < len(paragraphs):
+                merged_paragraphs.append(para + ": " + paragraphs[i+1])
+                skip_next = True
+            else:
+                merged_paragraphs.append(para)
+
+        # Semantic merge within the page
+        semantically_merged = merge_small_by_similarity(merged_paragraphs, min_tokens=25, max_tokens=max_size, similarity_threshold=0.7)
+
+        # Final chunk by size, preserving page number
+        buffer = ""
+        for para in semantically_merged:
+            if len(buffer) + len(para) < min_size:
+                buffer += " " + para
+            else:
+                if buffer:
+                    all_chunks.append({'text': buffer.strip(), 'page': page_num})
+                    buffer = ""
+                while len(para) > max_size:
+                    split_point = para[:max_size].rfind(".")
+                    if split_point == -1:
+                        split_point = max_size
+                    all_chunks.append({'text': para[:split_point+1].strip(), 'page': page_num})
+                    para = para[split_point+1:]
+                buffer = para
+        if buffer:
+            all_chunks.append({'text': buffer.strip(), 'page': page_num})
+    return all_chunks
+
+###
 def chunk_text(pages, chunk_size=2000, chunk_overlap=200):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size, chunk_overlap=chunk_overlap
@@ -48,6 +122,7 @@ def chunk_text(pages, chunk_size=2000, chunk_overlap=200):
         for chunk in splitter.split_text(page_text):
             chunks.append({'text': chunk, 'page': page_num + 1})
     return chunks
+###
 
 
 def embed_chunks(chunks):
@@ -80,8 +155,7 @@ def load_metadata(path=META_PATH):
 
 
 def index_paper(pdf_path, title, authors, paper_id=None):
-    pages = extract_text_from_pdf(pdf_path)
-    chunks = chunk_text(pages)
+    chunks = extract_and_chunk(pdf_path)
     embeddings = embed_chunks(chunks)
 
     # Try to load existing index and metadata
@@ -125,8 +199,7 @@ def build_full_index(papers):
     all_chunks = []
     all_metadata = []
     for paper in papers:
-        pages = remove_references(extract_text_from_pdf(paper['pdf_path']))
-        chunks = chunk_text(pages)
+        chunks = extract_and_chunk(paper['pdf_path'])
         for i, chunk in enumerate(chunks):
             all_chunks.append(chunk['text'])
             all_metadata.append({

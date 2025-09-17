@@ -35,6 +35,15 @@ class Paper(models.Model):
 
     year = models.PositiveIntegerField(null=True, blank=True) 
 
+    """
+    STATUS_CHOICES = [
+        ("uploaded", "Uploaded"),
+        ("processing", "Processing"),
+        ("ready", "Ready for Review"),
+        ("complete", "Complete"),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="uploaded")
+    """
     def __str__(self):
         return self.title
     
@@ -62,3 +71,4 @@ class MatchedCitation(models.Model):
 
     def __str__(self):
         return f"{self.source_paper.title} → {self.matched_paper.title if self.matched_paper else 'Unknown'}"
+

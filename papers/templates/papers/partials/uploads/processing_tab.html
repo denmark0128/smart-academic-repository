@@ -1,0 +1,16 @@
+  <!-- Processing Tab -->
+  <div x-show="tab === 'processing'" class="bg-white rounded-xl shadow border p-6">
+    <h2 class="text-lg font-semibold text-black mb-4">Processing Queue</h2>
+    <div class="space-y-2">
+      {% for file in processing_files %}
+      <div class="flex justify-between items-center border-b pb-2">
+        <span>{{ file.name }}</span>
+        <span class="text-sm text-gray-600">{{ file.stage }}</span>
+        <span class="text-sm text-gray-800 font-medium">{{ file.confidence }}%</span>
+      </div>
+      {% empty %}
+      <p class="text-gray-500">No files are being processed.</p>
+      {% endfor %}
+    </div>
+    hi
+  </div>

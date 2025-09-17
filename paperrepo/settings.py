@@ -44,7 +44,14 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'crispy_forms',
     'crispy_tailwind',
-    
+    'staff',
+    'django_htmx',
+    'pgvector',  # Ensure pgvector is included
+    'rest_framework',
+    'corsheaders',
+
+    # end INSTALLED_APPS
+    # do not add extra closing bracket here
 ]
 SITE_ID = 1
 
@@ -57,6 +64,8 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,9 +74,12 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_htmx.middleware.HtmxMiddleware',
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+CORS_ALLOW_ALL_ORIGINS = True  # testing only
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBcorackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True

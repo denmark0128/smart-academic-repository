@@ -1,13 +1,53 @@
 {% extends 'layouts/base.html' %}
+
 {% block content %}
-<h2 class="text-xl font-bold mb-4">Saved Papers</h2>
-<ul class="space-y-2">
-  {% for item in saved_papers %}
-    <li>
-      <a href="{% url 'paper_detail' item.paper.pk %}" class="text-blue-700 hover:underline">{{ item.paper.title }}</a>
-    </li>
-  {% empty %}
-    <li>No saved papers yet.</li>
-  {% endfor %}
-</ul>
+<h2 class="text-2xl font-bold mb-6">Saved Papers</h2>
+
+{% if saved_papers %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in saved_papers %}
+    <div class="bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+        <!-- Paper Info -->
+        <div>
+            <a href="{% url 'paper_detail' item.paper.pk %}" class="text-lg font-semibold text-blue-700 hover:underline">
+                {{ item.paper.title }}
+            </a>
+            <div class="text-sm text-gray-600 mt-1">
+                {% if item.paper.authors %}
+                    {% for author in item.paper.authors %}
+                        <span>{{ author }}{% if not forloop.last %}, {% endif %}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="italic">No authors listed</span>
+                {% endif %}
+            </div>
+            <div class="mt-1 text-gray-500 text-sm">
+                {% if item.paper.year %}{{ item.paper.year }}{% endif %}
+                {% if item.paper.college %} • {{ item.paper.college }}{% endif %}
+                {% if item.paper.program %} • {{ item.paper.program }}{% endif %}
+            </div>
+
+            <!-- Tags -->
+            {% if item.paper.tags %}
+            <div class="mt-2 flex flex-wrap gap-2">
+                {% for tag in item.paper.tags %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                    {{ tag }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-4">
+            {% include 'partials/_save_button.html' with paper=item.paper is_saved=True %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-gray-500 italic">You haven’t saved any papers yet.</p>
+{% endif %}
+
 {% endblock %}

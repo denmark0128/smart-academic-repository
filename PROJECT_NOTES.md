@@ -45,6 +45,9 @@ This notepad documents all major changes, features, and improvements made to the
   - References it cites (Matched Citations)
   - Other papers that cite it (Cited By)
 
+## Metadata Extraction
+- Metadata extraction from title pages using heuristic and spacy EntityRuler
+
 ## 7. Paper Model Author Refactor (August 3)
 - Changed `authors` field in the `Paper` model to a many-to-many relationship with a new `Author` model.
 - Added Select2 tagging widget in the admin and form for easier author selection and creation.

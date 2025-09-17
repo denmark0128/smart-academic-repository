@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
+            <h2 class="text-sm font-medium text-gray-500 mb-1">Pending Papers</h2>
+            <p class="text-3xl font-bold text-black">{{ stats.pending }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
+            <h2 class="text-sm font-medium text-gray-500 mb-1">Registered Papers</h2>
+            <p class="text-3xl font-bold text-black">{{ stats.registered }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
+            <h2 class="text-sm font-medium text-gray-500 mb-1">Total Papers</h2>
+            <p class="text-3xl font-bold text-black">{{ stats.total }}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div x-data="{ active: 'pending' }" class="flex space-x-4 mb-4">
+        <!-- Pending Button -->
+        <button 
+            @click="active = 'pending'"
+            hx-get="{% url 'staff_pending' %}" 
+            hx-target="#paper-table"
+            hx-swap="innerHTML"
+            :class="active === 'pending' 
+                ? 'bg-black text-white'  
+                : 'bg-white text-black'"
+            class="px-4 py-2 rounded transition">
+            Pending Papers
+        </button>
+
+        <!-- Registered Button -->
+        <button 
+            @click="active = 'registered'"
+            hx-get="{% url 'staff_registered' %}" 
+            hx-target="#paper-table"
+            hx-swap="innerHTML"
+            :class="active === 'registered' 
+                ? 'bg-black text-white' 
+                : 'bg-white text-black'"
+            class="px-4 py-2 rounded transition">
+            Registered Papers
+        </button>
+    </div>
+
+
+    <!-- Table -->
+    <div id="paper-table" class="bg-white rounded-xl shadow overflow-hidden">
+        {% include "staff/partials/paper_table.html" with papers=papers %}
+    </div>
+</div>
+{% endblock %}

@@ -77,18 +77,9 @@
       </a>
 
         <!-- Save/Unsave Button -->
-      <div 
-        x-data="savePaper({{ paper.pk }}, {{ is_saved|yesno:'true,false' }})"
-        class="mt-2 gap-2 flex justify-center border-gray-200"
-      >
-        <button 
-          x-cloak
-          x-text="isSaved ? 'Unsave Paper' : 'Save Paper'"
-          @click="toggleSave"
-          class="px-4 py-2 rounded font-semibold transition border border-gray-300 w-full"
-          :class="isSaved ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-green-600 text-white hover:bg-green-700'"
-        ></button>
-      </div>
+        <div id="save-btn-{{ paper.id }}">
+          {% include 'partials/_save_button.html' with paper=paper is_saved=is_saved %}
+        </div>
         <!-- Tags -->
   <div>
     <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
@@ -176,5 +167,31 @@
 
 <h3>Related Papers</h3>
 
+
+<div id="chat-container" class="flex flex-col space-y-2 p-4 border rounded-lg max-h-96 overflow-y-auto bg-gray-50">
+    <!-- Chat messages will appear here -->
+    <div id="answer" class="space-y-2">
+        <!-- Server responses will be injected here -->
+    </div>
+
+    <!-- Chat input -->
+    <form id="chat-form"
+          hx-post="{% url 'paper_query' paper.pk %}"
+          hx-target="#answer"
+          hx-swap="afterend"
+          hx-trigger="submit"
+          class="flex space-x-2"
+          autocomplete="off">
+        {% csrf_token %}
+        <input type="text" name="query" placeholder="Ask a question..." 
+               class="flex-1 border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button type="submit"
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Send
+        </button>
+    </form>
+</div>
+
+<!-- HTMX CSRF Token -->
 
 {% endblock %}

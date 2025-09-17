@@ -1,0 +1,47 @@
+<h2 class="text-xl font-bold mb-4">Review Paper</h2>
+<p class="text-gray-700 mb-4"><strong>{{ paper.title }}</strong> by {{ paper.authors }}</p>
+
+<ul class="space-y-2">
+    <li class="flex items-center">
+        {% if paper.abstract %}
+            ✅ <span class="ml-2">Abstract present</span>
+        {% else %}
+            ❌ <span class="ml-2 text-red-600">Abstract missing</span>
+        {% endif %}
+    </li>
+    <li class="flex items-center">
+        {% if paper.file %}
+            ✅ <span class="ml-2">PDF file uploaded</span>
+        {% else %}
+            ❌ <span class="ml-2 text-red-600">No file uploaded</span>
+        {% endif %}
+    </li>
+    <li class="flex items-center">
+        {% if paper.year %}
+            ✅ <span class="ml-2">Year specified</span>
+        {% else %}
+            ❌ <span class="ml-2 text-red-600">Year missing</span>
+        {% endif %}
+    </li>
+    <li class="flex items-center">
+        {% if paper.college and paper.program %}
+            ✅ <span class="ml-2">College & Program specified</span>
+        {% else %}
+            ❌ <span class="ml-2 text-red-600">College/Program missing</span>
+        {% endif %}
+    </li>
+</ul>
+
+<div class="mt-6 flex gap-3">
+    <button 
+        hx-post="{% url 'staff_approve_paper' paper.id %}" 
+        hx-target="#modal-content"
+        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+        Approve & Assign DOI
+    </button>
+    <button 
+        _="on click add .hidden to #modal remove .block from #modal"
+        class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+        Close
+    </button>
+</div>
