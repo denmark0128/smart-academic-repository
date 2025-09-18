@@ -32,7 +32,7 @@ class Paper(models.Model):
     tags = models.JSONField(default=list, blank=True)
     is_indexed = models.BooleanField(default=False)
     is_registered = models.BooleanField(default=False)
-
+    status = models.CharField(max_length=20, default="pending")
     year = models.PositiveIntegerField(null=True, blank=True) 
 
     """

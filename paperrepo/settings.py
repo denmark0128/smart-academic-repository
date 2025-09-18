@@ -167,8 +167,11 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_ALLOWED_TEMPLATE_PACKS = ("tailwind", )
 CRISPY_TEMPLATE_PACK = "tailwind"
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"

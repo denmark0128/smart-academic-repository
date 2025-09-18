@@ -27,11 +27,13 @@ chunk_map = {i: chunks_data[i] for i in range(len(chunks_data))}
 embed_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Load LLM
+"""
 llm = Llama.from_pretrained(
     repo_id="unsloth/gemma-3-1b-it-GGUF",
     filename="gemma-3-1b-it-BF16.gguf",
     n_ctx=32768,
 )
+"""
 
 # ----------------------------
 # RAG query function

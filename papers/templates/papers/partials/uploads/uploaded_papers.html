@@ -1,0 +1,76 @@
+<!-- papers/partials/uploaded_papers.html -->
+<div class="space-y-4">
+
+  <!-- Header + Add Paper button -->
+  <div class="flex justify-between items-center">
+    <h3 class="text-lg font-semibold"></h3>
+    <button 
+      @click="subTab = 'upload'" 
+      class="btn btn-primary">
+      Add Paper
+    </button>
+  </div>
+
+  <!-- Search + Filter -->
+  <div class="flex flex-col md:flex-row gap-2 md:gap-4">
+    <input 
+      type="text" 
+      placeholder="Search by title or author..." 
+      class="input input-bordered w-full md:w-1/2" 
+      x-model="searchQuery">
+
+    <select class="select select-bordered w-full md:w-1/4" x-model="filterYear">
+      <option value="">All Years</option>
+      {% for paper in papers %}
+        <option value="{{ paper.year }}">{{ paper.year }}</option>
+        {% endfor %}
+    </select>
+
+    <select class="select select-bordered w-full md:w-1/4" x-model="filterStatus">
+      <option value="">All Status</option>
+      <option value="success">Indexed</option>
+      <option value="processing">Processing</option>
+      <option value="error">Error</option>
+    </select>
+  </div>
+
+  <!-- Papers Table -->
+  <div class="overflow-x-auto">
+    <table class="table table-sm w-full">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Year</th>
+          <th>Authors</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for paper in papers %}
+        <tr 
+          x-show="(!searchQuery || '{{ paper.title }} {{ paper.authors|join:", " }}'.toLowerCase().includes(searchQuery.toLowerCase())) 
+                   && (!filterYear || filterYear == '{{ paper.year }}') 
+                   && (!filterStatus || filterStatus == '{{ paper.status }}')">
+
+          <td>{{ paper.title }}</td>
+          <td>{{ paper.year }}</td>
+          <td>{{ paper.authors|join:", " }}</td>
+          <td>
+            {% if paper.status == "success" %}
+              <span class="badge badge-dash budge-success">Indexed</span>
+            {% elif paper.status == "processing" %}
+              <span class="badge badge-dash badge-warning">Processing</span>
+            {% else %}
+              <span class="badge badge-dash badge-error">Error</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center text-gray-500">No uploaded papers yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

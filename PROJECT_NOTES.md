@@ -53,7 +53,9 @@ This notepad documents all major changes, features, and improvements made to the
 - Added Select2 tagging widget in the admin and form for easier author selection and creation.
 - Supports multiple authors with autocomplete and manual entry.
 
----
+## 9. Staff Page
+- added staff page with dashboard
+
 
 _Created at: June 17, 2025_  
 _Last updated: August 4, 2025_

@@ -4,207 +4,31 @@
 
 {% block content %}
 
-<!-- Status Modal -->
-{% if status == 'success' %}
-<div x-data="{ open: true }" x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-grey-200 bg-opacity-20">
-  <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
-    <h2 class="text-xl font-bold mb-2 text-green-700">File Uploaded &amp; Indexed</h2>
-    <p class="text-gray-700 mb-4">Your paper was successfully uploaded and indexed for search.</p>
-    <button @click="open = false" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Close</button>
+<div class="bg-white rounded-lg shadow p-6" x-data="{ subTab: 'uploaded' }">
+  <h2 class="text-lg font-semibold text-gray-900 mb-4">Upload Section</h2>
+
+  <!-- DaisyUI Tabs -->
+  <div class="tabs tabs-border mb-4">
+    <a @click="subTab = 'uploaded'" 
+       :class="subTab === 'uploaded' ? 'tab tab-active' : 'tab'">
+      Uploaded Papers
+    </a>
+    <a @click="subTab = 'upload'" 
+       :class="subTab === 'upload' ? 'tab tab-active' : 'tab'">
+      Upload a Paper
+    </a>
   </div>
-</div>
-{% endif %}
 
-<div class="max-w-2xl mx-auto p-6">
-  <!-- Header Section -->
-
+  <!-- Uploaded Papers -->
+  <div x-show="subTab === 'uploaded'" 
+       x-data="{ searchQuery: '', filterYear: '', filterStatus: '' }">
+    {% include 'papers/partials/uploads/uploaded_papers.html' %}
+  </div>
 
   <!-- Upload Form -->
-  <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900 flex items-center">
-        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        Paper Details
-      </h2>
-    </div>
-    
-    <form id="upload-form" class="p-6 space-y-6" method="POST" enctype="multipart/form-data">
-      {% csrf_token %}
-      
-      <!-- Custom Form Styling -->
-      <div class="space-y-6">
-        <!-- Form fields will be styled by Django, but we can add custom wrapper styling -->
-        <div class="form-section">
-          {{ form|crispy }}
-        </div>
-      </div>
-
-      <!-- Submit Button -->
-      <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-        <div class="flex items-center text-sm text-gray-500">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          Supported formats: PDF
-        </div>
-        <button type="submit" 
-                class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-          </svg>
-          Upload Paper
-        </button>
-    </form>
-
-    <!-- Processing Spinner/Message -->
-    <div id="processing-spinner" style="display:none;" class="flex flex-col items-center justify-center mt-8">
-      <svg class="animate-spin h-8 w-8 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-      </svg>
-      <p class="text-blue-700 font-semibold">Processing your paper. This may take up to a few minutes. Please do not close this page...</p>
-    </div>
-
-    <script>
-      document.getElementById('upload-form').addEventListener('submit', function() {
-        document.getElementById('processing-spinner').style.display = 'flex';
-      });
-
-      document.getElementById('id_file').addEventListener('change', function () {
-    const fileInput = this;
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    fetch('/papers/extract-metadata/', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            const meta = data.metadata;
-
-            document.getElementById('id_title').value = meta.title || '';
-            document.getElementById('id_year').value = meta.year || '';
-            document.getElementById('id_authors').value = (meta.authors || []).join(' ');
-            document.getElementById('id_abstract').value = meta.abstract || '';
-            document.getElementById('id_college').value = meta.college || '';
-            document.getElementById('id_program').value = meta.program || '';
-        } else {
-            alert("Failed to extract metadata: " + data.error);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Error uploading file.");
-    });
-});
-
-    </script
-
-      </div>
-  </form>
+  <div x-show="subTab === 'upload'">
+    {% include 'papers/partials/uploads/upload_form.html' %}
   </div>
 
-  <!-- Help Section -->
-  <div class="mt-8 bg-blue-50 rounded-lg p-6 border border-blue-200">
-    <h3 class="text-lg font-semibold text-blue-900 mb-3 flex items-center">
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-      </svg>
-      Upload Guidelines
-    </h3>
-    <ul class="text-blue-800 space-y-2">
-      <li class="flex items-start">
-        <svg class="w-4 h-4 mr-2 mt-0.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        Ensure your paper is in PDF format
-      </li>
-      <li class="flex items-start">
-        <svg class="w-4 h-4 mr-2 mt-0.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        Include a clear title and author information
-      </li>
-      <li class="flex items-start">
-        <svg class="w-4 h-4 mr-2 mt-0.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        Provide a comprehensive abstract
-      </li>
-      <li class="flex items-start">
-        <svg class="w-4 h-4 mr-2 mt-0.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        Tags will be automatically extracted from your paper
-      </li>
-    </ul>
-  </div>
 </div>
-
-<!-- Custom CSS for Django Form Fields -->
-<style>
-.form-section p {
-  @apply mb-4;
-}
-
-.form-section label {
-  @apply block text-sm font-medium text-gray-700 mb-2;
-}
-
-.form-section input[type="text"],
-.form-section input[type="email"],
-.form-section input[type="file"],
-.form-section textarea,
-.form-section select {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
-}
-
-.form-section textarea {
-  @apply resize-vertical min-h-[120px];
-}
-
-.form-section input[type="file"] {
-  @apply file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer;
-}
-
-.form-section .helptext {
-  @apply text-sm text-gray-500 mt-1;
-}
-
-.form-section .errorlist {
-  @apply text-red-600 text-sm mt-1 list-none;
-}
-
-.form-section .errorlist li {
-  @apply mb-1;
-}
-
-.custom-file-input {
-    border: 2px dashed #4CAF50;
-    border-radius: 8px;
-    padding: 20px;
-    width: 100%;
-    cursor: pointer;
-    text-align: center;
-    font-weight: bold;
-    color: #555;
-    transition: background-color 0.2s;
-}
-
-.custom-file-input:hover {
-    background-color: #f0f0f0;
-}
-</style>
-
-
 {% endblock %}

@@ -1,24 +1,28 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
-from .models import Paper, SavedPaper, MatchedCitation
-from .forms import PaperForm
-#from .models import AcademicPaper
 from django.http import HttpResponse, JsonResponse
-from .utils.nlp import extract_tags
+from django.conf import settings
+from django.utils.http import urlencode
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+
 import re
 import os
 import fitz
-from django.conf import settings
-from django.utils.http import urlencode
-from utils.semantic_search import semantic_search, keyword_search, index_paper
-from utils.metadata_extractor import extract_metadata as extract_metadata_from_pdf
-from utils.metadata_extractor import normalize_college, normalize_program
-from utils.related import find_related_papers
-from django.contrib.auth.decorators import login_required
-from collections import Counter
 import json
+from collections import Counter
+
+from papers.models import Paper, SavedPaper, MatchedCitation
+from papers.forms import PaperForm
+from papers.utils.nlp import extract_tags
+from utils.semantic_search import semantic_search, keyword_search, index_paper
+from utils.metadata_extractor import (
+    extract_metadata as extract_metadata_from_pdf,
+    normalize_college,
+    normalize_program,
+)
+from utils.related import find_related_papers
 
 from utils.single_paper_rag import query_rag
 
@@ -162,12 +166,13 @@ def paper_query(request, pk):
 
 
 def paper_upload(request):
+    papers = Paper.objects.all().order_by("-uploaded_at")  
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES)
         if form.is_valid():
             paper = form.save(commit=False)
             paper.is_indexed = False  # Initially set to False
-
+            
             # Extract tags from abstract
             tags = extract_tags((paper.title or "") + " " + (paper.abstract or "") + " " + (paper.summary or ""))
             paper.tags = tags
@@ -200,7 +205,7 @@ def paper_upload(request):
     else:
         form = PaperForm()
     status = request.GET.get('status')
-    return render(request, 'papers/paper_upload.html', {'form': form, 'status': status})
+    return render(request, 'papers/paper_upload.html', {'form': form, 'status': status, 'papers': papers,})
 
 
 @login_required
