@@ -7,7 +7,7 @@ psycopg2-binary  # Needed for PostgreSQL support
 spacy
 faiss-cpu
 sentence-transformers
-
+django-htmx
 # NLP and semantic search
 
 
