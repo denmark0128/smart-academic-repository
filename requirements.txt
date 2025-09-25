@@ -9,14 +9,14 @@ faiss-cpu
 sentence-transformers
 
 # NLP and semantic search
-'''
 
 
-torch
-numpy
 
-langchain
-'''
+#torch
+#numpy
+
+#langchain
+
 # PDF and text extraction
 pymupdf  # For PDF parsing (aka fitz)
 
