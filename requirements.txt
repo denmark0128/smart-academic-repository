@@ -4,15 +4,19 @@ django-allauth
 django-crispy-forms
 crispy-tailwind
 psycopg2-binary  # Needed for PostgreSQL support
+spacy
+faiss-cpu
+sentence-transformers
 
 # NLP and semantic search
-spacy
-sentence-transformers
+'''
+
+
 torch
 numpy
-faiss-cpu
-langchain
 
+langchain
+'''
 # PDF and text extraction
 pymupdf  # For PDF parsing (aka fitz)
 
