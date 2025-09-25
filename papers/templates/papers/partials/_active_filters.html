@@ -1,0 +1,19 @@
+<div id="active-filters">
+  {% if selected_filters or query or tag %}
+    <div class="flex flex-wrap gap-2">
+      {% for f in selected_filters %}
+        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+          {{ f }}
+          <button 
+            hx-get="{% url 'paper_list' %}" 
+            hx-target="#papers-content"
+            hx-push-url="true"
+            hx-vals='{"remove_filter": "{{ f }}"}'
+            class="ml-1 text-xs text-red-600 hover:underline">
+            ✕
+          </button>
+        </span>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

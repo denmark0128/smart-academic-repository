@@ -1,6 +1,6 @@
 
 from django.urls import path, include
-from . import views
+from .views import views
 from rest_framework import routers
 from .api import PaperViewSet, SavedPaperViewSet
 

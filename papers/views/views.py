@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils.http import urlencode
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
+from urllib.parse import urlencode
 
 import re
 import os
@@ -49,8 +50,60 @@ def extract_matching_snippet(text, query):
     
 def paper_list(request):
     query = request.GET.get('q')
+    tag = request.GET.get('tag')
+    college = request.GET.get('college')
+    program = request.GET.get('program')
+    year = request.GET.get('year')
+    
     results = []
     papers = Paper.objects.all()
+
+    # Apply filters
+    if college:
+        papers = papers.filter(college=college)
+    if program:
+        papers = papers.filter(program=program)
+    if year:
+        try:
+            papers = papers.filter(year=int(year))
+        except (ValueError, TypeError):
+            # If year is not a valid integer, ignore the year filter
+            pass
+    if tag:
+        papers = papers.filter(tags__contains=[tag])
+
+    # Get unique values for filters
+    colleges = Paper.objects.values_list('college', flat=True).distinct()
+    programs = Paper.objects.values_list('program', flat=True).distinct()
+    years = Paper.objects.values_list('year', flat=True).distinct()
+    years = sorted(years, reverse=True)
+    
+    # Build active filters for display
+    active_filters = []
+    if college:
+        active_filters.append({
+            'label': 'College',
+            'value': college,
+            'remove_url': urlencode({k:v for k,v in request.GET.items() if k != 'college'})
+        })
+    if program:
+        active_filters.append({
+            'label': 'Program',
+            'value': program,
+            'remove_url': urlencode({k:v for k,v in request.GET.items() if k != 'program'})
+        })
+    if year:
+        active_filters.append({
+            'label': 'Year',
+            'value': year,
+            'remove_url': urlencode({k:v for k,v in request.GET.items() if k != 'year'})
+        })
+    if tag:
+        active_filters.append({
+            'label': 'Tag',
+            'value': tag,
+            'remove_url': urlencode({k:v for k,v in request.GET.items() if k != 'tag'})
+        })
 
     if query:
         # Use keyword search first
@@ -116,10 +169,22 @@ def paper_list(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'papers/paper_list.html', {
+    context = {
         'results': results,
-        'query': query ,
-        'page_obj': page_obj})
+        'query': query,
+        'page_obj': page_obj,
+        'colleges': colleges,
+        'programs': programs,
+        'years': years,
+        'selected_college': college,
+        'selected_program': program,
+        'selected_year': year,
+        'active_filters': active_filters
+    }
+
+    if request.htmx:
+        return render(request, 'papers/partials/_paper_list_content.html', context)
+    return render(request, 'papers/paper_list.html', context)
 
 def paper_detail(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
@@ -166,7 +231,8 @@ def paper_query(request, pk):
 
 
 def paper_upload(request):
-    papers = Paper.objects.all().order_by("-uploaded_at")  
+    papers = Paper.objects.all().order_by("-uploaded_at") 
+    years = Paper.objects.values_list('year', flat=True).distinct().order_by('-year')
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES)
         if form.is_valid():
@@ -205,7 +271,7 @@ def paper_upload(request):
     else:
         form = PaperForm()
     status = request.GET.get('status')
-    return render(request, 'papers/paper_upload.html', {'form': form, 'status': status, 'papers': papers,})
+    return render(request, 'papers/paper_upload.html', {'form': form, 'status': status, 'papers': papers, 'years': years,})
 
 
 @login_required

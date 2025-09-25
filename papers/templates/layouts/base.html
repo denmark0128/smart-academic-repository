@@ -7,9 +7,12 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
@@ -20,6 +23,7 @@
             background: #000000; 
             height: 3px;
         }
+          [x-cloak] { display: none !important; }
     </style>
   <!-- Alpine Core -->
     <script
@@ -30,8 +34,7 @@
     {% block extra_head %}{% endblock %}
     {% include 'components/navbar.html' %}
 </head>
-<body class="bg-gray-100">
-    {% include 'components/marquee.html' %}
+<body class="bg-gray-100 font-sans">
     <div id="main-content" class="container mx-auto p-6">
         {% block content %}{% endblock %}
     </div>
