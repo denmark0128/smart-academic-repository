@@ -1,4 +1,4 @@
-from .semantic_search import load_index, load_metadata, save_index, save_metadata, model
+from .semantic_search import load_index, load_metadata, save_index, save_metadata, get_model
 import faiss
 
 def find_related_papers(paper_title, top_k=5, min_score=0.1):
@@ -17,6 +17,7 @@ def find_related_papers(paper_title, top_k=5, min_score=0.1):
         return []
 
     paper_text = " ".join(paper_chunks)
+    model = get_model()
     query_emb = model.encode([paper_text], convert_to_numpy=True)
     faiss.normalize_L2(query_emb)
 
@@ -51,6 +52,7 @@ def find_related_papers(paper_title, top_k=5, min_score=0.1):
 
 def build_title_index(papers):
     titles = [p['title'] for p in papers]
+    model = get_model()
     embeddings = model.encode(titles, show_progress_bar=True, convert_to_numpy=True)
     dim = embeddings.shape[1]
     index = faiss.IndexFlatIP(dim)

@@ -13,18 +13,40 @@ BASE_DIR = settings.BASE_DIR
 INDEX_FILE = os.path.join(BASE_DIR, "media", "indices", "paragraphs.index")
 JSON_FILE = os.path.join(BASE_DIR, "media", "indices", "paragraphs_metadata.json")
 
-# Load FAISS index
-index = faiss.read_index(INDEX_FILE)
 
-# Load metadata
-with open(JSON_FILE, "r", encoding="utf-8") as f:
-    chunks_data = json.load(f)
+# Lazy loading for FAISS index
+_faiss_index = None
+def get_faiss_index():
+    global _faiss_index
+    if _faiss_index is None:
+        _faiss_index = faiss.read_index(INDEX_FILE)
+    return _faiss_index
 
-# Map index -> chunk data
-chunk_map = {i: chunks_data[i] for i in range(len(chunks_data))}
+# Lazy loading for metadata
+_chunks_data = None
+def get_chunks_data():
+    global _chunks_data
+    if _chunks_data is None:
+        with open(JSON_FILE, "r", encoding="utf-8") as f:
+            _chunks_data = json.load(f)
+    return _chunks_data
 
-# Load embedding model
-embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+# Lazy loading for chunk map
+_chunk_map = None
+def get_chunk_map():
+    global _chunk_map
+    if _chunk_map is None:
+        chunks_data = get_chunks_data()
+        _chunk_map = {i: chunks_data[i] for i in range(len(chunks_data))}
+    return _chunk_map
+
+# Lazy loading for embedding model
+_embed_model = None
+def get_embed_model():
+    global _embed_model
+    if _embed_model is None:
+        _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embed_model
 
 # Load LLM
 """
@@ -40,9 +62,12 @@ llm = Llama.from_pretrained(
 # ----------------------------
 def query_rag(user_query, top_k=3):
     # Embed query
+    embed_model = get_embed_model()
     query_vec = embed_model.encode([user_query])
-    
+
     # Retrieve top-k chunks
+    index = get_faiss_index()
+    chunk_map = get_chunk_map()
     D, I = index.search(np.array(query_vec), top_k)
     retrieved_chunks = [chunk_map[i] for i in I[0]]
 

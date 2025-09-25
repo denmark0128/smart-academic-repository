@@ -8,9 +8,15 @@ from sentence_transformers import SentenceTransformer, util
 
 INDEX_PATH = os.path.join('media', 'indices', 'paragraphs.index')
 META_PATH = os.path.join('media', 'indices', 'paragraphs_metadata.json')
+
 EMBED_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'  # or 'allenai-specter'
-MODEL = SentenceTransformer(EMBED_MODEL)
-model = SentenceTransformer(EMBED_MODEL)
+
+_model_instance = None
+def get_model():
+    global _model_instance
+    if _model_instance is None:
+        _model_instance = SentenceTransformer(EMBED_MODEL)
+    return _model_instance
 
 
 def extract_text_from_pdf(pdf_path):
@@ -43,10 +49,11 @@ def merge_small_by_similarity(paragraphs, min_tokens=25, max_tokens=500, similar
     merged = []
     buffer = ""
     buffer_emb = None
+    model = get_model()
     for para in paragraphs:
         if not para.strip():
             continue
-        emb = MODEL.encode(para, convert_to_tensor=True)
+        emb = model.encode(para, convert_to_tensor=True)
         if not buffer:
             buffer = para
             buffer_emb = emb
@@ -54,7 +61,7 @@ def merge_small_by_similarity(paragraphs, min_tokens=25, max_tokens=500, similar
         score = util.cos_sim(buffer_emb, emb).item()
         if score >= similarity_threshold and len(buffer.split()) + len(para.split()) <= max_tokens:
             buffer += " " + para
-            buffer_emb = MODEL.encode(buffer, convert_to_tensor=True)
+            buffer_emb = model.encode(buffer, convert_to_tensor=True)
         else:
             merged.append(buffer.strip())
             buffer = para
@@ -127,6 +134,7 @@ def chunk_text(pages, chunk_size=2000, chunk_overlap=200):
 
 def embed_chunks(chunks):
     texts = [c['text'] for c in chunks]
+    model = get_model()
     embeddings = model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
     return embeddings
 
@@ -211,6 +219,7 @@ def build_full_index(papers):
             })
     if not all_chunks:
         return
+    model = get_model()
     embeddings = model.encode(all_chunks, show_progress_bar=True, convert_to_numpy=True)
     dim = embeddings.shape[1]
     index = faiss.IndexFlatIP(dim)
@@ -229,6 +238,7 @@ def highlight_query(text, query):
 def semantic_search(query, top_k=5, min_score=0.25):
     index = load_index()
     metadata = load_metadata()
+    model = get_model()
     query_emb = model.encode([query], convert_to_numpy=True)
     faiss.normalize_L2(query_emb)
     D, I = index.search(query_emb, top_k * 10)  # Search more to allow filtering

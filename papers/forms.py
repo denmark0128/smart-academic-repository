@@ -49,7 +49,7 @@ class PaperForm(forms.ModelForm):
 
         self.helper.layout = Layout(
             # File field full width
-            Field('file', css_class="file-input file-input-bordered w-full"),
+            Field('file', css_class="file-input file-input-bordered w-full", id="file-upload"),
 
             # Title + Year side by side
             Div(

@@ -4,16 +4,17 @@
     display: none;
   }
 </style>
-<div class="p-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-  <!-- Header -->
 
+<div class="p-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
   <form id="upload-form" class="p-6 space-y-6" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
+
+    <!-- Crispy form fields -->
     <div class="form-section">
       {% crispy form %}
     </div>
 
-    <!-- Submit -->
+    <!-- Info / submit section -->
     <div class="flex items-center justify-between pt-6 border-t border-gray-200">
       <div class="flex items-center text-sm text-gray-500">
         Supported formats: PDF
@@ -21,7 +22,7 @@
     </div>
   </form>
 
-  <!-- Processing Spinner -->
+  <!-- Spinner -->
   <div id="processing-spinner" style="display:none;" class="flex flex-col items-center justify-center mt-8">
     <svg class="animate-spin h-8 w-8 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -29,6 +30,39 @@
     </svg>
     <p class="text-blue-700 font-semibold">Processing your paper…</p>
   </div>
-
 </div>
 
+<script>
+document.querySelector("#file-upload").addEventListener("change", async (e) => {
+    let file = e.target.files[0];
+    if (!file) return;
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    document.querySelector("#processing-spinner").style.display = "flex";
+
+    let response = await fetch("{% url 'extract_metadata' %}", {
+        method: "POST", 
+        body: formData,
+        headers: {
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    });
+
+    let data = await response.json();
+    document.querySelector("#processing-spinner").style.display = "none";
+
+    if (data.success) {
+        // Auto-fill crispy form fields
+        const fields = ['title', 'college', 'program', 'authors', 'year'];
+        fields.forEach(f => {
+            const el = document.querySelector(`#id_${f}`);
+            if (!el) return;
+            if (f === 'authors') el.value = (data.metadata[f] || []).join(", ");
+            else if (f === 'year') el.value = (data.metadata[f] || []).join(", ");
+            else el.value = data.metadata[f] || "";
+        });
+    }
+});
+</script>

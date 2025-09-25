@@ -76,7 +76,7 @@ def paper_list(request):
     colleges = Paper.objects.values_list('college', flat=True).distinct()
     programs = Paper.objects.values_list('program', flat=True).distinct()
     years = Paper.objects.values_list('year', flat=True).distinct()
-    years = sorted(years, reverse=True)
+    years = sorted([y for y in years if y is not None], reverse=True)
     
     # Build active filters for display
     active_filters = []

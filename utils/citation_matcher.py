@@ -4,8 +4,14 @@ from sentence_transformers import SentenceTransformer, util
 import numpy as np
 import faiss
 
-# Load sentence transformer model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Lazy loading for sentence transformer model
+_model_instance = None
+def get_model():
+    global _model_instance
+    if _model_instance is None:
+        _model_instance = SentenceTransformer("all-MiniLM-L6-v2")
+    return _model_instance
 
 # Detect section heading
 def is_reference_heading(line):
@@ -76,6 +82,7 @@ def parse_apa_citation(cite):
 
 # Step 3: Compare citation with known papers
 def compare_citation_with_known(parsed, known_papers):
+    model = get_model()
     parsed_embed = model.encode(parsed['title'], convert_to_tensor=True)
 
     best_match = None
@@ -106,6 +113,10 @@ def run_reference_matching(pdf_path, known_papers, model, threshold=0.75, return
     if not refs:
         print("⚠ No references found.")
         return [] if return_matches else None
+
+    # Use passed-in model if provided, else use lazy loader
+    if model is None:
+        model = get_model()
 
     dim = model.get_sentence_embedding_dimension()
     index = faiss.IndexFlatIP(dim)
