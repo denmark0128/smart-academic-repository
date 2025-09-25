@@ -9,6 +9,9 @@ faiss-cpu
 sentence-transformers
 django-htmx
 pgvector
+djangorestframework
+gunicorn
+django-cors-headers
 # NLP and semantic search
 
 
