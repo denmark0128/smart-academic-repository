@@ -45,34 +45,34 @@ class PaperForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_id = 'upload-form'
-        self.helper.form_class = 'space-y-4'  # vertical spacing
+        self.helper.form_class = 'space-y-6'
 
         self.helper.layout = Layout(
             # File field full width
             Field('file', css_class="file-input file-input-bordered w-full", id="file-upload"),
 
-            # Title + Year side by side
+            # Title + Year side by side (responsive)
             Div(
-                Field('title', css_class="textarea textarea-bordered w-full"),
-                Field('year', css_class="input input-bordered w-32"),
-                css_class="grid grid-cols-3 gap-4"
+                Field('title', css_class="textarea textarea-bordered w-full col-span-2 sm:col-span-2"),
+                Field('year', css_class="input input-bordered w-full sm:w-32"),
+                css_class="grid grid-cols-1 sm:grid-cols-3 gap-4"
             ),
 
-            # Abstract (full width)
+            # Abstract full width
             Field('abstract', css_class="textarea textarea-bordered w-full"),
 
-            # College + Program side by side
+            # College + Program side by side (responsive)
             Div(
                 Field('college', css_class="input input-bordered w-full"),
                 Field('program', css_class="input input-bordered w-full"),
-                css_class="grid grid-cols-2 gap-4"
+                css_class="grid grid-cols-1 sm:grid-cols-2 gap-4"
             ),
 
-            # Authors field (textarea style)
+            # Authors field (full width)
             Field('authors', css_class="textarea textarea-bordered w-full"),
 
-            # Submit button styled with DaisyUI
-            Submit('submit', 'Upload Paper', css_class="btn btn-primary w-full")
+            # Submit button
+            Submit('submit', 'Upload Paper', css_class="btn btn-active btn-accent w-full sm:w-auto")
         )
 
     def clean_authors(self):

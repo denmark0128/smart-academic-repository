@@ -14,10 +14,10 @@ import fitz
 import json
 from collections import Counter
 
-from papers.models import Paper, SavedPaper, MatchedCitation
+from papers.models import Paper, PaperChunk, SavedPaper, MatchedCitation
 from papers.forms import PaperForm
 from papers.utils.nlp import extract_tags
-from utils.semantic_search import semantic_search, keyword_search, index_paper
+from utils.semantic_search import semantic_search, keyword_search, index_paper, get_model
 from utils.metadata_extractor import (
     extract_metadata as extract_metadata_from_pdf,
     normalize_college,
@@ -47,7 +47,7 @@ def extract_matching_snippet(text, query):
             highlighted = pattern.sub(r'<mark>\g<0></mark>', p)
             return highlighted.strip()
     return ""
-    
+
 def paper_list(request):
     query = request.GET.get('q')
     tag = request.GET.get('tag')
@@ -58,7 +58,7 @@ def paper_list(request):
     results = []
     papers = Paper.objects.all()
 
-    # Apply filters
+    # === Apply filters ===
     if college:
         papers = papers.filter(college=college)
     if program:
@@ -67,124 +67,103 @@ def paper_list(request):
         try:
             papers = papers.filter(year=int(year))
         except (ValueError, TypeError):
-            # If year is not a valid integer, ignore the year filter
             pass
     if tag:
         papers = papers.filter(tags__contains=[tag])
 
-    # Get unique values for filters
+    # === Get unique values for filters ===
     colleges = Paper.objects.values_list('college', flat=True).distinct()
     programs = Paper.objects.values_list('program', flat=True).distinct()
     years = Paper.objects.values_list('year', flat=True).distinct()
     years = sorted([y for y in years if y is not None], reverse=True)
     
-    # Build active filters for display
+    # === Build active filters ===
     active_filters = []
-    if college:
-        active_filters.append({
-            'label': 'College',
-            'value': college,
-            'remove_url': urlencode({k:v for k,v in request.GET.items() if k != 'college'})
-        })
-    if program:
-        active_filters.append({
-            'label': 'Program',
-            'value': program,
-            'remove_url': urlencode({k:v for k,v in request.GET.items() if k != 'program'})
-        })
-    if year:
-        active_filters.append({
-            'label': 'Year',
-            'value': year,
-            'remove_url': urlencode({k:v for k,v in request.GET.items() if k != 'year'})
-        })
-    if tag:
-        active_filters.append({
-            'label': 'Tag',
-            'value': tag,
-            'remove_url': urlencode({k:v for k,v in request.GET.items() if k != 'tag'})
-        })
+    for label, value, key in [
+        ("College", college, "college"),
+        ("Program", program, "program"),
+        ("Year", year, "year"),
+        ("Tag", tag, "tag"),
+    ]:
+        if value:
+            active_filters.append({
+                "label": label,
+                "value": value,
+                "remove_url": urlencode({k:v for k,v in request.GET.items() if k != key})
+            })
 
+    # === Searching ===
     if query:
-        # Use keyword search first
         try:
+            # Keyword search first
             search_results = keyword_search(query, top_k=5)
-            if not search_results:
-                # Fallback to semantic search if keyword search returns nothing
-                search_results = semantic_search(query, top_k=5, min_score=0.25)
-            for res in search_results:
-                paper_obj = None
-                # Try to match by paper_id if available
-                paper_id = res.get('paper_id')
-                if paper_id:
-                    paper_obj = Paper.objects.filter(pk=paper_id).first()
-                # Fallback to title and author matching
-                if not paper_obj:
-                    title = res.get('title')
-                    author_name = res.get('authors')
-                    paper_qs = Paper.objects.filter(title=title)
-                    if author_name:
-                        # If author_name is a list, check for any author in the list
-                        from django.db.models import Q
-                        if isinstance(author_name, list):
-                            author_filter = Q()
-                            for a in author_name:
-                                author_filter |= Q(authors__icontains=a)
-                            paper_qs = paper_qs.filter(author_filter)
-                        else:
-                            paper_qs = paper_qs.filter(authors__icontains=author_name)
-                    paper_obj = paper_qs.first()
 
+            if not search_results:
+                # Use the custom semantic_search function with filters
+                search_results = semantic_search(
+                    query,
+                    top_k=5,
+                    college=college,
+                    program=program,
+                    year=year,
+                    tag=tag
+                )
+
+            # Convert into results list
+            for res in search_results:
+                paper_obj = Paper.objects.filter(pk=res.get("paper_id")).first()
                 results.append({
-                    'query': query, 
-                    'paper': paper_obj,
-                    'snippet': res.get('text', ''),
-                    'tags': paper_obj.tags if paper_obj else [],
-                    'score': f"{res.get('score', '-')}",
-                    'page': res.get('page'),
+                    "query": query,
+                    "paper": paper_obj,
+                    "snippet": res.get("text", ""),
+                    "tags": paper_obj.tags if paper_obj else [],
+                    "score": f"{res.get('score', '-'):.3f}",
+                    "page": res.get("page"),
                 })
+
         except Exception as e:
-            # fallback to default search if index not built
+            # Fallback to naive filter if embeddings/index missing
             papers = Paper.objects.filter(
                 Q(title__icontains=query) | Q(abstract__icontains=query)
             )
             for paper in papers:
                 snippet = extract_matching_snippet(paper.abstract, query)
                 results.append({
-                    'query': query,
-                    'paper': paper,
-                    'snippet': snippet,
-                    'tags': paper.tags,
+                    "query": query,
+                    "paper": paper,
+                    "snippet": snippet,
+                    "tags": paper.tags,
                 })
     else:
         for paper in papers:
             results.append({
-                'query': query,
-                'paper': paper,
-                'snippet': "",
-                'tags': paper.tags,
-        })
+                "query": query,
+                "paper": paper,
+                "snippet": "",
+                "tags": paper.tags,
+            })
             
-    paginator = Paginator(results, 10)  # Show 10 items per page
+    paginator = Paginator(results, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     context = {
-        'results': results,
-        'query': query,
-        'page_obj': page_obj,
-        'colleges': colleges,
-        'programs': programs,
-        'years': years,
-        'selected_college': college,
-        'selected_program': program,
-        'selected_year': year,
-        'active_filters': active_filters
+        "results": results,
+        "query": query,
+        "page_obj": page_obj,
+        "colleges": colleges,
+        "programs": programs,
+        "years": years,
+        "selected_college": college,
+        "selected_program": program,
+        "selected_year": year,
+        "active_filters": active_filters,
     }
 
     if request.htmx:
-        return render(request, 'papers/partials/_paper_list_content.html', context)
-    return render(request, 'papers/paper_list.html', context)
+        return render(request, "papers/partials/_paper_list_content.html", context)
+    return render(request, "papers/paper_list.html", context)
+
 
 def paper_detail(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
@@ -231,47 +210,59 @@ def paper_query(request, pk):
 
 
 def paper_upload(request):
-    papers = Paper.objects.all().order_by("-uploaded_at") 
+    papers = Paper.objects.filter(uploaded_by=request.user).order_by("-uploaded_at")
     years = Paper.objects.values_list('year', flat=True).distinct().order_by('-year')
+
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES)
-        if form.is_valid():
+        if form.is_valid(): 
             paper = form.save(commit=False)
+            paper.uploaded_by = request.user
             paper.is_indexed = False  # Initially set to False
             
             # Extract tags from abstract
-            tags = extract_tags((paper.title or "") + " " + (paper.abstract or "") + " " + (paper.summary or ""))
+            tags = extract_tags(
+                (paper.title or "") + " " +
+                (paper.abstract or "") + " " +
+                (paper.summary or "")
+            )
             paper.tags = tags
             paper.save()
 
-            # Auto-generate summary and embed for semantic search
+            # --- Auto-summary ---
             if paper.file:
                 try:
-                    # --- Auto-summary ---
                     from utils.summarize import extract_text_from_pdf, summarize_text
                     text = extract_text_from_pdf(paper.file.path)
-                    print(f"[DEBUG] Extracted text length: {len(text)}")
                     summary = summarize_text(text)
-                    print(f"[DEBUG] Summary: {summary}")
                     paper.summary = summary
                     paper.save(update_fields=['summary'])
                 except Exception as e:
                     import traceback
                     print(f"[Summary Error] {e}")
                     traceback.print_exc()
+
                 try:
-                    # Pass paper.id as paper_id for correct metadata
-                    index_paper(paper.file.path, paper.title, paper.authors, paper.id)
-                    paper.is_indexed = True  # Set to True after successful indexing
+                    # --- Embed chunks directly into PaperChunk ---
+                    from utils.semantic_search import index_paper
+                    index_paper(paper)  # ✅ pass the Paper instance
+                    paper.is_indexed = True
                     paper.save(update_fields=['is_indexed'])
                 except Exception as e:
+                    import traceback
                     print(f"[Embedding Error] {e}")
+                    traceback.print_exc()
 
             return redirect('/papers/upload?status=success')
     else:
         form = PaperForm()
+
     status = request.GET.get('status')
-    return render(request, 'papers/paper_upload.html', {'form': form, 'status': status, 'papers': papers, 'years': years,})
+    return render(
+        request,
+        'papers/paper_upload.html',
+        {'form': form, 'status': status, 'papers': papers, 'years': years}
+    )
 
 
 @login_required
@@ -386,3 +377,4 @@ def processing_tab(request):
 
 def review_tab(request):
     return render(request, "papers/partials/uploads/review_tab.html")
+   

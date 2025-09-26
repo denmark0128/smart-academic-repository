@@ -1,285 +1,239 @@
-import os
-import json
-import fitz  # PyMuPDF
-import faiss
 import re
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer, util
+import fitz  # PyMuPDF
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from papers.models import Paper, PaperChunk
+from django.db.models import Func, FloatField, Value
+from pgvector.django import CosineDistance
 
-INDEX_PATH = os.path.join('media', 'indices', 'paragraphs.index')
-META_PATH = os.path.join('media', 'indices', 'paragraphs_metadata.json')
+# -------------------------------
+# Settings
+# -------------------------------
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+_model = None
 
-EMBED_MODEL = 'sentence-transformers/all-MiniLM-L6-v2'  # or 'allenai-specter'
 
-_model_instance = None
 def get_model():
-    global _model_instance
-    if _model_instance is None:
-        _model_instance = SentenceTransformer(EMBED_MODEL)
-    return _model_instance
+    global _model
+    if _model is None:
+        _model = SentenceTransformer(EMBED_MODEL)
+    return _model
 
 
-def extract_text_from_pdf(pdf_path):
-    doc = fitz.open(pdf_path)
-    text = []
-    for page_num, page in enumerate(doc):
-        text.append(page.get_text())
-    return text  # list of page text
-
-def is_reference_heading(line):
-    return re.match(r"^\s*(references|bibliography|works cited)\s*$", line.strip(), re.IGNORECASE)
-
-def remove_references(pages):
-    clean_pages = []
-    found_references = False
-    for page_text in pages:
-        if found_references:
-            break
-        lines = page_text.split("\n")
-        filtered_lines = []
-        for line in lines:
-            if is_reference_heading(line):
-                found_references = True
-                break
-            filtered_lines.append(line)
-        clean_pages.append("\n".join(filtered_lines))
-    return clean_pages
-
-def merge_small_by_similarity(paragraphs, min_tokens=25, max_tokens=500, similarity_threshold=0.3):
-    merged = []
-    buffer = ""
-    buffer_emb = None
-    model = get_model()
-    for para in paragraphs:
-        if not para.strip():
-            continue
-        emb = model.encode(para, convert_to_tensor=True)
-        if not buffer:
-            buffer = para
-            buffer_emb = emb
-            continue
-        score = util.cos_sim(buffer_emb, emb).item()
-        if score >= similarity_threshold and len(buffer.split()) + len(para.split()) <= max_tokens:
-            buffer += " " + para
-            buffer_emb = model.encode(buffer, convert_to_tensor=True)
-        else:
-            merged.append(buffer.strip())
-            buffer = para
-            buffer_emb = emb
-    if buffer:
-        merged.append(buffer.strip())
-    return merged
-
-
+# -------------------------------
+# PDF extraction & chunking
+# -------------------------------
 def extract_and_chunk(pdf_path, min_size=100, max_size=500):
+    """
+    Extracts text from a PDF and chunks into paragraphs of reasonable size.
+    """
     doc = fitz.open(pdf_path)
-    # Step 1: get page texts
-    page_texts = [page.get_text("text").replace("\r","").strip() for page in doc]
-
-    # Step 2: process each page separately to preserve page numbers
     all_chunks = []
-    for page_num, text in enumerate(page_texts, start=1):
-        # Merge paragraphs within the page
+
+    for page_num, page in enumerate(doc, start=1):
+        text = page.get_text("text").replace("\r", "").strip()
+        # Split into paragraphs by double newlines
         raw_paragraphs = re.split(r"\n\s*\n", text)
-        paragraphs = [re.sub(r"\s+", " ", re.sub(r"\n(?!\n)", " ", p)).strip() for p in raw_paragraphs if p.strip()]
+        paragraphs = [
+            re.sub(r"\s+", " ", p).strip()
+            for p in raw_paragraphs if p.strip()
+        ]
 
-        # Merge short headers
-        merged_paragraphs = []
-        skip_next = False
-        for i, para in enumerate(paragraphs):
-            if skip_next:
-                skip_next = False
-                continue
-            if len(para.split()) <= 3 and i + 1 < len(paragraphs):
-                merged_paragraphs.append(para + ": " + paragraphs[i+1])
-                skip_next = True
-            else:
-                merged_paragraphs.append(para)
-
-        # Semantic merge within the page
-        semantically_merged = merge_small_by_similarity(merged_paragraphs, min_tokens=25, max_tokens=max_size, similarity_threshold=0.7)
-
-        # Final chunk by size, preserving page number
         buffer = ""
-        for para in semantically_merged:
-            if len(buffer) + len(para) < min_size:
+        for para in paragraphs:
+            if len(buffer.split()) + len(para.split()) < min_size:
                 buffer += " " + para
             else:
                 if buffer:
-                    all_chunks.append({'text': buffer.strip(), 'page': page_num})
+                    all_chunks.append({"text": buffer.strip(), "page": page_num})
                     buffer = ""
-                while len(para) > max_size:
+                while len(para.split()) > max_size:
                     split_point = para[:max_size].rfind(".")
                     if split_point == -1:
                         split_point = max_size
-                    all_chunks.append({'text': para[:split_point+1].strip(), 'page': page_num})
+                    all_chunks.append({"text": para[:split_point+1].strip(), "page": page_num})
                     para = para[split_point+1:]
                 buffer = para
         if buffer:
-            all_chunks.append({'text': buffer.strip(), 'page': page_num})
-    return all_chunks
+            all_chunks.append({"text": buffer.strip(), "page": page_num})
 
-###
-def chunk_text(pages, chunk_size=2000, chunk_overlap=200):
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=chunk_overlap
-    )
-    chunks = []
-    for page_num, page_text in enumerate(pages):
-        for chunk in splitter.split_text(page_text):
-            chunks.append({'text': chunk, 'page': page_num + 1})
-    return chunks
-###
+    return [
+        {**chunk, "chunk_id": i} for i, chunk in enumerate(all_chunks)
+    ]
 
 
-def embed_chunks(chunks):
-    texts = [c['text'] for c in chunks]
+# -------------------------------
+# Indexing
+# -------------------------------
+def index_paper(paper: Paper):
+    """
+    Extract, chunk, embed, and save PaperChunks into DB for a Paper.
+    """
+    chunks = extract_and_chunk(paper.file.path)
     model = get_model()
-    embeddings = model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
-    return embeddings
+    texts = [c["text"] for c in chunks]
+    embeddings = model.encode(texts, convert_to_numpy=True)
 
-
-def build_faiss_index(embeddings):
-    dim = embeddings.shape[1]
-    index = faiss.IndexFlatIP(dim)
-    faiss.normalize_L2(embeddings)
-    index.add(embeddings)
-    return index
-
-
-def save_index(index, path=INDEX_PATH):
-    faiss.write_index(index, path)
-
-def save_metadata(metadata, path=META_PATH):
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(metadata, f, ensure_ascii=False, indent=2)
-
-def load_index(path=INDEX_PATH):
-    return faiss.read_index(path)
-
-def load_metadata(path=META_PATH):
-    with open(path, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-
-def index_paper(pdf_path, title, authors, paper_id=None):
-    chunks = extract_and_chunk(pdf_path)
-    embeddings = embed_chunks(chunks)
-
-    # Try to load existing index and metadata
-    try:
-        index = load_index()
-        metadata = load_metadata()
-    except Exception:
-        index = None
-        metadata = []
-
-    if index is not None and len(metadata) > 0:
-        # Append to existing index and metadata
-        faiss.normalize_L2(embeddings)
-        index.add(embeddings)
-        save_index(index)
-        offset = len(metadata)
-    else:
-        # Create new index and metadata
-        index = build_faiss_index(embeddings)
-        save_index(index)
-        offset = 0
-        metadata = []
-
-    # Add new metadata with correct chunk_id
+    objs = []
     for i, chunk in enumerate(chunks):
-        metadata.append({
-            'paper_id': paper_id,
-            'title': title.strip(),
-            'page': chunk['page'],
-            'chunk_id': offset + i,
-            'text': chunk['text'],
-        })
-    save_metadata(metadata)
+        objs.append(
+            PaperChunk(
+                paper=paper,
+                title=paper.title,
+                authors=paper.authors,
+                page=chunk["page"],
+                chunk_id=i,
+                text=chunk["text"],
+                embedding=embeddings[i],  # pgvector accepts np.ndarray
+            )
+        )
+
+    PaperChunk.objects.bulk_create(objs)
+    paper.is_indexed = True
+    paper.save()
 
 
-def build_full_index(papers):
+# -------------------------------
+# Semantic Search
+# -------------------------------
+
+
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+
+def semantic_search(query, top_k=5, min_score=0.25, bm25_weight=0.5, vector_weight=0.5):
     """
-    Build a single FAISS index and metadata for all papers.
-    papers: list of dicts with keys: pdf_path, title, author
+    Hybrid BM25 (full-text) + vector similarity search.
+    1. Use BM25 to get top candidates.
+    2. Re-rank with vector similarity.
+    3. Combine scores for final ranking.
     """
-    all_chunks = []
-    all_metadata = []
-    for paper in papers:
-        chunks = extract_and_chunk(paper['pdf_path'])
-        for i, chunk in enumerate(chunks):
-            all_chunks.append(chunk['text'])
-            all_metadata.append({
-                'title': paper['title'],
-                'authors': paper['authors'],  
-                'page': chunk['page'],
-                'chunk_id': len(all_metadata),
-                'text': chunk['text'],
+    model = get_model()
+    query_emb = model.encode([query], convert_to_numpy=True)[0]
+    query_emb_list = query_emb.tolist()
+
+    # Step 1: BM25 (full-text) search for candidates
+    search_vector = SearchVector('text', weight='A')
+    search_query = SearchQuery(query)
+    bm25_qs = (
+        PaperChunk.objects
+        .annotate(bm25=SearchRank(search_vector, search_query))
+        .filter(bm25__gt=0)
+        .order_by('-bm25')[:max(20, top_k*2)]  # get more for re-ranking
+    )
+
+    # Step 2: For each candidate, compute vector similarity
+    # (pgvector CosineDistance: similarity = 1 - distance)
+    candidates = list(bm25_qs)
+    if not candidates:
+        # fallback to pure vector search if no BM25 hits
+        results = (
+            PaperChunk.objects
+            .annotate(distance=CosineDistance("embedding", query_emb_list))
+            .order_by("distance")[:top_k]
+        )
+        output = []
+        for res in results:
+            similarity = 1 - res.distance
+            if similarity < min_score:
+                continue
+            output.append({
+                "paper_id": res.paper.id,
+                "title": res.paper.title,
+                "authors": res.paper.authors,
+                "page": res.page,
+                "text": highlight_query(res.text, query),
+                "score": round(similarity, 4),
             })
-    if not all_chunks:
-        return
-    model = get_model()
-    embeddings = model.encode(all_chunks, show_progress_bar=True, convert_to_numpy=True)
-    dim = embeddings.shape[1]
-    index = faiss.IndexFlatIP(dim)
-    faiss.normalize_L2(embeddings)
-    index.add(embeddings)
-    save_index(index)
-    save_metadata(all_metadata)
+        return output
+
+    # Get vector similarities for candidates
+    # (fetch all candidate ids, then annotate with vector distance)
+    candidate_ids = [c.id for c in candidates]
+    vector_qs = (
+        PaperChunk.objects
+        .filter(id__in=candidate_ids)
+        .annotate(distance=CosineDistance("embedding", query_emb_list))
+    )
+    # Map id to vector similarity
+    id_to_vector = {c.id: 1 - c.distance for c in vector_qs}
+    # Map id to bm25
+    id_to_bm25 = {c.id: c.bm25 for c in candidates}
+
+    # Normalize scores
+    bm25_scores = list(id_to_bm25.values())
+    vector_scores = list(id_to_vector.values())
+    def norm(x, scores):
+        if not scores or max(scores) == min(scores):
+            return 1.0 if scores and x == max(scores) else 0.0
+        return (x - min(scores)) / (max(scores) - min(scores))
+
+    # Combine scores
+    combined = []
+    for cid in candidate_ids:
+        bm25_norm = norm(id_to_bm25[cid], bm25_scores)
+        vector_norm = norm(id_to_vector.get(cid, 0), vector_scores)
+        hybrid_score = bm25_weight * bm25_norm + vector_weight * vector_norm
+        combined.append((cid, hybrid_score, id_to_bm25[cid], id_to_vector.get(cid, 0)))
+
+    # Sort by hybrid score
+    combined.sort(key=lambda x: x[1], reverse=True)
+
+    # Build output: only return unique papers (best chunk per paper)
+    paper_best = {}
+    for cid, hybrid_score, bm25_score, vector_score in combined:
+        chunk = next((c for c in candidates if c.id == cid), None)
+        if not chunk:
+            continue
+        if vector_score < min_score:
+            continue
+        pid = chunk.paper.id
+        # If this paper is not yet added or this chunk has a better score, update
+        if pid not in paper_best or hybrid_score > paper_best[pid]["score"]:
+            paper_best[pid] = {
+                "paper_id": chunk.paper.id,
+                "title": chunk.paper.title,
+                "authors": chunk.paper.authors,
+                "page": chunk.page,
+                "text": highlight_query(chunk.text, query),
+                "score": round(hybrid_score, 4),
+                "bm25": round(bm25_score, 4),
+                "vector": round(vector_score, 4),
+            }
+    # Return top_k unique papers by score
+    output = sorted(paper_best.values(), key=lambda x: x["score"], reverse=True)[:top_k]
+    return output
 
 
-def highlight_query(text, query):
-    import re
-    pattern = re.compile(re.escape(query), re.IGNORECASE)
-    return pattern.sub(r'<mark>\g<0></mark>', text)
-
-
-def semantic_search(query, top_k=5, min_score=0.25):
-    index = load_index()
-    metadata = load_metadata()
-    model = get_model()
-    query_emb = model.encode([query], convert_to_numpy=True)
-    faiss.normalize_L2(query_emb)
-    D, I = index.search(query_emb, top_k * 10)  # Search more to allow filtering
-    results = []
-    seen_titles = {}
-    for score, idx in zip(D[0], I[0]):
-        if idx < len(metadata) and score >= min_score:
-            meta = metadata[idx].copy()
-            title = meta.get('title', '')
-            if title not in seen_titles or score > seen_titles[title]['score']:
-                meta['score'] = float(score)
-                meta['text'] = highlight_query(meta['text'], query)
-                seen_titles[title] = meta
-        if len(seen_titles) >= top_k:
-            break
-    results = list(seen_titles.values())
-    # Optionally, sort by score descending
-    results.sort(key=lambda x: x['score'], reverse=True)
-    return results
-
+# -------------------------------
+# Keyword Search
+# -------------------------------
 def keyword_search(query, top_k=5):
     """
-    Simple case-insensitive keyword search across all fields (text, title, author).
-    Returns up to top_k unique papers (highest match per title).
+    Simple keyword search across chunks.
     """
-    metadata = load_metadata()
-    query_lower = query.lower()
-    seen_titles = {}
-    for meta in metadata:
-        authors = meta.get('authors', [])
-        if isinstance(authors, list):
-            author_str = ' '.join(authors)
-        else:
-            author_str = str(authors)
-        haystack = f"{meta.get('text','')} {meta.get('title','')} {author_str}".lower()
-        if query_lower in haystack:
-            title = meta.get('title', '')
-            if title not in seen_titles:
-                meta_copy = meta.copy()
-                meta_copy['match_type'] = 'keyword'
-                seen_titles[title] = meta_copy
-            if len(seen_titles) >= top_k:
-                break
-    return list(seen_titles.values())
+    qs = (
+        PaperChunk.objects
+        .filter(text__icontains=query)
+        .select_related("paper")[:top_k]
+    )
+
+    return [
+        {
+            "paper_id": c.paper.id,
+            "title": c.paper.title,
+            "authors": c.paper.authors,
+            "page": c.page,
+            "text": highlight_query(c.text, query),
+            "score": None,
+            "match_type": "keyword",
+        }
+        for c in qs
+    ]
+
+
+# -------------------------------
+# Helpers
+# -------------------------------
+def highlight_query(text, query):
+    pattern = re.compile(re.escape(query), re.IGNORECASE)
+    return pattern.sub(r"<mark>\g<0></mark>", text)

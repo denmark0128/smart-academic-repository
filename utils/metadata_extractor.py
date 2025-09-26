@@ -83,6 +83,47 @@ patterns = [
 ]
 ruler.add_patterns(patterns)
 
+def extract_project_description(pdf_path):
+    import fitz
+    import re
+
+    doc = fitz.open(pdf_path)
+    description = None
+
+    for page in doc:
+        lines = page.get_text().splitlines()
+        collecting = False
+        desc_lines = []
+
+        for line in lines:
+            stripped = line.strip()
+            
+            # Start collecting when we see Project Description:
+            if not collecting and re.search(r'(?i)^project description\s*:', stripped):
+                # Collect any text after the colon on the same line
+                parts = re.split(r':', stripped, 1)
+                if len(parts) > 1 and parts[1].strip():
+                    desc_lines.append(parts[1].strip())
+                collecting = True
+                continue
+
+            # Stop collecting at first empty line
+            if collecting:
+                if stripped == "":
+                    break
+                desc_lines.append(stripped)  # already stripped here
+
+        if desc_lines:
+            # Join and strip extra whitespace
+            description = " ".join(desc_lines).strip()
+            break
+
+    if description:
+        # Remove any multiple spaces inside text
+        description = re.sub(r'\s+', ' ', description).strip()
+
+    return description
+
 
 # === Run extractor on PDF ===
 def extract_metadata(pdf_path):
@@ -108,6 +149,7 @@ def extract_metadata(pdf_path):
         "program": extract_program(cleaned_text),
         "authors": list(person_lines),
         "year": extract_date(cleaned_text),
+        "abstract": extract_project_description(pdf_path),
 
     }
 

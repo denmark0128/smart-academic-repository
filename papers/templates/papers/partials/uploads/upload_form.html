@@ -5,7 +5,7 @@
   }
 </style>
 
-<div class="p-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+<div class="overflow-hidden">
   <form id="upload-form" class="p-6 space-y-6" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
@@ -55,7 +55,7 @@ document.querySelector("#file-upload").addEventListener("change", async (e) => {
 
     if (data.success) {
         // Auto-fill crispy form fields
-        const fields = ['title', 'college', 'program', 'authors', 'year'];
+        const fields = ['title', 'college', 'program','abstract', 'authors', 'year'];
         fields.forEach(f => {
             const el = document.querySelector(`#id_${f}`);
             if (!el) return;

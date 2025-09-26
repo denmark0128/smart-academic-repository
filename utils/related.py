@@ -1,64 +1,63 @@
-from .semantic_search import load_index, load_metadata, save_index, save_metadata, get_model
-import faiss
+from sentence_transformers import SentenceTransformer
+from django.db.models import Q
+from papers.models import Paper, PaperChunk
+
+# Load model once globally
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
 
 def find_related_papers(paper_title, top_k=5, min_score=0.1):
-    print(f"Searching related papers for: {paper_title}")
-
-    index = load_index()
-    metadata = load_metadata()
-
-    # Normalize titles for matching
-    paper_title_norm = paper_title.strip().lower()
-    paper_chunks = [m['text'] for m in metadata if m['title'].strip().lower() == paper_title_norm]
-    print(f"Found {len(paper_chunks)} chunks for paper titled '{paper_title}'")
-
-    if not paper_chunks:
-        print("No chunks found for this paper title in metadata.")
+    """
+    Find related papers by comparing embeddings of chunks belonging to the given paper title
+    against all other chunks in the database (pgvector).
+    """
+    paper = Paper.objects.filter(title__iexact=paper_title).first()
+    if not paper:
+        print(f"No paper found with title: {paper_title}")
         return []
 
-    paper_text = " ".join(paper_chunks)
-    model = get_model()
-    query_emb = model.encode([paper_text], convert_to_numpy=True)
-    faiss.normalize_L2(query_emb)
+    # Collect all chunks of this paper
+    paper_chunks = PaperChunk.objects.filter(paper=paper)
+    if not paper_chunks.exists():
+        print(f"No chunks found for paper titled '{paper_title}'")
+        return []
 
-    D, I = index.search(query_emb, top_k * 10)
-    print(f"Search scores: {D[0]}")
-    print(f"Search indices: {I[0]}")
+    # Merge all chunk texts into one representation
+    paper_text = " ".join(c.text for c in paper_chunks)
+    query_emb = model.encode(paper_text).tolist()
+
+    # Search across all chunks in the DB using pgvector
+    matches = (
+        PaperChunk.objects
+        .exclude(paper=paper)  # skip same paper
+        .annotate(distance=PaperChunk.embedding.cosine_distance(query_emb))
+        .order_by("distance")[: top_k * 5]  # fetch more for filtering
+    )
 
     related = {}
-    for score, idx in zip(D[0], I[0]):
-        if idx >= len(metadata):
-            print(f"Skipping index {idx} - out of metadata range")
-            continue
+    for m in matches:
+        score = 1 - m.distance  # cosine similarity
         if score < min_score:
-            print(f"Skipping index {idx} - score {score} below min_score {min_score}")
             continue
-        meta = metadata[idx]
-        related_title_norm = meta['title'].strip().lower()
-        if related_title_norm == paper_title_norm:
-            continue  # skip same paper
-        if related_title_norm not in related or score > related[related_title_norm]['score']:
-            related[related_title_norm] = {
-                'title': meta['title'],
-                'authors': meta.get('authors', []),
-                'score': float(score),
+        related_title = m.paper.title if m.paper else "Unknown"
+        if related_title not in related or score > related[related_title]['score']:
+            related[related_title] = {
+                "title": related_title,
+                "authors": m.paper.authors if m.paper else [],
+                "score": float(score),
             }
         if len(related) >= top_k:
             break
 
-    results = sorted(related.values(), key=lambda x: x['score'], reverse=True)
+    results = sorted(related.values(), key=lambda x: x["score"], reverse=True)
     print(f"Found {len(results)} related papers.")
     return results
 
+
 def build_title_index(papers):
-    titles = [p['title'] for p in papers]
-    model = get_model()
-    embeddings = model.encode(titles, show_progress_bar=True, convert_to_numpy=True)
-    dim = embeddings.shape[1]
-    index = faiss.IndexFlatIP(dim)
-    faiss.normalize_L2(embeddings)
-    index.add(embeddings)
-    save_index(index)
-    # Save metadata per paper, no chunks
-    metadata = [{'title': p['title'], 'authors': p['authors']} for p in papers]
-    save_metadata(metadata)
+    """
+    In pgvector you don’t need to build a separate FAISS index.
+    This is a no-op kept for API compatibility.
+    """
+    print("pgvector stores embeddings directly in the DB. No FAISS index needed.")
+    return

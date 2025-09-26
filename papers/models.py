@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from pgvector.django import VectorField
 
 COLLEGE_CHOICES = [
     ('ccs', 'College of Computer Studies'),
@@ -27,6 +28,7 @@ class Paper(models.Model):
     college = models.CharField(max_length=100, blank=True, null=True, choices=COLLEGE_CHOICES)
     program = models.CharField(max_length=100, blank=True, null=True, choices=PROGRAM_CHOICES)
     summary = models.TextField(blank=True, null=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='papers/')
     tags = models.JSONField(default=list, blank=True)
@@ -52,6 +54,20 @@ class Paper(models.Model):
     
     def citation_count(self):
         return MatchedCitation.objects.filter(matched_paper=self).count()
+    
+class PaperChunk(models.Model):
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE,null=True, related_name="chunks")
+    title = models.TextField(null=True, blank=True)
+    authors = models.JSONField(null=True, blank=True)  # store list of authors
+    page = models.IntegerField(null=True, blank=True)
+    chunk_id = models.IntegerField()
+    text = models.TextField()
+    embedding = VectorField(dimensions=384)  # MiniLM-L6-v2 = 384 dims
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["paper_id"]),
+        ]
 
 
 class SavedPaper(models.Model):

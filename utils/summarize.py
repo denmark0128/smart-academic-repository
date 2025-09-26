@@ -10,7 +10,7 @@ from huggingface_hub import InferenceClient
 
 load_dotenv()
 
-#tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM3-3B")
+# tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM3-3B")
 client = InferenceClient(
     provider="hf-inference",
     api_key = os.environ.get("HF_TOKEN")

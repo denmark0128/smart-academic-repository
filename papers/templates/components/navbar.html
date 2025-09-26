@@ -1,36 +1,77 @@
-<nav class="bg-white p-4 text-black">
-  <div class="container mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+<nav class="bg-white p-4 shadow">
+  <div class="container mx-auto flex items-center justify-between">
+
     <!-- Logo -->
     <a href="/" class="font-bold text-xl">Academic Repo</a>
 
-    <!-- Search -->
-    <form action="{% url 'paper_list' %}" method="get" class="flex flex-1 flex-col sm:flex-row items-center gap-2">
-      <input
-        type="search"
-        name="q"
-        placeholder="Search papers, authors, or topics..."
-        value="{{ request.GET.q }}"
-        class="flex-1 p-2 rounded-md border-[1px] border-b  lack focus:ring-2 focus:ring-black focus:outline-none transition"
-      >
-      <button type="submit" class="px-4 py-2 text-black bg-white border-black border-[1px] rounded-md font-semibold hover:bg-black hover:text-white hover:border-white transition">
-        Search
-      </button>
-    </form>
+<!-- Search with icon -->
+<form action="{% url 'paper_list' %}" method="get" class="flex-1 relative mx-4 flex">
+  <!-- Search Icon -->
+  <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>
+  </svg>
 
+  <!-- Input -->
+  <input
+    type="search"
+    name="q"
+    placeholder="Search papers, authors, or topics..."
+    value="{{ request.GET.q }}"
+    class="flex-1 pl-10 pr-24 py-2 rounded-l-md border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none transition"
+  >
 
-    <!-- Nav Links -->
-    <ul class="flex flex-wrap justify-center sm:justify-end items-center gap-4 text-sm">
-      <li><a href="{% url 'saved_papers' %}" class="hover:underline">Library</a></li>
-      <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
-      <li><a href="{% url 'paper_list' %}" class="hover:underline">Papers</a></li>
-      <li><a href="{% url 'paper_upload' %}" class="hover:underline">Upload</a></li>
-      {% if user.is_authenticated %}
+  <!-- Submit Button -->
+  <button type="submit" class="absolute right-0 top-0 h-full px-4 bg-black text-white rounded-r-md hover:bg-gray-800 transition">
+    Search
+  </button>
+</form>
+
+    <!-- Mobile Menu / Login -->
+    {% if user.is_authenticated %}
+      <!-- Logged in: Hamburger menu -->
+      <div x-data="{ open: false }" class="relative sm:hidden">
+        <button @click="open = !open" class="btn btn-square btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <div x-show="open" x-transition class="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50 flex flex-col">
+          <a href="{% url 'saved_papers' %}" class="px-4 py-2 hover:bg-gray-100">Library</a>
+          <a href="{% url 'home' %}" class="px-4 py-2 hover:bg-gray-100">Home</a>
+          <a href="{% url 'paper_list' %}" class="px-4 py-2 hover:bg-gray-100">Papers</a>
+          <a href="{% url 'paper_upload' %}" class="px-4 py-2 hover:bg-gray-100">Upload</a>
+          <a href="{% url 'profile_page' %}" class="px-4 py-2 hover:bg-gray-100">Hi, {{ user.username }}</a>
+          <a href="{% url 'account_logout' %}" class="px-4 py-2 hover:bg-gray-100">Logout</a>
+        </div>
+      </div>
+
+      <!-- Desktop Links -->
+      <ul class="hidden sm:flex gap-4 text-sm">
+        <li><a href="{% url 'saved_papers' %}" class="hover:underline">Library</a></li>
+        <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
+        <li><a href="{% url 'paper_list' %}" class="hover:underline">Papers</a></li>
+        <li><a href="{% url 'paper_upload' %}" class="hover:underline">Upload</a></li>
         <li><a href="{% url 'profile_page' %}" class="hover:underline">Hi, {{ user.username }}</a></li>
         <li><a href="{% url 'account_logout' %}" class="hover:underline">Logout</a></li>
-      {% else %}
+      </ul>
+    {% else %}
+      <!-- Not logged in: show login button only on mobile -->
+      <a href="{% url 'account_login' %}" class="btn btn-sm btn-primary sm:hidden">Login</a>
+
+      <!-- Desktop links -->
+      <ul class="hidden sm:flex gap-4 text-sm">
+        <li><a href="{% url 'saved_papers' %}" class="hover:underline">Library</a></li>
+        <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
+        <li><a href="{% url 'paper_list' %}" class="hover:underline">Papers</a></li>
+        <li><a href="{% url 'paper_upload' %}" class="hover:underline">Upload</a></li>
         <li><a href="{% url 'account_login' %}" class="hover:underline">Login</a></li>
         <li><a href="{% url 'account_signup' %}" class="hover:underline">Register</a></li>
-      {% endif %}
-    </ul>
+      </ul>
+    {% endif %}
+
   </div>
 </nav>
