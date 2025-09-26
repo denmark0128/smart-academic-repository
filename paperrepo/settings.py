@@ -184,3 +184,5 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+ALLOWED_HOSTS = ["django-thesis.onrender.com", "localhost", "127.0.0.1"]
