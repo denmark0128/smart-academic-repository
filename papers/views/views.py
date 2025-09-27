@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.utils.http import urlencode
-from django.db.models import Q
+from django.db.models import Q, Min, Max
 from django.contrib.auth.decorators import login_required
 from urllib.parse import urlencode
 
@@ -12,6 +12,7 @@ import re
 import os
 import fitz
 import json
+import random
 from collections import Counter
 
 from papers.models import Paper, PaperChunk, SavedPaper, MatchedCitation
@@ -27,9 +28,21 @@ from utils.related import find_related_papers
 
 from utils.single_paper_rag import query_rag
 
+def random_paper_redirect(request):
+    count = Paper.objects.count()
+    if count == 0:
+        return redirect('paper_list')  # fallback if no papers
+
+    random_index = random.randint(0, count - 1)
+    paper = Paper.objects.all()[random_index]
+
+    return redirect('paper_detail', pk=paper.id)
 
 def home(request):
-    return render(request, 'home.html', {'name': 'John'})
+    all_papers = list(Paper.objects.all())
+    random_paper = random.choice(all_papers) if all_papers else None
+
+    return render(request, "home.html", {"random_paper": random_paper})
 
 
 def papers_view(request):
@@ -95,33 +108,35 @@ def paper_list(request):
     # === Searching ===
     if query:
         try:
-            # Keyword search first
+            print(f"[DEBUG] Calling keyword_search with query: {query}")
             search_results = keyword_search(query, top_k=5)
+            print(f"[DEBUG] keyword_search results: {search_results}")
 
             if not search_results:
-                # Use the custom semantic_search function with filters
+                print("[DEBUG] keyword_search returned no results, calling semantic_search")
                 search_results = semantic_search(
                     query,
-                    top_k=5,
-                    college=college,
-                    program=program,
-                    year=year,
-                    tag=tag
+                    top_k=5
                 )
+                print(f"[DEBUG] semantic_search results: {search_results}")
 
             # Convert into results list
             for res in search_results:
                 paper_obj = Paper.objects.filter(pk=res.get("paper_id")).first()
+                score = res.get('score')
                 results.append({
                     "query": query,
                     "paper": paper_obj,
                     "snippet": res.get("text", ""),
                     "tags": paper_obj.tags if paper_obj else [],
-                    "score": f"{res.get('score', '-'):.3f}",
+                    "score": f"{score:.3f}" if isinstance(score, (int, float)) else "-",
                     "page": res.get("page"),
                 })
 
         except Exception as e:
+            print(f"[ERROR] Exception during search: {e}")
+            import traceback
+            traceback.print_exc()
             # Fallback to naive filter if embeddings/index missing
             papers = Paper.objects.filter(
                 Q(title__icontains=query) | Q(abstract__icontains=query)

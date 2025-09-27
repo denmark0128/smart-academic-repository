@@ -8,7 +8,7 @@
                htmx.ajax('GET', '{% url 'toast' %}?message=Paper removed!', '#toast-container')"
     >
         {% csrf_token %}
-        <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white w-full">
+        <button type="submit" class="btn btn-outline w-full">
             Unsave Paper
         </button>
     </form>
@@ -21,7 +21,7 @@
                htmx.ajax('GET', '{% url 'toast' %}?message=Paper saved!', '#toast-container')"
     >
         {% csrf_token %}
-        <button type="submit" class="px-4 py-2 rounded bg-green-600 text-white w-full">
+        <button type="submit" class="btn btn-neutral w-full">
             Save Paper
         </button>
     </form>

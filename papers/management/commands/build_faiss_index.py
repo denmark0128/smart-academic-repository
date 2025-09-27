@@ -1,44 +1,40 @@
-import os
 import pprint
 from django.core.management.base import BaseCommand
-from papers.models import Paper
-from utils.semantic_search import build_full_index
-
-FAISS_INDEX_PATH = "media/indices/paragraphs.index"      # Path to FAISS index
-FAISS_METADATA_PATH = "media/indices/paragraphs_metadata.json"  # Path to metadata JSON
+from papers.models import Paper, PaperChunk
+from utils.semantic_search import get_model  # your SentenceTransformer wrapper
 
 class Command(BaseCommand):
-    help = 'Rebuild FAISS index from all uploaded PDFs, deleting old index and metadata first.'
+    help = 'Rebuild embeddings for all uploaded papers and store them in DB (pgvector).'
 
     def handle(self, *args, **options):
-        # Delete old FAISS index
-        if os.path.exists(FAISS_INDEX_PATH):
-            os.remove(FAISS_INDEX_PATH)
-            self.stdout.write(self.style.WARNING(f"Deleted old FAISS index at {FAISS_INDEX_PATH}"))
+        model = get_model()
 
-        # Delete old metadata
-        if os.path.exists(FAISS_METADATA_PATH):
-            os.remove(FAISS_METADATA_PATH)
-            self.stdout.write(self.style.WARNING(f"Deleted old FAISS metadata at {FAISS_METADATA_PATH}"))
+        # Delete all old chunks globally
+        PaperChunk.objects.all().delete()
+        self.stdout.write(self.style.WARNING("Deleted all old chunks."))
 
         papers = Paper.objects.all()
         if not papers:
             self.stdout.write(self.style.WARNING('No papers found.'))
             return
 
-        paper_list = []
-        for paper in papers:
-            pdf_path = paper.file.path
-            title = paper.title
-            authors = paper.authors if isinstance(paper.authors, list) else [paper.authors]
-            paper_list.append({
-                'pdf_path': pdf_path,
-                'title': title,
-                'authors': authors
-            })
+        for i, paper in enumerate(papers, 1):
+            self.stdout.write(f"[{i}/{len(papers)}] Processing {paper.title}")
 
-        self.stdout.write(f'Indexing {len(paper_list)} papers...')
-        pprint.pprint(paper_list)
+            # Load + chunk text (replace with your smart chunking function)
+            text = paper.abstract or ""
+            chunks = [text]  # Example: one chunk per abstract
 
-        build_full_index(paper_list)
-        self.stdout.write(self.style.SUCCESS('FAISS index built successfully.'))
+            # Encode chunks
+            embeddings = model.encode(chunks, convert_to_numpy=True)
+
+            # Create chunks with sequential chunk_id
+            for idx, (chunk_text, emb) in enumerate(zip(chunks, embeddings)):
+                PaperChunk.objects.create(
+                    paper=paper,
+                    chunk_id=idx,  # sequential ID per paper
+                    text=chunk_text,
+                    embedding=emb.tolist()
+                )
+
+        self.stdout.write(self.style.SUCCESS('Index rebuilt successfully.'))

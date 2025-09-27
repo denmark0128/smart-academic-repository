@@ -24,4 +24,5 @@ urlpatterns = [
     path("processing/tab/", views.processing_tab, name="processing_tab"),
     path("review/tab/", views.review_tab, name="review_tab"),
     path('', include(router.urls)),
+    path('random-paper/', views.random_paper_redirect, name='random_paper_redirect'),
 ]

@@ -67,12 +67,12 @@
     <div class="space-y-4">
       <a href="{{ paper.file.url }}" 
          download 
-         class="block w-full text-center px-4 py-3 bg-black text-white border-[1px] font-medium rounded-lg hover:bg-white hover:text-black hover:border-black transition">
+         class="btn btn-neutral  text-center font-medium hover:bg-white hover:text-black hover:border-black transition">
         Download PDF
       </a>
       <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ paper.file.url }}" 
          target="_blank"
-         class="block w-full text-center px-4 py-3 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 transition">
+         class="btn btn-neutral  text-center font-medium hover:bg-gray-900 transition">
         View in PDF Viewer
       </a>
 
@@ -157,30 +157,6 @@
 
 <h3>Related Papers</h3>
 
-
-<div id="chat-container" class="flex flex-col space-y-2 p-4 border rounded-lg max-h-96 overflow-y-auto bg-gray-50">
-    <!-- Chat messages will appear here -->
-    <div id="answer" class="space-y-2">
-        <!-- Server responses will be injected here -->
-    </div>
-
-    <!-- Chat input -->
-    <form id="chat-form"
-          hx-post="{% url 'paper_query' paper.pk %}"
-          hx-target="#answer"
-          hx-swap="afterend"
-          hx-trigger="submit"
-          class="flex space-x-2"
-          autocomplete="off">
-        {% csrf_token %}
-        <input type="text" name="query" placeholder="Ask a question..." 
-               class="flex-1 border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            Send
-        </button>
-    </form>
-</div>
 
 <!-- HTMX CSRF Token -->
 

@@ -1,4 +1,4 @@
-{% extends 'layouts/home.html' %}
+{% extends 'layouts/base.html' %}
 
 {% block content %}
 <div class="flex flex-col items-center justify-center min-h-[60vh]">
@@ -20,9 +20,16 @@
     </form>
 
     <div class="mt-6 flex flex-col gap-2 text-center">
+      <a href="{% url 'random_paper_redirect' %}"
+        class="text-black hover:underline font-medium">
+        Show a Random Paper
+      </a>
       <a href="{% url 'paper_upload' %}" class="text-black hover:underline font-medium">Upload a Paper</a>
       <a href="{% url 'paper_list' %}" class="text-black hover:underline font-medium">Browse All Papers</a>
     </div>
   </div>
 </div>
+
+
+
 {% endblock %}
