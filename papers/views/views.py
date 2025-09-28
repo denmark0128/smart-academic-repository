@@ -176,7 +176,7 @@ def paper_list(request):
     }
 
     if request.htmx:
-        return render(request, "papers/partials/_paper_list_content.html", context)
+        return render(request, "papers/partials/paper_list/_paper_list_content.html", context)
     return render(request, "papers/paper_list.html", context)
 
 
@@ -246,6 +246,17 @@ def paper_upload(request):
 
             # --- Auto-summary ---
             if paper.file:
+                try:
+                    model = get_model()
+                    if paper.title:
+                        paper.title_embedding = model.encode(paper.title).tolist()
+                    if paper.abstract:
+                        paper.abstract_embedding = model.encode(paper.abstract).tolist()
+                    paper.save(update_fields=['title_embedding', 'abstract_embedding'])
+                except Exception as e:
+                    import traceback
+                    print(f"[Metadata Embedding Error] {e}")
+                    traceback.print_exc()
                 try:
                     from utils.summarize import extract_text_from_pdf, summarize_text
                     text = extract_text_from_pdf(paper.file.path)

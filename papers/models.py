@@ -23,8 +23,10 @@ PROGRAM_CHOICES = [
 class Paper(models.Model):
     local_doi = models.CharField(max_length=100, unique=True, null=True, blank=True)
     title = models.CharField(max_length=200)
+    title_embedding = VectorField(dimensions=384, null=True)
     authors = models.JSONField(default=list) 
     abstract = models.TextField(blank=True, null=True)
+    abstract_embedding = VectorField(dimensions=384, null=True)
     college = models.CharField(max_length=100, blank=True, null=True, choices=COLLEGE_CHOICES)
     program = models.CharField(max_length=100, blank=True, null=True, choices=PROGRAM_CHOICES)
     summary = models.TextField(blank=True, null=True)
