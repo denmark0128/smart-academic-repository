@@ -1,3 +1,4 @@
+{% load static %}
 <!-- OOB swap for Active Filters -->
 <div id="active-filters" hx-swap-oob="true">
   {% include "papers/partials/paper_list/_active_filters.html" %}
@@ -38,7 +39,7 @@
     {% endwith %}
       
     <!-- Snippet -->
-    <div x-data="{ expanded: false }" class="mt-2 text-gray-600 text-sm leading-relaxed">
+    <div x-data="{ expanded: false }" x-cloak class="mt-2 text-gray-600 text-sm leading-relaxed">
       {% if item.snippet|length > 180 %}
         <!-- Collapsed view -->
         <span x-show="!expanded">
@@ -57,7 +58,7 @@
     </div>
 
     {% if item.paper.summary %}
-      <div x-data="{ open: false }" class="mt-2">
+      <div x-data="{ open: false }" x-cloak class="mt-2">
         <button
           @click="open = !open"
           class="text-yellow-800 font-semibold hover:underline focus:outline-none"
@@ -76,9 +77,38 @@
       </div>
     {% endif %}
 
-    <!-- Tags -->
+    <!-- Tags (Alpine mapping) -->
     {% if item.tags %}
-      <div class="mt-3 flex flex-wrap gap-2 text-xs">
+      <div x-data="{
+          // mapping of topic -> {bg, text}
+          topics: {
+            'computer science': {bg: 'bg-blue-100', text: 'text-blue-800', title: 'Computer Science'},
+            'computer': {bg: 'bg-blue-100', text: 'text-blue-800', title: 'Computer Science'},
+            'cs': {bg: 'bg-blue-100', text: 'text-blue-800', title: 'Computer Science'},
+            'machine learning': {bg: 'bg-green-100', text: 'text-green-800', title: 'Machine Learning'},
+            'ml': {bg: 'bg-green-100', text: 'text-green-800', title: 'Machine Learning'},
+            'deep learning': {bg: 'bg-green-100', text: 'text-green-800', title: 'Machine Learning'},
+            'neural': {bg: 'bg-green-100', text: 'text-green-800', title: 'Machine Learning'},
+            'data science': {bg: 'bg-teal-100', text: 'text-teal-800', title: 'Data Science'},
+            'data': {bg: 'bg-teal-100', text: 'text-teal-800', title: 'Data Science'},
+            'mathematics': {bg: 'bg-purple-100', text: 'text-purple-800', title: 'Mathematics'},
+            'math': {bg: 'bg-purple-100', text: 'text-purple-800', title: 'Mathematics'},
+            'statistics': {bg: 'bg-purple-100', text: 'text-purple-800', title: 'Mathematics'},
+            'biology': {bg: 'bg-emerald-100', text: 'text-emerald-800', title: 'Biology'},
+            'bio': {bg: 'bg-emerald-100', text: 'text-emerald-800', title: 'Biology'},
+            'medicine': {bg: 'bg-red-100', text: 'text-red-800', title: 'Medicine'},
+            'medical': {bg: 'bg-red-100', text: 'text-red-800', title: 'Medicine'},
+            'physics': {bg: 'bg-slate-100', text: 'text-slate-900', title: 'Physics'}
+          },
+          // helper to find topic by substring matching
+          findTopic(tag){
+            const t = tag.toLowerCase();
+            for(const k in this.topics){
+              if(t.includes(k)) return this.topics[k];
+            }
+            return null;
+          }
+        }" class="mt-3 flex flex-wrap gap-2 text-xs">
         {% for tag in item.tags %}
           <a href="#" 
              hx-get="{% url 'paper_list' %}"
@@ -86,17 +116,36 @@
              hx-push-url="true"
              hx-include="[name='college'],[name='program'],[name='year']"
              hx-vals='{"tag": "{{ tag }}"}'>
-            <span class="inline-block bg-gray-200 text-gray-700 font-semibold px-2 py-1 rounded-full hover:bg-gray-300">
+            <span x-text="'{{ tag }}'"
+                  x-bind:class="(findTopic('{{ tag }}') ? (findTopic('{{ tag }}').bg + ' ' + findTopic('{{ tag }}').text) : 'bg-gray-200 text-gray-700') + ' font-semibold px-2 py-1 rounded-full hover:opacity-90'"
+                  x-bind:title="(findTopic('{{ tag }}') ? findTopic('{{ tag }}').title : 'Other')">
               {{ tag }}
             </span>
           </a>
         {% endfor %}
       </div>
     {% endif %}
+    <!-- Actions -->
+{% if item.paper %}
+  <div class="mt-4 flex items-center gap-2">
+    <a href="{{ item.paper.file.url }}" download class="btn btn-xs btn-outline text-red-600">
+      Download PDF
+    </a>
+    <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" 
+       target="_blank" class="btn btn-xs btn-outline">
+      View in PDF Viewer
+    </a>
+    <div id="save-btn-{{ item.paper.id }}">
+      {% include 'partials/_save_button_list.html' with paper=item.paper is_saved=is_saved %}
+    </div>
+    </div>
+{% endif %}
   </div>
 {% empty %}
   <div class="text-center text-gray-500 mt-12">No results found.</div>
 {% endfor %}
+
+
 
 <!-- Pagination Controls -->
 <div class="mt-8 flex justify-center">

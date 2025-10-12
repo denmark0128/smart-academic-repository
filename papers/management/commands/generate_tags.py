@@ -19,8 +19,6 @@ class Command(BaseCommand):
                 try:
                     combined_text = " ".join([
                         paper.title or "",
-                        paper.abstract or "",
-                        paper.summary or ""
                     ]).strip()
 
                     if not combined_text:

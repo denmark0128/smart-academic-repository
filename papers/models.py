@@ -23,10 +23,10 @@ PROGRAM_CHOICES = [
 class Paper(models.Model):
     local_doi = models.CharField(max_length=100, unique=True, null=True, blank=True)
     title = models.CharField(max_length=200)
-    title_embedding = VectorField(dimensions=384, null=True)
+    title_embedding = VectorField(dimensions=768, null=True)
     authors = models.JSONField(default=list) 
     abstract = models.TextField(blank=True, null=True)
-    abstract_embedding = VectorField(dimensions=384, null=True)
+    abstract_embedding = VectorField(dimensions=768, null=True)
     college = models.CharField(max_length=100, blank=True, null=True, choices=COLLEGE_CHOICES)
     program = models.CharField(max_length=100, blank=True, null=True, choices=PROGRAM_CHOICES)
     summary = models.TextField(blank=True, null=True)
@@ -64,7 +64,7 @@ class PaperChunk(models.Model):
     page = models.IntegerField(null=True, blank=True)
     chunk_id = models.IntegerField()
     text = models.TextField()
-    embedding = VectorField(dimensions=384)  # MiniLM-L6-v2 = 384 dims
+    embedding = VectorField(dimensions=768)  # MiniLM-L6-v2 = 384 dims // embeddinggemma = 768
 
     class Meta:
         indexes = [
@@ -90,3 +90,8 @@ class MatchedCitation(models.Model):
     def __str__(self):
         return f"{self.source_paper.title} → {self.matched_paper.title if self.matched_paper else 'Unknown'}"
 
+class ExtractedFigure(models.Model):
+    paper = models.ForeignKey("Paper", on_delete=models.CASCADE)  # if linked to a paper
+    image = models.ImageField(upload_to="extracted/")
+    page_number = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -3,7 +3,7 @@ from django.db.models import Q
 from papers.models import Paper, PaperChunk
 
 # Load model once globally
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+model = SentenceTransformer("google/embeddinggemma-300m")
 
 
 def find_related_papers(paper_title, top_k=5, min_score=0.1):

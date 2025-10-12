@@ -12,6 +12,7 @@ urlpatterns = [
     path('', views.paper_list, name='paper_list'),
     path('papers/<int:pk>/', views.paper_detail, name='paper_detail'),
     path('papers/<int:pk>/query/', views.paper_query, name='paper_query'),  # new
+    path('autocomplete/', views.autocomplete, name='autocomplete'),
     path('upload/', views.paper_upload, name='paper_upload'),
     path('profile/', views.profile_page, name='profile_page'),
     path('saved/', views.saved_papers, name='saved_papers'),

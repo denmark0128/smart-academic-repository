@@ -3,6 +3,7 @@ import re
 from spacy.lang.en.stop_words import STOP_WORDS
 from sentence_transformers import SentenceTransformer, util
 import torch
+from utils.semantic_search import get_model
 
 nlp = spacy.load("en_core_web_sm")
 _mpnet_model = None
@@ -10,8 +11,9 @@ _mpnet_model = None
 def get_mpnet_model():
     global _mpnet_model
     if _mpnet_model is None:
-        _mpnet_model = SentenceTransformer("allenai/specter2_base")
+        _mpnet_model = get_model()  # returns the SentenceTransformer instance
     return _mpnet_model
+
 
 
 EXTRA_STOPWORDS = {
@@ -61,14 +63,14 @@ def load_bank_of_words(path='bank_of_words.txt'):
 
 # Add general topic tags
 GENERAL_TOPICS = [
-    "computer science", "environmental science", "psychology", "medicine", "biology",
+    "computer science", "psychology", "medicine", "biology",
     "physics", "mathematics", "engineering", "chemistry", "social science", "economics",
     "education", "political science", "philosophy", "history", "art", "literature"
 ]
 
 BANK_OF_WORDS = load_bank_of_words().union(set(GENERAL_TOPICS))
 
-def extract_tags(text, top_n=8):
+def extract_tags(text, top_n=5, min_score=0.3):
     # Use the bank of words as tag candidates
     candidates = list(BANK_OF_WORDS)
     if not candidates:
@@ -83,4 +85,4 @@ def extract_tags(text, top_n=8):
     top_tags = [candidates[i] for i in top_idx]
     # Remove tags that are substrings of longer tags
     top_tags = [t for t in top_tags if not any((t != o and t in o) for o in top_tags)]
-    return top_tags
+    return [t for t in top_tags if scores[top_idx[top_tags.index(t)]] >= min_score]

@@ -88,41 +88,47 @@ def extract_project_description(pdf_path):
     import re
 
     doc = fitz.open(pdf_path)
-    description = None
+    collecting = False
+    desc_lines = []
 
     for page in doc:
         lines = page.get_text().splitlines()
-        collecting = False
-        desc_lines = []
-
         for line in lines:
             stripped = line.strip()
-            
-            # Start collecting when we see Project Description:
+
+            # Start collecting when "Project Description:" appears
             if not collecting and re.search(r'(?i)^project description\s*:', stripped):
-                # Collect any text after the colon on the same line
                 parts = re.split(r':', stripped, 1)
                 if len(parts) > 1 and parts[1].strip():
                     desc_lines.append(parts[1].strip())
                 collecting = True
                 continue
 
-            # Stop collecting at first empty line
-            if collecting:
-                if stripped == "":
-                    break
-                desc_lines.append(stripped)  # already stripped here
+            
+            # Stop if we detect the start of a new chapter (only after collecting)
+            if collecting and re.search(r'(?i)^\s*chapter\s+\d+', stripped):
+                collecting = False
+                break
 
-        if desc_lines:
-            # Join and strip extra whitespace
-            description = " ".join(desc_lines).strip()
+            # Stop only if completely empty line *and* we've collected enough text already
+            if collecting and stripped == "":
+                # check if the next lines are just spacing or still part of description
+                continue
+
+            # Add lines while collecting
+            if collecting:
+                desc_lines.append(stripped)
+
+        if not collecting and desc_lines:
+            # we already finished collecting and broke from the inner loop
             break
 
-    if description:
-        # Remove any multiple spaces inside text
-        description = re.sub(r'\s+', ' ', description).strip()
+    # Join and clean up
+    if desc_lines:
+        description = re.sub(r'\s+', ' ', " ".join(desc_lines)).strip()
+        return description
 
-    return description
+    return None
 
 
 # === Run extractor on PDF ===

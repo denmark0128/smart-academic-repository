@@ -56,10 +56,17 @@
           <td>{{ paper.year }}</td>
           <td>{{ paper.authors|join:", " }}</td>
           <td>
-            {% if paper.status == "success" %}
-              <span class="badge badge-dash budge-success">Indexed</span>
-            {% elif paper.status == "processing" %}
-              <span class="badge badge-dash badge-warning">Processing</span>
+            {% if paper.is_indexed %}
+              <span class="badge badge-dash badge-success">Indexed</span>
+            {% else %}
+              <span class="badge badge-dash badge-warning">Not Indexed</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if paper.status == "pending" %}
+              <span class="badge badge-dash badge-success">pending</span>
+            {% elif paper.status == "approved" %}
+              <span class="badge badge-dash badge-warning">Approved</span>
             {% else %}
               <span class="badge badge-dash badge-error">Error</span>
             {% endif %}

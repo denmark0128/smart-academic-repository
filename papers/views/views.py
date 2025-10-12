@@ -2,9 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
+from django.core.cache import cache
+from django.utils.html import escape
 from django.conf import settings
 from django.utils.http import urlencode
-from django.db.models import Q, Min, Max
+from django.db.models import Q, Min, Max, Count
 from django.contrib.auth.decorators import login_required
 from urllib.parse import urlencode
 
@@ -61,8 +63,144 @@ def extract_matching_snippet(text, query):
             return highlighted.strip()
     return ""
 
+
+def highlight_text(text, query):
+    """Escape and highlight occurrences of query inside text (case-insensitive)."""
+    if not text:
+        return ""
+    try:
+        pattern = re.compile(re.escape(query), re.IGNORECASE)
+        return pattern.sub(r'<mark>\g<0></mark>', escape(text))
+    except Exception:
+        return escape(text)
+
+
+def autocomplete(request):
+    """Return JSON suggestions for titles and authors.
+
+    GET params:
+      - q: query string
+      - limit: optional integer (max suggestions, default 10)
+    """
+    q = (request.GET.get('q') or '').strip()
+
+    # detect HTMX early so we can return an empty fragment (no-swap) when there's no query
+    try:
+        is_htmx = bool(request.htmx)
+    except Exception:
+        is_htmx = request.headers.get('Hx-Request') == 'true'
+
+    if not q:
+        # If HTMX request, show recent papers/authors from session (if any)
+        recent_papers = []
+        recent_authors = []
+        try:
+            rp_ids = request.session.get('recent_papers', [])[:5]
+            if rp_ids:
+                # fetch paper titles and preserve order
+                papers_qs = Paper.objects.filter(id__in=rp_ids)
+                id_to_title = {p.id: p.title for p in papers_qs}
+                for pid in rp_ids:
+                    title = id_to_title.get(pid)
+                    if title:
+                        recent_papers.append({'paper_id': pid, 'value': title, 'display': escape(title)})
+
+            ra = request.session.get('recent_authors', [])[:5]
+            for a in ra:
+                recent_authors.append({'value': a, 'display': escape(a)})
+        except Exception:
+            pass
+
+        if is_htmx and (recent_papers or recent_authors):
+            return render(request, 'partials/autocomplete_list.html', {
+                'papers': recent_papers,
+                'authors': recent_authors,
+                'query': q,
+            })
+
+        # Fallback: no recent items — return 204 so nothing shows
+        return HttpResponse(status=204)
+
+    try:
+        limit = int(request.GET.get('limit', 10))
+    except Exception:
+        limit = 10
+
+    # Per-section hard limit (user requested 5 per section)
+    per_section_limit = 5
+
+    cache_key = f"autocomplete:{q.lower()}:{limit}"
+    results = None
+    try:
+        results = cache.get(cache_key)
+    except Exception:
+        results = None
+
+    if results is not None:
+        # cached structure is expected to be {'papers': [...], 'authors': [...]}
+        if is_htmx:
+            return render(request, 'partials/autocomplete_list.html', {
+                'papers': results.get('papers', []),
+                'authors': results.get('authors', []),
+                'query': q,
+            })
+        return JsonResponse(results)
+
+    # Build separate lists for papers and authors
+    papers_list = []
+    authors_list = []
+
+    # 1) Titles (exact substring match) - up to `limit` results
+    title_qs = Paper.objects.filter(title__icontains=q).values('id', 'title')[:limit]
+    for t in title_qs:
+        papers_list.append({
+            'paper_id': t['id'],
+            'value': t['title'],
+            'display': highlight_text(t['title'], q),
+        })
+
+    # 2) Authors (search in JSON list; fall back to Python-side filter)
+    if True:
+        candidate_qs = Paper.objects.exclude(authors__isnull=True).values('id', 'authors')[:1000]
+        seen_authors = set()
+        for item in candidate_qs:
+            authors = item.get('authors') or []
+            for a in authors:
+                if not isinstance(a, str):
+                    continue
+                if q.lower() in a.lower() and a not in seen_authors:
+                    seen_authors.add(a)
+                    authors_list.append({
+                        'value': a,
+                        'display': highlight_text(a, q),
+                    })
+                    if len(authors_list) >= limit:
+                        break
+            if len(authors_list) >= limit:
+                break
+
+    # trim and package
+    papers_list = papers_list[:per_section_limit]
+    authors_list = authors_list[:per_section_limit]
+
+    res_struct = {'papers': papers_list, 'authors': authors_list}
+    try:
+        cache.set(cache_key, res_struct, timeout=30)
+    except Exception:
+        pass
+
+    if is_htmx:
+        return render(request, 'partials/autocomplete_list.html', {
+            'papers': papers_list,
+            'authors': authors_list,
+            'query': q,
+        })
+
+    return JsonResponse(res_struct)
+
 def paper_list(request):
     query = request.GET.get('q')
+    author_filter = request.GET.get('author')
     tag = request.GET.get('tag')
     college = request.GET.get('college')
     program = request.GET.get('program')
@@ -108,8 +246,23 @@ def paper_list(request):
     # === Searching ===
     if query:
         try:
-            print(f"[DEBUG] Calling keyword_search with query: {query}")
-            search_results = keyword_search(query, top_k=5)
+            # If author filter is present, prefer author-filtered results (unique papers by that author)
+            if author_filter:
+                papers_by_author = Paper.objects.filter(authors__contains=[author_filter])[:10]
+                for paper in papers_by_author:
+                    snippet = extract_matching_snippet(paper.abstract or paper.summary or '', query or author_filter)
+                    results.append({
+                        "query": query,
+                        "paper": paper,
+                        "snippet": snippet,
+                        "tags": paper.tags,
+                        "score": '-',
+                        "page": None,
+                    })
+                search_results = []
+            else:
+                print(f"[DEBUG] Calling keyword_search with query: {query}")
+                search_results = keyword_search(query, top_k=5)
             print(f"[DEBUG] keyword_search results: {search_results}")
 
             if not search_results:
@@ -186,7 +339,14 @@ def paper_detail(request, pk):
     # PDF viewer
     pdf_url = request.build_absolute_uri(paper.file.url)
     viewer_url = f"{settings.STATIC_URL}pdfjs/web/viewer.html?file={pdf_url}"
-
+    paper_folder = os.path.join(settings.MEDIA_URL, f"extracted/paper_{paper.id}")
+    figures = []
+    if os.path.exists(os.path.join(settings.MEDIA_ROOT, f"extracted/paper_{paper.id}")):
+        for fname in os.listdir(os.path.join(settings.MEDIA_ROOT, f"extracted/paper_{paper.id}")):
+            figures.append({
+                "url": os.path.join(paper_folder, fname),
+                "page_number": None,  # unless you track it
+            })
     # Citations & saved state
     matched_citations = paper.matched_citations.select_related("matched_paper")
     matched_citation_count = matched_citations.count()
@@ -205,7 +365,29 @@ def paper_detail(request, pk):
         'matched_citation_count': matched_citation_count,
         'viewer_url': viewer_url,
         'is_saved': is_saved,
+        'figures': figures,
     })
+
+    # Track recent papers/authors in session (keep last 10)
+    try:
+        recent_papers = request.session.get('recent_papers', [])
+        if paper.id in recent_papers:
+            recent_papers.remove(paper.id)
+        recent_papers.insert(0, paper.id)
+        request.session['recent_papers'] = recent_papers[:10]
+
+        # Track recent authors (flatten list)
+        recent_authors = request.session.get('recent_authors', [])
+        for a in (paper.authors or []):
+            if not isinstance(a, str):
+                continue
+            if a in recent_authors:
+                recent_authors.remove(a)
+            recent_authors.insert(0, a)
+        request.session['recent_authors'] = recent_authors[:20]
+    except Exception:
+        # don't fail page view if session storage fails
+        pass
 
 def paper_query(request, pk):
     """HTMX endpoint for paper Q&A chatbot"""
@@ -388,10 +570,110 @@ def paper_insights(request):
     tag_labels = list(tag_counts.keys())
     tag_values = list(tag_counts.values())
 
+    # Trend: number of papers per year
+    years = sorted({p.year for p in papers if p.year})
+    year_counts = {y: 0 for y in years}
+    for p in papers:
+        if p.year:
+            year_counts[p.year] = year_counts.get(p.year, 0) + 1
+    year_labels = years
+    year_values = [year_counts.get(y, 0) for y in year_labels]
+
+    # Top authors by number of papers and compute average citations per author
+    # Map paper_id -> citation count
+    paper_cite_counts = {}
+    cite_qs = MatchedCitation.objects.values('matched_paper').annotate(c=Count('id'))
+    for row in cite_qs:
+        pid = row.get('matched_paper')
+        if pid:
+            paper_cite_counts[pid] = row.get('c', 0)
+
+    author_to_papers = {}
+    for p in papers:
+        for a in (p.authors or []):
+            if not isinstance(a, str):
+                continue
+            author_to_papers.setdefault(a, []).append(p.id)
+
+    author_stats = []
+    for a, pids in author_to_papers.items():
+        counts = [paper_cite_counts.get(pid, 0) for pid in pids]
+        total = sum(counts)
+        avg = (total / len(counts)) if counts else 0
+        author_stats.append((a, len(pids), avg))
+
+    # Top authors by number of papers (for bar chart) and by avg citations
+    top_by_count = sorted(author_stats, key=lambda x: x[1], reverse=True)[:10]
+    author_labels = [a for a, n, avg in top_by_count]
+    author_values = [n for a, n, avg in top_by_count]
+
+    top_by_avg = sorted([s for s in author_stats if s[1] > 0], key=lambda x: x[2], reverse=True)[:10]
+    avg_author_labels = [a for a, n, avg in top_by_avg]
+    avg_author_values = [round(avg, 2) for a, n, avg in top_by_avg]
+
+    # Tag trend over time: pick top tags and compute counts per year
+    top_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_tag_names = [t for t, _ in top_tags]
+    tag_trends = {}
+    for tag in top_tag_names:
+        counts = []
+        for y in year_labels:
+            c = Paper.objects.filter(year=y, tags__contains=[tag]).count()
+            counts.append(c)
+        tag_trends[tag] = counts
+
+    # Papers by college/program: choose top programs and compute counts per college
+    programs = [p.program for p in papers if p.program]
+    prog_counts = Counter(programs)
+    top_programs = [p for p,c in prog_counts.most_common(5)]
+    colleges = sorted(set([p.college for p in papers if p.college]))
+    college_program_matrix = []
+    for college in colleges:
+        row = []
+        for prog in top_programs:
+            row.append(Paper.objects.filter(college=college, program=prog).count())
+        college_program_matrix.append({
+            'college': college,
+            'counts': row,
+        })
+
+    insights = {
+        'tag_labels': tag_labels,
+        'tag_values': tag_values,
+        'year_labels': year_labels,
+        'year_values': year_values,
+        'author_labels': author_labels,
+        'author_values': author_values,
+        'avg_author_labels': avg_author_labels,
+        'avg_author_values': avg_author_values,
+        'tag_trends': tag_trends,
+        'top_tag_names': top_tag_names,
+        'programs': top_programs,
+        'colleges': colleges,
+        'college_program_matrix': college_program_matrix,
+        # papers per college
+        'college_labels': colleges,
+        'college_values': [Paper.objects.filter(college=c).count() for c in colleges],
+    }
+
+    # Top cited papers (ordered)
+    top_cited = []
+    cite_qs2 = MatchedCitation.objects.values('matched_paper').annotate(c=Count('id')).order_by('-c')[:10]
+    top_ids = [r['matched_paper'] for r in cite_qs2 if r.get('matched_paper')]
+    if top_ids:
+        papers_map = {p.id: p.title for p in Paper.objects.filter(id__in=top_ids)}
+        for r in cite_qs2:
+            pid = r.get('matched_paper')
+            if not pid:
+                continue
+            title = papers_map.get(pid)
+            if title:
+                top_cited.append({'paper_id': pid, 'title': title, 'count': r.get('c', 0)})
+
     return render(request, 'papers/paper_insights.html', {
         'tag_counts': tag_counts,
-        'tag_labels_json': json.dumps(tag_labels),
-        'tag_values_json': json.dumps(tag_values)
+        'insights_json': json.dumps(insights),
+        'top_cited_papers': top_cited,
     })
 
 

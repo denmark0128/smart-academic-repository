@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <title>{% block title %}Academic Repo{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Prevent white flash on dark mode -->
+    <script>
+      try {
+        if (localStorage.getItem('darkMode') === '1') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
@@ -34,7 +42,48 @@
     {% block extra_head %}{% endblock %}
     {% include 'components/navbar.html' %}
 </head>
-<body class="bg-gray-100 font-sans">
+<style>
+  html.dark, html.dark body {
+    background: #000000 !important;
+    color: #96a6c8 !important;
+  }
+  html.dark .bg-white, html.dark .bg-gray-100, html.dark .bg-gray-200 {
+    background: #23232a !important;
+    color: #f3f4f6 !important;
+  }
+  /* Make all common Tailwind text colors light in dark mode */
+  html.dark .text-black,
+  html.dark .text-gray-900,
+  html.dark .text-gray-800,
+  html.dark .text-gray-700,
+  html.dark .text-gray-600,
+  html.dark .text-gray-500,
+  html.dark .text-gray-400,
+  html.dark .text-gray-300,
+  html.dark .text-gray-200,
+  html.dark .text-gray-100 {
+    color: #f3f4f6 !important;
+  }
+  html.dark .text-yellow-800 {
+    color: #fde68a !important;
+  }
+  html.dark .text-blue-800 {
+    color: #93c5fd !important;
+  }
+  html.dark .text-green-900 {
+    color: #bbf7d0 !important;
+  }
+  html.dark .text-red-600 {
+    color: #fca5a5 !important;
+  }
+  html.dark .border-gray-200 {
+    border-color: #333646 !important;
+  }
+  html.dark .shadow {
+    box-shadow: 0 2px 8px 0 #0004 !important;
+  }
+</style>
+<body class="bg-gray-100 font-sans text-gray-700">
     <div id="main-content" class="container mx-auto p-6">
         {% block content %}{% endblock %}
     </div>

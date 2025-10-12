@@ -9,7 +9,7 @@ from pgvector.django import CosineDistance
 # -------------------------------
 # Settings
 # -------------------------------
-EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_MODEL = "google/embeddinggemma-300m"
 _model = None
 
 
@@ -211,24 +211,57 @@ def keyword_search(query, top_k=5):
     """
     Simple keyword search across chunks.
     """
+    if not query:
+        return []
+
+    # Fetch candidate chunks that contain the query (case-insensitive)
+    # limit the number of chunks scanned for performance
     qs = (
         PaperChunk.objects
         .filter(text__icontains=query)
-        .select_related("paper")[:top_k]
+        .select_related("paper")[:2000]
     )
 
-    return [
-        {
-            "paper_id": c.paper.id,
-            "title": c.paper.title,
-            "authors": c.paper.authors,
-            "page": c.page,
-            "text": highlight_query(c.text, query),
-            "score": None,
+    # Aggregate occurrences by paper
+    pattern = re.compile(re.escape(query), re.IGNORECASE)
+    per_paper = {}
+    for c in qs:
+        text = c.text or ""
+        count = len(pattern.findall(text))
+        if count == 0:
+            continue
+        pid = c.paper.id
+        if pid not in per_paper:
+            per_paper[pid] = {
+                "paper_id": pid,
+                "title": c.paper.title,
+                "authors": c.paper.authors,
+                "count": 0,
+                "page": c.page,
+                "snippet": "",
+            }
+        per_paper[pid]["count"] += count
+        # store the first matching snippet (highlighted)
+        if not per_paper[pid]["snippet"]:
+            per_paper[pid]["snippet"] = highlight_query(text, query)
+
+    # Convert to list and sort by occurrence count
+    results = sorted(per_paper.values(), key=lambda x: x["count"], reverse=True)
+
+    output = []
+    for r in results[:top_k]:
+        output.append({
+            "paper_id": r["paper_id"],
+            "title": r["title"],
+            "authors": r["authors"],
+            "page": r.get("page"),
+            "text": r.get("snippet", ""),
+            # use score to communicate number of occurrences (as float for compatibility)
+            "score": float(r["count"]),
             "match_type": "keyword",
-        }
-        for c in qs
-    ]
+        })
+
+    return output
 
 
 # -------------------------------

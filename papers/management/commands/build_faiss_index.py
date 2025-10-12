@@ -1,40 +1,28 @@
-import pprint
 from django.core.management.base import BaseCommand
 from papers.models import Paper, PaperChunk
-from utils.semantic_search import get_model  # your SentenceTransformer wrapper
+from utils.semantic_search import index_paper  # <-- your existing function
 
 class Command(BaseCommand):
-    help = 'Rebuild embeddings for all uploaded papers and store them in DB (pgvector).'
+    help = "Extract, chunk, embed, and index ALL papers in the database."
 
-    def handle(self, *args, **options):
-        model = get_model()
-
-        # Delete all old chunks globally
-        PaperChunk.objects.all().delete()
-        self.stdout.write(self.style.WARNING("Deleted all old chunks."))
-
+    def handle(self, *args, **kwargs):
         papers = Paper.objects.all()
-        if not papers:
-            self.stdout.write(self.style.WARNING('No papers found.'))
+        if not papers.exists():
+            self.stdout.write(self.style.WARNING("No papers found in DB."))
             return
 
-        for i, paper in enumerate(papers, 1):
-            self.stdout.write(f"[{i}/{len(papers)}] Processing {paper.title}")
+        for i, paper in enumerate(papers, start=1):
+            self.stdout.write(f"[{i}/{len(papers)}] Indexing: {paper.title}")
 
-            # Load + chunk text (replace with your smart chunking function)
-            text = paper.abstract or ""
-            chunks = [text]  # Example: one chunk per abstract
+            # Delete old chunks for this paper
+            PaperChunk.objects.filter(paper=paper).delete()
 
-            # Encode chunks
-            embeddings = model.encode(chunks, convert_to_numpy=True)
-
-            # Create chunks with sequential chunk_id
-            for idx, (chunk_text, emb) in enumerate(zip(chunks, embeddings)):
-                PaperChunk.objects.create(
-                    paper=paper,
-                    chunk_id=idx,  # sequential ID per paper
-                    text=chunk_text,
-                    embedding=emb.tolist()
+            try:
+                index_paper(paper)
+                self.stdout.write(self.style.SUCCESS(f"✓ Indexed {paper.title}"))
+            except Exception as e:
+                self.stdout.write(
+                    self.style.ERROR(f"✗ Failed {paper.title}: {e}")
                 )
 
-        self.stdout.write(self.style.SUCCESS('Index rebuilt successfully.'))
+        self.stdout.write(self.style.SUCCESS("All papers indexed successfully."))

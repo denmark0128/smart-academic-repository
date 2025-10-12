@@ -1,31 +1,86 @@
-<nav class="bg-white p-4 shadow">
+<nav class="bg-white p-4 shadow flex items-center">
   <div class="container mx-auto flex items-center justify-between">
 
+
     <!-- Logo -->
-    <a href="/" class="font-bold text-xl">Academic Repo</a>
+  <a href="/" class="font-bold text-xl">Academic Repo</a>
+
+    <!-- Dark mode toggle -->
+    <button x-data="{ dark: false }"
+            x-cloak
+            x-init="dark = localStorage.getItem('darkMode') === '1'; if(dark){ document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); }"
+            @click="dark = !dark; if(dark){ document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); } localStorage.setItem('darkMode', dark ? '1' : '0');"
+            class="ml-4 px-2 py-1 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 focus:outline-none"
+            title="Toggle dark mode">
+      <span x-show="!dark">🌙</span>
+      <span x-show="dark">☀️</span>
+    </button>
 
 <!-- Search with icon -->
-<form action="{% url 'paper_list' %}" method="get" class="flex-1 relative mx-4 flex">
+<form action="{% url 'paper_list' %}" method="get" autocomplete="off" role="search" class="flex-1 relative mx-4 flex">
   <!-- Search Icon -->
-  <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg class="absolute left-7 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
     <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>
   </svg>
 
   <!-- Input -->
-  <input
-    type="search"
-    name="q"
-    placeholder="Search papers, authors, or topics..."
-    value="{{ request.GET.q }}"
-    class="flex-1 pl-10 pr-24 py-2 rounded-l-md border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none transition"
-  >
+  <div x-data="{ open:false }" class="flex-1 relative mx-4">
+    <input
+      type="search"
+      name="q"
+      id="global-search"
+      placeholder="Search papers, authors, or topics..."
+      value="{{ request.GET.q }}"
+      class="w-full pl-10 pr-24 py-2 rounded-l-md border border-gray-300"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      role="combobox"
+      aria-autocomplete="list"
+      :aria-expanded="open"
+      aria-controls="autocomplete-results"
+      hx-get="{% url 'autocomplete' %}"
+      hx-trigger="keyup changed delay:250ms"
+      hx-target="#autocomplete-results"
+      hx-swap="innerHTML"
+        @autocomplete-select.window="(e) => {
+          if(e.detail.type === 'paper' && e.detail.paper_id){
+            window.location.href = '/papers/' + e.detail.paper_id + '/';
+          } else if(e.detail.type === 'author'){
+            // set visible query, set hidden author field, and submit the enclosing form
+            document.getElementById('global-search').value = e.detail.value;
+            var authorInput = document.getElementById('search-author');
+            if(!authorInput){
+              authorInput = document.createElement('input');
+              authorInput.type = 'hidden';
+              authorInput.name = 'author';
+              authorInput.id = 'search-author';
+              document.getElementById('global-search').closest('form').appendChild(authorInput);
+            }
+            authorInput.value = e.detail.value;
+            // submit the form to perform author-filtered search
+            document.getElementById('global-search').closest('form').submit();
+          } else {
+            document.getElementById('global-search').value = e.detail.value; $dispatch('input');
+          }
+        }"
+      @focus="open = true"
+      @blur="setTimeout(()=> open=false,150)"
+      @keydown.escape="open=false"
+    >
+
+    <div id="autocomplete-results" x-show="open" class="absolute left-0 right-0 z-50 mt-1"></div>
+  </div>
 
   <!-- Submit Button -->
   <button type="submit" class="absolute right-0 top-0 h-full px-4 bg-black text-white rounded-r-md hover:bg-gray-800 transition">
     Search
   </button>
 </form>
+
+  {# HTMX/Alpine/Tailwind are already used in the project; this component uses them. #}
 
     <!-- Mobile Menu / Login -->
     {% if user.is_authenticated %}
@@ -52,6 +107,7 @@
       <!-- Desktop Links -->
       <ul class="hidden sm:flex gap-4 text-sm">
         <li><a href="{% url 'saved_papers' %}" class="hover:underline">Library</a></li>
+        <li><a href="{% url 'paper_insights' %}" class="hover:underline">Overview</a></li>
         <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
         <li><a href="{% url 'paper_list' %}" class="hover:underline">Papers</a></li>
         <li><a href="{% url 'paper_upload' %}" class="hover:underline">Upload</a></li>

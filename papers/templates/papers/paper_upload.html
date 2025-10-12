@@ -17,6 +17,10 @@
        :class="subTab === 'upload' ? 'tab tab-active' : 'tab'">
       Upload a Paper
     </a>
+    <a @click="subTab = 'review'" 
+       :class="subTab === 'review' ? 'tab tab-active' : 'tab'">
+      Review
+    </a>
   </div>
 
   <!-- Uploaded Papers -->
@@ -28,6 +32,10 @@
   <!-- Upload Form -->
   <div x-show="subTab === 'upload'">
     {% include 'papers/partials/uploads/upload_form.html' %}
+  </div>
+
+  <div x-show="subTab === 'review">
+    {% include 'papers/partials/uploads/review.html' %}
   </div>
 
 </div>

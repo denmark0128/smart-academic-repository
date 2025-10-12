@@ -1,23 +1,4 @@
-# General
-research
-study
-analysis
-methodology
-findings
-results
-conclusion
-data
-participants
-survey
-experiment
-hypothesis
-theory
-model
-evaluation
-system
-framework
-
-# Information Technology / CS
+evaluation of a techology
 artificial intelligence
 machine learning
 neural networks
@@ -35,26 +16,13 @@ programming
 software engineering
 information systems
 networking
-
-# Psychology
 mental health
-cognition
-behavior
-emotion
-therapy
-personality
 developmental psychology
 clinical psychology
 abnormal psychology
 experimental psychology
 social behavior
 neuroscience
-stress
-motivation
-learning
-memory
-
-# Nursing
 patient care
 clinical outcomes
 nursing practice
@@ -70,15 +38,12 @@ evidence-based practice
 acute care
 medication administration
 primary care
-
-# Electronics Engineering
 circuits
 microcontrollers
 digital systems
 signal processing
 semiconductors
 embedded systems
-robotics
 electrical design
 communications
 arduino
@@ -87,33 +52,21 @@ control systems
 power electronics
 sensors
 wireless technology
-
-# Education / Secondary Education
 curriculum
 pedagogy
 learning outcomes
 student performance
 teacher effectiveness
 educational technology
-assessment
-lesson planning
-instructional design
 inclusive education
-educational psychology
-classroom management
-blended learning
 learning styles
 formative assessment
-
-# Cross-domain
 sustainability
 innovation
 ethics
 accessibility
 digital transformation
 community impact
-gender studies
-policy
 interdisciplinary
 technology integration
 cultural sensitivity
@@ -121,3 +74,17 @@ quantitative analysis
 qualitative research
 case study
 field work
+budgetary control
+budget management
+financial management
+accounting practices
+construction companies
+construction management
+organizational control
+financial assessment
+project budgeting
+internal control
+cost control
+management practices
+corporate finance
+performance evaluation

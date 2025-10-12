@@ -7,42 +7,379 @@
     <h2 class="text-xl font-semibold mb-4">Trending Topics (Tags)</h2>
     <div class="flex flex-col md:flex-row gap-8">
       <div class="md:w-1/2">
-        <canvas id="tagsPieChart" class="w-full h-auto rounded border"></canvas>
+  <div id="tagsPieChart" class="w-full h-72 rounded border bg-white"></div>
       </div>
-      <div class="md:w-1/2">
-        <ul class="list-disc pl-6">
-          {% for tag, count in tag_counts.items %}
-            <li class="mb-2"><a href="?tag={{ tag|urlencode }}" class="text-blue-600 hover:underline">{{ tag }}</a>: {{ count }}</span></li>
-          {% endfor %}
-        </ul>
-      </div>
+      <div class="md:w-1/2 bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+  <h3 class="text-lg font-semibold text-gray-800 mb-3">Top Tags</h3>
+  <ul class="space-y-2 max-h-80 overflow-y-auto">
+    {% for tag, count in tag_counts.items %}
+      <li class="flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition rounded-lg px-3 py-2">
+        <a href="?tag={{ tag|urlencode }}" class="text-blue-700 font-medium hover:underline truncate">
+          {{ tag }}
+        </a>
+        <span class="text-xs font-semibold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full">{{ count }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Trend: Papers per Year</h2>
+  <div id="trendLineChart" class="w-full h-64 rounded border bg-white"></div>
+    </div>
+
+    <div class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Top Cited Papers (Top 10)</h2>
+      <ol class="list-decimal pl-6">
+        {% for p in top_cited_papers %}
+          <li class="mb-2"><a href="{% url 'paper_detail' p.paper_id %}" class="text-blue-600 hover:underline">{{ p.title }}</a> — {{ p.count }} citations</li>
+        {% empty %}
+          <li class="text-sm text-gray-500 italic">No citation data available</li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Tag trends over time</h2>
+  <div id="tagTrendChart" class="w-full h-64 rounded border bg-white"></div>
+    </div>
+    <div class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Papers by College / Program</h2>
+        <div id="collegeProgramChart" class="w-full h-64 rounded border  bg-white"></div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js"></script>
+  <script type="application/json" id="insights-json">{{ insights_json|safe }}</script>
   <script>
-    const tagLabels = {{ tag_labels_json|safe }};
-    const tagDataValues = {{ tag_values_json|safe }};
-    const tagData = {
-      labels: tagLabels,
-      datasets: [{
-        data: tagDataValues,
-        backgroundColor: [
-          '#60a5fa', '#fbbf24', '#34d399', '#f87171', '#a78bfa', '#f472b6', '#facc15', '#38bdf8', '#4ade80', '#fca5a5', '#c084fc', '#fb7185', '#fde68a', '#818cf8', '#2dd4bf'
-        ],
-      }]
-    };
-    const ctx = document.getElementById('tagsPieChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'pie',
-      data: tagData,
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'bottom' },
-          title: { display: true, text: 'Trending Topics (Tags)' }
-        }
+    const insights = JSON.parse(document.getElementById('insights-json').textContent || '{}');
+    const tagLabels = insights.tag_labels || [];
+    const tagDataValues = insights.tag_values || [];
+    const yearLabels = insights.year_labels || [];
+    const yearValues = insights.year_values || [];
+    const tagTrends = insights.tag_trends || {};
+    const topTagNames = insights.top_tag_names || [];
+    const programs = insights.programs || [];
+    const colleges = insights.colleges || [];
+    const collegeProgramMatrix = insights.college_program_matrix || [];
+
+
+
+    // Bar chart for top tags
+    if (tagLabels.length && tagDataValues.length) {
+  // Sort tags by value (descending) and take top 10
+  const sortedTags = tagLabels
+    .map((name, i) => ({ name, value: tagDataValues[i] }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+
+  const barChart = echarts.init(document.getElementById('tagsPieChart'));
+  barChart.setOption({
+    title: {
+      text: 'Top Trending Tags',
+      left: 'center',
+      textStyle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#374151',
+      },
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: '{b}: {c}'
+    },
+    grid: {
+      left: '3%',
+      right: '6%',
+      bottom: '5%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'value',
+      axisLine: { lineStyle: { color: '#9ca3af' } },
+      axisLabel: { color: '#4b5563' }
+    },
+    yAxis: {
+      type: 'category',
+      data: sortedTags.map(t => t.name),
+      axisLine: { lineStyle: { color: '#9ca3af' } },
+      axisLabel: {
+        color: '#374151',
+        fontSize: 12,
+        interval: 0,
+        overflow: 'truncate'
       }
-    });
+    },
+    series: [{
+      type: 'bar',
+      data: sortedTags.map(t => t.value),
+      barWidth: '60%',
+      itemStyle: {
+        borderRadius: [4, 4, 0, 0],
+        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+          { offset: 0, color: '#60a5fa' },
+          { offset: 1, color: '#3b82f6' }
+        ])
+      },
+      label: {
+        show: true,
+        position: 'right',
+        color: '#374151',
+        fontSize: 12
+      }
+    }]
+  });
+}
+
+
+// Line chart for papers per year (Enhanced)
+if (yearLabels.length && yearValues.length) {
+  const trendChart = echarts.init(document.getElementById('trendLineChart'));
+  trendChart.setOption({
+    title: {
+      text: 'Papers Published per Year',
+      left: 'center',
+      textStyle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#374151'
+      }
+    },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#f9fafb',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      textStyle: { color: '#111827' },
+      axisPointer: {
+        lineStyle: { color: '#a5b4fc', width: 2 }
+      }
+    },
+    grid: {
+      top: 60,
+      left: 50,
+      right: 20,
+      bottom: 40,
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: yearLabels,
+      name: 'Year',
+      nameLocation: 'middle',
+      nameGap: 30,
+      axisLine: { lineStyle: { color: '#9ca3af' } },
+      axisLabel: { color: '#374151' }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Number of Papers',
+      nameLocation: 'middle',
+      nameGap: 45,
+      axisLine: { lineStyle: { color: '#9ca3af' } },
+      splitLine: { lineStyle: { color: '#e5e7eb' } },
+      axisLabel: { color: '#374151' }
+    },
+    series: [{
+      name: 'Papers',
+      data: yearValues,
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 8,
+      lineStyle: {
+        color: '#4f46e5',
+        width: 3
+      },
+      itemStyle: {
+        color: '#6366f1',
+        borderColor: '#fff',
+        borderWidth: 2
+      },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(99,102,241,0.3)' },
+          { offset: 1, color: 'rgba(99,102,241,0.05)' }
+        ])
+      },
+      emphasis: {
+        focus: 'series',
+        itemStyle: { color: '#4338ca', borderColor: '#fff', borderWidth: 2 }
+      }
+    }]
+  });
+}
+
+// Line chart for tag trends (Enhanced Multi-Line)
+if (topTagNames.length && yearLabels.length) {
+  const tagTrendChart = echarts.init(document.getElementById('tagTrendChart'));
+  tagTrendChart.setOption({
+    title: {
+      text: 'Trending Tags Over Time',
+      left: 'center',
+      textStyle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#374151'
+      }
+    },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#f9fafb',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      textStyle: { color: '#111827' },
+      axisPointer: {
+        lineStyle: { color: '#a5b4fc', width: 2 }
+      }
+    },
+    legend: {
+      top: 40,
+      type: 'scroll',
+      icon: 'circle',
+      textStyle: { color: '#4b5563', fontSize: 12 }
+    },
+    grid: {
+      top: 80,
+      left: 50,
+      right: 20,
+      bottom: 40,
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: yearLabels,
+      name: 'Year',
+      nameLocation: 'middle',
+      nameGap: 30,
+      axisLine: { lineStyle: { color: '#9ca3af' } },
+      axisLabel: { color: '#374151' }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Count',
+      nameLocation: 'middle',
+      nameGap: 45,
+      axisLine: { lineStyle: { color: '#9ca3af' } },
+      splitLine: { lineStyle: { color: '#e5e7eb' } },
+      axisLabel: { color: '#374151' }
+    },
+    series: topTagNames.map((t, i) => ({
+      name: t,
+      type: 'line',
+      data: tagTrends[t] || [],
+      smooth: true,
+      showSymbol: false,
+      lineStyle: {
+        width: 2,
+        color: [
+          '#ef4444', '#f97316', '#f59e0b', '#10b981',
+          '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6'
+        ][i % 8]
+      },
+      areaStyle: {
+        opacity: 0.1,
+        color: [
+          '#ef4444', '#f97316', '#f59e0b', '#10b981',
+          '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6'
+        ][i % 8]
+      }
+    }))
+  });
+}
+
+
+// Enhanced Stacked Bar Chart for College / Program
+if (colleges.length && programs.length && collegeProgramMatrix.length) {
+  const cpChart = echarts.init(document.getElementById('collegeProgramChart'));
+
+  const palette = [
+    '#60a5fa', '#34d399', '#fbbf24', '#f472b6',
+    '#a78bfa', '#f59e0b', '#10b981', '#818cf8'
+  ];
+
+  const series = programs.map((prog, i) => ({
+    name: prog,
+    type: 'bar',
+    stack: 'total',
+    emphasis: { focus: 'series' },
+    data: collegeProgramMatrix.map(row => row.counts[i]),
+    itemStyle: {
+      color: palette[i % palette.length],
+      borderRadius: [3, 3, 0, 0]
+    },
+    barWidth: '60%'
+  }));
+
+  cpChart.setOption({
+    title: {
+      text: 'Papers by College and Program',
+      left: 'center',
+      textStyle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#374151'
+      }
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: '#f9fafb',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      textStyle: { color: '#111827' },
+      formatter: params => {
+        let total = params.reduce((sum, p) => sum + p.value, 0);
+        return `
+          <div style="font-weight:600;margin-bottom:4px;">${params[0].axisValue}</div>
+          ${params.map(p => `
+            <div>
+              <span style="display:inline-block;width:10px;height:10px;background:${p.color};border-radius:50%;margin-right:5px;"></span>
+              ${p.seriesName}: ${p.value}
+            </div>`).join('')}
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:6px 0;">
+          <div><b>Total:</b> ${total}</div>
+        `;
+      }
+    },
+    legend: {
+      top: 50,
+      type: 'scroll',
+      textStyle: { color: '#4b5563', fontSize: 12 }
+    },
+    grid: {
+      top: 100,
+      left: 80,
+      right: 20,
+      bottom: 60,
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: colleges,
+      name: 'College',
+      nameLocation: 'middle',
+      nameGap: 35,
+      axisLabel: { color: '#374151', rotate: 20 },
+      axisLine: { lineStyle: { color: '#9ca3af' } }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Count',
+      nameLocation: 'middle',
+      nameGap: 45,
+      axisLabel: { color: '#374151' },
+      splitLine: { lineStyle: { color: '#e5e7eb' } }
+    },
+    series
+  });
+}
+
   </script>
 </div>
 {% endblock %}
