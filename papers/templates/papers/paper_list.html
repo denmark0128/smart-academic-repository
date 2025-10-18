@@ -41,6 +41,7 @@
           <form id="filters" class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
 
+            <input type="hidden" name="view_mode" x-model="view">
             <!-- College -->
             <div>
               <label class="block mb-1 text-sm font-semibold text-blue-700">College</label>
@@ -124,6 +125,18 @@
       </div>
     </div>
 
+
+    <!-- Hidden form for HTMX include -->
+<form id="filters" class="hidden">
+  {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+  {% if selected_college %}<input type="hidden" name="college" value="{{ selected_college }}">{% endif %}
+  {% if selected_program %}<input type="hidden" name="program" value="{{ selected_program }}">{% endif %}
+  {% if selected_year %}<input type="hidden" name="year" value="{{ selected_year }}">{% endif %}
+  {% for t in tags %}
+    <input type="hidden" name="tag" value="{{ t }}">
+  {% endfor %}
+</form>
+
 <!-- Browse Tags Sidebar -->
 <aside class="w-full md:w-64 md:ml-6 mt-8 md:mt-2">
   <div class="bg-white rounded-2xl shadow border border-blue-100 p-4 sticky top-4">
@@ -132,28 +145,23 @@
       {% for tag, count in tag_counts.items %}
         {% cycle 'blue' 'purple' 'green' 'yellow' 'orange' 'red' 'cyan' as color silent %}
         <a href="#"
-          hx-get="{% url 'paper_list' %}?tag={{ tag }}"
-          hx-target="#papers-content"
-          hx-swap="innerHTML"
-          hx-boost="false"
-          class="flex items-center gap-2 rounded-full font-semibold border transition duration-200
-          {% if count > 6 %}
-            text-lg px-5 py-2
-          {% elif count > 3 %}
-            text-base px-4 py-1.5
-          {% else %}
-            text-sm px-3 py-1
-          {% endif %}
-          {% if color == 'blue' %}bg-blue-50 text-blue-800 border-blue-300 hover:bg-blue-100{% endif %}
-          {% if color == 'purple' %}bg-purple-50 text-purple-800 border-purple-300 hover:bg-purple-100{% endif %}
-          {% if color == 'green' %}bg-green-50 text-green-800 border-green-300 hover:bg-green-100{% endif %}
-          {% if color == 'yellow' %}bg-yellow-50 text-yellow-800 border-yellow-300 hover:bg-yellow-100{% endif %}
-          {% if color == 'orange' %}bg-orange-50 text-orange-800 border-orange-300 hover:bg-orange-100{% endif %}
-          {% if color == 'red' %}bg-red-50 text-red-800 border-red-300 hover:bg-red-100{% endif %}
-          {% if color == 'cyan' %}bg-cyan-50 text-cyan-800 border-cyan-300 hover:bg-cyan-100{% endif %}
-        ">
-          <span>{{ tag }}</span>
-          <span class="opacity-70 text-xs font-bold">({{ count }})</span>
+           hx-get="{% url 'paper_list' %}"
+           hx-target="#papers-content"
+           hx-push-url="true"
+           hx-include="#filters"
+           hx-vals='{"tag": ["{{ tag }}"]}'>
+          <span class="flex items-center gap-2 rounded-full font-semibold border transition duration-200
+                       {% if count > 6 %}text-lg px-5 py-2{% elif count > 3 %}text-base px-4 py-1.5{% else %}text-sm px-3 py-1{% endif %}
+                       {% if color == 'blue' %}bg-blue-50 text-blue-800 border-blue-300 hover:bg-blue-100{% endif %}
+                       {% if color == 'purple' %}bg-purple-50 text-purple-800 border-purple-300 hover:bg-purple-100{% endif %}
+                       {% if color == 'green' %}bg-green-50 text-green-800 border-green-300 hover:bg-green-100{% endif %}
+                       {% if color == 'yellow' %}bg-yellow-50 text-yellow-800 border-yellow-300 hover:bg-yellow-100{% endif %}
+                       {% if color == 'orange' %}bg-orange-50 text-orange-800 border-orange-300 hover:bg-orange-100{% endif %}
+                       {% if color == 'red' %}bg-red-50 text-red-800 border-red-300 hover:bg-red-100{% endif %}
+                       {% if color == 'cyan' %}bg-cyan-50 text-cyan-800 border-cyan-300 hover:bg-cyan-100{% endif %}">
+            {{ tag }}
+            <span class="opacity-70 text-xs font-bold">({{ count }})</span>
+          </span>
         </a>
       {% empty %}
         <div class="flex flex-col items-center justify-center py-8">

@@ -129,8 +129,6 @@
     {% else %}
       <!-- Not logged in: show login button only on mobile -->
       <a href="{% url 'account_login' %}" class="btn btn-sm btn-primary sm:hidden">Login</a>
-
-      <!-- Desktop links -->
       <ul class="hidden sm:flex gap-4 text-sm">
         <li><a href="{% url 'saved_papers' %}" class="hover:underline">Library</a></li>
         <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>

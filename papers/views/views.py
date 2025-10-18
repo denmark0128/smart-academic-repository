@@ -6,7 +6,7 @@ from django.core.cache import cache
 from django.utils.html import escape
 from django.conf import settings
 from django.utils.http import urlencode
-from django.db.models import Q, Min, Max, Count, Prefetch
+from django.db.models import Q, Min, Max, Count, Prefetch, Sum
 from django.contrib.auth.decorators import login_required
 from urllib.parse import urlencode
 from django.db.models.signals import post_save, post_delete
@@ -50,6 +50,7 @@ def random_paper_redirect(request):
 def home(request):
     paper = Paper.objects.order_by('?').first()
     return render(request, "home.html", {"random_paper": paper})
+
 
 
 def papers_view(request):
@@ -206,21 +207,22 @@ def autocomplete(request):
 def paper_list(request):
     query = request.GET.get('q')
     author_filter = request.GET.get('author')
-    tag = request.GET.get('tag')
+    tags = request.GET.getlist('tag')  # multiple tags
     college = request.GET.get('college')
     program = request.GET.get('program')
     year = request.GET.get('year')
-    
+
     results = []
+
     # === Fetch tags efficiently (no heavy fields) ===
     tag_data = Paper.objects.only('tags').values_list('tags', flat=True)
     all_tags = []
-    for tags in tag_data:
-        if isinstance(tags, list):
-            all_tags.extend(tags)
+    for tlist in tag_data:
+        if isinstance(tlist, list):
+            all_tags.extend(tlist)
     tag_counts = dict(Counter(all_tags))
 
-    # === Base query — defer heavy fields ===
+    # === Base queryset — defer heavy fields ===
     papers = Paper.objects.defer(
         'title_embedding', 'abstract_embedding', 'summary', 'file'
     ).all()
@@ -235,35 +237,51 @@ def paper_list(request):
             papers = papers.filter(year=int(year))
         except (ValueError, TypeError):
             pass
-    if tag:
-        papers = papers.filter(tags__contains=[tag])
+
+    # === Additive multi-tag filtering (OR) ===
+    if tags:
+        tag_filters = Q()
+        for t in tags:
+            tag_filters |= Q(tags__contains=[t])
+        papers = papers.filter(tag_filters)
 
     # === Get unique values for filters ===
     colleges = Paper.objects.values_list('college', flat=True).distinct()
     programs = Paper.objects.values_list('program', flat=True).distinct()
     years = Paper.objects.values_list('year', flat=True).distinct()
     years = sorted([y for y in years if y is not None], reverse=True)
-    
+
     # === Build active filters ===
     active_filters = []
+    # College / Program / Year
     for label, value, key in [
         ("College", college, "college"),
         ("Program", program, "program"),
         ("Year", year, "year"),
-        ("Tag", tag, "tag"),
     ]:
         if value:
+            query_dict = request.GET.copy()
+            query_dict.pop(key, None)
             active_filters.append({
                 "label": label,
                 "value": value,
-                "remove_url": urlencode({k:v for k,v in request.GET.items() if k != key})
+                "remove_url": query_dict.urlencode()
             })
 
+    # Tags (individual pills)
+    for t in tags:
+        remaining_tags = [x for x in tags if x != t]
+        query_dict = request.GET.copy()
+        query_dict.setlist('tag', remaining_tags)
+        active_filters.append({
+            "label": "Tag",
+            "value": t,
+            "remove_url": query_dict.urlencode()
+        })
 
     # === Searching ===
     if query:
         try:
-            # If author filter is present, prefer author-filtered results (unique papers by that author)
             if author_filter:
                 papers_by_author = Paper.objects.filter(authors__contains=[author_filter])[:10]
                 for paper in papers_by_author:
@@ -278,19 +296,11 @@ def paper_list(request):
                     })
                 search_results = []
             else:
-                print(f"[DEBUG] Calling keyword_search with query: {query}")
                 search_results = keyword_search(query, top_k=5)
-            print(f"[DEBUG] keyword_search results: {search_results}")
 
             if not search_results:
-                print("[DEBUG] keyword_search returned no results, calling semantic_search")
-                search_results = semantic_search(
-                    query,
-                    top_k=5
-                )
-                print(f"[DEBUG] semantic_search results: {search_results}")
+                search_results = semantic_search(query, top_k=5)
 
-            # Convert into results list
             for res in search_results:
                 paper_obj = Paper.objects.filter(pk=res.get("paper_id")).first()
                 score = res.get('score')
@@ -304,13 +314,9 @@ def paper_list(request):
                 })
 
         except Exception as e:
-            print(f"[ERROR] Exception during search: {e}")
             import traceback
             traceback.print_exc()
-            # Fallback to naive filter if embeddings/index missing
-            papers = Paper.objects.filter(
-                Q(title__icontains=query) | Q(abstract__icontains=query)
-            )
+            papers = Paper.objects.filter(Q(title__icontains=query) | Q(abstract__icontains=query))
             for paper in papers:
                 snippet = extract_matching_snippet(paper.abstract, query)
                 results.append({
@@ -327,11 +333,12 @@ def paper_list(request):
                 "snippet": "",
                 "tags": paper.tags,
             })
-            
+
+    # === Pagination ===
     paginator = Paginator(results, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-
+    view_mode = request.GET.get('view_mode', 'card')
     context = {
         "results": results,
         "query": query,
@@ -342,13 +349,16 @@ def paper_list(request):
         "selected_college": college,
         "selected_program": program,
         "selected_year": year,
+        "selected_tags": tags,
         "active_filters": active_filters,
         "tag_counts": tag_counts,
+        "view_mode": view_mode,
     }
 
     if request.htmx:
         return render(request, "papers/partials/paper_list/_paper_list_content.html", context)
     return render(request, "papers/paper_list.html", context)
+
 
 
 def paper_detail(request, pk):
@@ -710,6 +720,9 @@ def paper_insights(request):
         'tag_counts': tag_counts,
         'insights_json': json.dumps(insights),
         'top_cited_papers': top_cited,
+        'total_papers': Paper.objects.count(),
+        'total_citations': Paper.objects.aggregate(Sum('citation_count_cached'))['citation_count_cached__sum'] or 0,
+        'top_cited_paper': Paper.objects.order_by('-citation_count_cached').first(),
     })
 
 

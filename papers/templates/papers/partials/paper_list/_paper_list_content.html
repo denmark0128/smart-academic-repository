@@ -1,18 +1,54 @@
+
 {% load static %}
+
 <!-- OOB swap for Active Filters -->
 <div id="active-filters" hx-swap-oob="true">
   {% include "papers/partials/paper_list/_active_filters.html" %}
 </div>
 
+<!-- Show heading for query -->
 {% if query %}
-  <h2 class="text-lg font-semibold mb-4">
-    {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "<span class="text-black">{{ query }}</span>"
-  </h2>
+<h2 class="text-lg font-semibold mb-2">
+  {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "<span class="text-black">{{ query }}</span>"
+</h2>
 {% endif %}
+
+{% if active_filters %}
+  <div class="mb-4">
+    <!-- Main filter pill headline -->
+    {% with main_filter=active_filters.0 %}
+      <div class="inline-block bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-full mb-1">
+        {{ main_filter.value }}
+      </div>
+      <p class="text-sm text-gray-600 mb-2">
+        Papers in "{{ main_filter.value }}" • 
+        {{ page_obj.paginator.count }} papers found 
+      </p>
+    {% endwith %}
+
+    <!-- Removable tags -->
+    <div class="flex flex-wrap gap-2">
+      {% for filter in active_filters %}
+        <div class="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">
+          <span>{{ filter.label }}: {{ filter.value }}</span>
+          <a href="?{% if query %}q={{ query }}&{% endif %}{{ filter.remove_url }}"
+             hx-get="?{% if query %}q={{ query }}&{% endif %}{{ filter.remove_url }}"
+             hx-target="#papers-content"
+             hx-push-url="true"
+             class="ml-1 text-xs hover:text-red-600 font-bold">
+            ×
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+
 
 <!-- Search Results -->
 {% if view_mode == 'compact' %}
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
     {% for item in page_obj %}
       <div class="border rounded-xl bg-white p-4 border-gray-200 hover:shadow transition flex flex-col h-full">
         {% if item.paper %}
@@ -213,8 +249,9 @@
          hx-target="#papers-content"
          hx-push-url="true"
          hx-include="[name='college'],[name='program'],[name='year'],[name='tag']"
-         hx-vals='{"page": "{{ page_obj.previous_page_number }}"}' 
-         class="px-3 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 rounded-l-md">Previous</a>
+         hx-vals='{"page": "{{ page_obj.previous_page_number }}", "view_mode": view}'>
+         Previous
+      </a>
     {% else %}
       <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-l-md cursor-not-allowed">Previous</span>
     {% endif %}
@@ -226,8 +263,9 @@
          hx-target="#papers-content"
          hx-push-url="true"
          hx-include="[name='college'],[name='program'],[name='year'],[name='tag']"
-         hx-vals='{"page": "{{ page_obj.next_page_number }}"}'
-         class="px-3 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 rounded-r-md">Next</a>
+         hx-vals='{"page": "{{ page_obj.next_page_number }}", "view_mode": view}'>
+         Next
+      </a>
     {% else %}
       <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-r-md cursor-not-allowed">Next</span>
     {% endif %}

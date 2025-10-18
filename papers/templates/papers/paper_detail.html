@@ -5,209 +5,200 @@
 
 {% block content %}
 
-<div class="max-w-6xl mx-auto p-6 bg-white space-y-2">
-<h1 class="text-3xl font-bold text-gray-900 leading-tight">{{ paper.title }}</h1>
- <!-- Grid: Left = Metadata + Abstract, Right = Chat/Buttons/Tags -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="container mx-auto px-4 py-8 max-w-4xl">
 
-  <!-- LEFT COLUMN -->
-  <div class="md:col-span-2 space-y-6">
+  <!-- Grid: Left = Metadata + Abstract, Right = Chat/Buttons/Tags -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-    <!-- Title -->
-    
+    <!-- LEFT COLUMN -->
+    <div class="md:col-span-2 space-y-6">
 
-    <!-- Authors -->
-    {% if paper.authors %}
-      <div class="flex flex-wrap gap-2">
-        {% for author in paper.authors %}
-          <span class="p-1 bg-grey-300 text-green-900">
-          {{ author }}
-          </span>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="text-gray-400 italic">No authors listed.</div>
-    {% endif %}
+      <!-- Title + Metadata + Authors + Tags + Buttons -->
+      <div class="bg-white/80 backdrop-blur-sm border border-gray-200 p-6 rounded-lg bg-white space-y-4 ">
+        <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-4">{{ paper.title }}</h1>
 
-    <!-- Year, College, Program -->
-    <div class="flex flex-wrap gap-3">
-      {% if paper.year %}
-        <span class="font-bold">{{ paper.year }}</span>
-      {% endif %}
-      {% if paper.college %}
-        <span class="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{{ paper.college }}</span>
-      {% endif %}
-      {% if paper.program %}
-        <span class="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded">{{ paper.program }}</span>
-      {% endif %}
-    </div>
+        <!-- DOI -->
+        {% if paper.local_doi %}
+          <div class="text-sm text-gray-600">
+            DOI: <a href="" class="text-blue-600 hover:underline">{{ paper.local_doi }}</a>
+          </div>
+        {% endif %}
 
-    <!-- DOI -->
-    {% if paper.local_doi %}
-      <div class="text-sm text-gray-500">
-        DOI: <a href="" class="text-blue-600 hover:underline">{{ paper.local_doi }}</a>
-      </div>
-    {% endif %}
+        <!-- Authors -->
+        {% if paper.authors %}
+          <div class="flex flex-wrap gap-2">
+            {% for author in paper.authors %}
+              <span class="p-1 text-gray-600 rounded">{{ author }}</span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-gray-400 italic">No authors listed.</div>
+        {% endif %}
 
-    <!-- Abstract -->
-    <div>
-      <h2 class="text-2xl font-semibold">Abstract</h2>
-      <p class="text-gray-700">{{ paper.abstract }}</p>
-    </div>
-
-    <div>
-      <h2 class="text-2xl font-semibold">Conclusion</h2>
-    </div>
-
-    <!-- Summary -->
-    {% if paper.summary %}
-      <div class="p-4 bg-yellow-50 border-yellow-400 rounded">
-        <h3 class="text-lg font-semibold text-yellow-800 mb-2">Summary with AI</h3>
-        <pre class="text-gray-800 whitespace-pre-wrap font-sans">{{ paper.summary }}</pre>
-      </div>
-    {% endif %}
-
-    <div>
-      <h2 class="text-2xl font-semibold">Gaps, Limitations, and Future Work to Improve</h2>
-    </div>
-
-    <div>
-      <h2 class="text-2xl font-semibold">Impact to the community</h2>
-    </div>
-  </div>
-
-  <!-- RIGHT COLUMN -->
-  <div class="flex flex-col space-y-3">
-
-    <!-- Chat -->
-    <div class="bg-grey rounded-lg border border-1 flex flex-col h-96">
-      <!-- Chat Messages -->
-      <div class="flex-1 overflow-y-auto p-4 space-y-4">
-        <div class="chat chat-start">
-          <div class="chat-bubble">It's over Anakin,<br/>I have the high ground.</div>
+        <!-- Year, College, Program -->
+        <div class="flex flex-wrap gap-3">
+          {% if paper.year %}
+            <span class="font-bold">{{ paper.year }}</span>
+          {% endif %}
+          {% if paper.college %}
+            <span class="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{{ paper.college }}</span>
+          {% endif %}
+          {% if paper.program %}
+            <span class="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded">{{ paper.program }}</span>
+          {% endif %}
         </div>
-        <div class="chat chat-end">
-          <div class="chat-bubble">You underestimate my power!</div>
+
+        <!-- Tags -->
+        <div class="flex flex-wrap gap-2">
+          {% for tag in tags %}
+            <span class="badge badge-soft badge-primary">{{ tag }}</span>
+          {% empty %}
+            <span class="px-3 py-1 rounded-full font-bold bg-gray-100 text-gray-600 border">
+              No tags extracted
+            </span>
+          {% endfor %}
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-row gap-2 w-full">
+          <a href="{{ paper.file.url }}" download class="btn btn-primary">Download PDF</a>
+          <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ paper.file.url }}" target="_blank" class="btn btn-neutral">View in PDF Viewer</a>
+
+          {% if user.is_authenticated %}
+          <div id="save-btn-{{ paper.id }}">
+            {% include 'partials/_save_button.html' with paper=paper is_saved=is_saved %}
+          </div>
+          {% else %}
+          <div class="text-center">
+            <a href="{% url 'account_login' %}?next={% url 'paper_detail' paper.pk %}" class="text-sm text-blue-600 hover:underline">
+              Log in to save this paper
+            </a>
+          </div>
+          {% endif %}
         </div>
       </div>
 
-      <!-- Chat Input -->
-      <div class="p-3 border-t border-gray-700">
-        <div class="join w-full">
-          <input 
-            type="text" 
-            placeholder="Type a message..." 
-            class="input input-bordered join-item w-full" 
-          />
-          <button class="btn btn-neutral join-item">Send</button>
+      <!-- Abstract -->
+        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 p-6 rounded-2xl">
+          <h2 class="text-xl font-semibold">Abstract</h2>
+          <p class="text-gray-700 leading-relaxed">{{ paper.abstract }}</p>
         </div>
-      </div>
-    </div>
 
+        <!-- Summary -->
+        {% if paper.summary %}
+        <div class="border border-gray-300 p-6 rounded-2xl bg-yellow-50 border-yellow-400">
+          <h3 class="text-lg font-semibold text-yellow-800 mb-2">Summary with AI</h3>
+          <pre class="text-gray-800 whitespace-pre-wrap font-sans">{{ paper.summary }}</pre>
+        </div>
+        {% endif %}
 
-    <!-- Buttons -->
-    <a href="{{ paper.file.url }}" download class="btn btn-neutral w-full">Download PDF</a>
-    <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ paper.file.url }}" target="_blank" class="btn btn-neutral w-full">View in PDF Viewer</a>
+        <div class="border border-gray-300 p-6 rounded-2xl bg-white">
+          <h2 class="text-xl font-semibold">AI Insights</h2>
+        </div>
 
-    {% if user.is_authenticated %}
-    <!-- Save Button -->
-    <div id="save-btn-{{ paper.id }}">
-      {% include 'partials/_save_button.html' with paper=paper is_saved=is_saved %}
-    </div>
-    {% else %}
+        <!-- Match Citation -->
+        {% if matched_citations or citations_pointing_here %}
+        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
 
-    <div class="text-center">
-      <a href="{% url 'account_login' %}?next={% url 'paper_detail' paper.pk %}" class="text-sm text-blue-600 hover:underline">
-        Log in to save this paper
-      </a>
-    </div>
-    {% endif %}
-    <!-- Tags -->
-    <div>
-      <h3 class="text-lg font-semibold text-gray-900 mb-2">Tags</h3>
-      <div class="flex flex-wrap gap-2">
-        {% for tag in tags %}
-          <span class="badge badge-soft badge-primary">{{ tag }}</span>
-        {% empty %}
-          <span class="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 border">
-            No tags extracted
-          </span>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-</div>
+          <h2 class="text-xl font-semibold">Citations</h2>
 
-
-
-{% if matched_citations or citations_pointing_here %}
-  <div id="citations-section">
-    <h1 class="text-2xl">Citations</h1>
-    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Matched Citations (Left Column) -->
-      <div class="border border-gray-200 p-6 rounded-lg shadow-sm bg-white">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          Matched Citations ({{ matched_citation_count }})
-        </h2>
-        {% if matched_citations %}
-          <ul class="space-y-3">
-            {% for match in matched_citations %}
-              <li class="p-3 rounded border border-gray-100">
-                <p class="italic text-sm text-gray-700 mb-1">"{{ match.raw_citation }}"</p>
-                {% if match.matched_paper %}
-                  <a href="{% url 'paper_detail' match.matched_paper.pk %}" class="block font-medium text-gray-900 hover:text-blue-700 underline">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Matched Citations -->
+            <div class="border border-gray-200 p-4 rounded-lg shadow-sm bg-white space-y-3">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Matched Citations ({{ matched_citation_count }})</h3>
+              
+              {% if matched_citations %}
+              <ul class="space-y-2">
+                {% for match in matched_citations %}
+                <li class="p-2 rounded border border-gray-100 bg-gray-50">
+                  <p class="italic text-sm text-gray-700 mb-1">"{{ match.raw_citation }}"</p>
+                  {% if match.matched_paper %}
+                  <a href="{% url 'paper_detail' match.matched_paper.pk %}" class="block font-medium text-gray-900 hover:text-blue-700 underline text-sm">
                     → {{ match.matched_paper.title }}
                   </a>
-                {% else %}
-                  <span class="text-gray-400 italic">No matched paper</span>
-                {% endif %}
-                <div class="text-xs text-gray-500 mt-1">Score: {{ match.score|floatformat:2 }}</div>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-gray-400 italic">No matched citations found.</p>
-        {% endif %}
-      </div>
+                  {% else %}
+                  <span class="text-gray-400 italic text-sm">No matched paper</span>
+                  {% endif %}
+                  <div class="text-xs text-gray-500 mt-1">Score: {{ match.score|floatformat:2 }}</div>
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-gray-400 italic text-sm">No matched citations found.</p>
+              {% endif %}
+            </div>
 
-      <!-- Cited By (Right Column) -->
-      <div class="border border-gray-200 p-6 rounded-lg shadow-sm bg-white">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          Cited By ({{ paper.citation_count }})
-        </h2>
-        {% if citations_pointing_here %}
-          <ul class="space-y-3">
-            {% for cite in citations_pointing_here %}
-              <li class="p-3 rounded border border-gray-100">
-                <div class="text-sm text-gray-800">
-                  <strong>{{ cite.source_paper.title }}</strong> cited this paper.
-                  <div class="text-xs text-gray-500 mt-1">Score: {{ cite.score|floatformat:3 }}</div>
-                </div>
-                <a href="{% url 'paper_detail' cite.source_paper.pk %}" class="text-blue-700 underline text-sm hover:text-blue-900 mt-1 block">
-                  View citing paper →
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-gray-400 italic">No citations pointing to this paper.</p>
+            <!-- Cited By -->
+            <div class="border border-gray-200 p-4 rounded-lg shadow-sm bg-white space-y-3">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Cited By ({{ paper.citation_count }})</h3>
+              
+              {% if citations_pointing_here %}
+              <ul class="space-y-2">
+                {% for cite in citations_pointing_here %}
+                <li class="p-2 rounded border border-gray-100 bg-gray-50">
+                  <div class="text-sm text-gray-800">
+                    <strong>{{ cite.source_paper.title }}</strong> cited this paper.
+                    <div class="text-xs text-gray-500 mt-1">Score: {{ cite.score|floatformat:3 }}</div>
+                  </div>
+                  <a href="{% url 'paper_detail' cite.source_paper.pk %}" class="text-blue-700 underline text-sm hover:text-blue-900 mt-1 block">
+                    View citing paper →
+                  </a>
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-gray-400 italic text-sm">No citations pointing to this paper.</p>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
         {% endif %}
-      </div>
     </div>
-  </div>
-{% endif %}
 
-<div id="figures-section" class="mt-10">
-  <h1 class="text-2xl">Figures</h1>
-  <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-    {% for figure in figures %}
-      <div class="border border-gray-200 p-4 rounded-lg shadow-sm bg-white">
-        <img src="{{ figure.url }}" alt="Figure from {{ paper.title }}">
+    <!-- RIGHT COLUMN -->
+    <div class="flex flex-col space-y-3">
+      <!-- Chat -->
+      <div class="bg-white rounded-lg border border-gray-300 flex flex-col h-96">
+        <!-- Chat Messages -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          <div class="chat chat-start">
+            <div class="chat-bubble">It's over Anakin,<br/>I have the high ground.</div>
+          </div>
+          <div class="chat chat-end">
+            <div class="chat-bubble">You underestimate my power!</div>
+          </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-3 border-t border-gray-300">
+          <div class="join w-full">
+            <input type="text" placeholder="Type a message..." class="input input-bordered join-item w-full" />
+            <button class="btn btn-neutral join-item">Send</button>
+          </div>
+        </div>
       </div>
-    {% empty %}
-      <p class="text-gray-400 italic">No figures extracted.</p>
-    {% endfor %}
-  </div>
+      <!--Figures-->
+      <div id="figures-section" class="mt-10"> <h1 class="text-2xl">Figures</h1> <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"> {% for figure in figures %} <div class="border border-gray-200 p-4 rounded-lg shadow-sm bg-white"> <img src="{{ figure.url }}" alt="Figure from {{ paper.title }}"> </div> {% empty %} <p class="text-gray-400 italic">No figures extracted.</p> {% endfor %} </div> </div>
+      <!--Citation-->
+      <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-sm">
+        <!-- Card Header -->
+        <div class="p-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold">Citation</h3>
+        </div>
+
+        <!-- Card Content -->
+        <div class="p-4 space-y-2">
+          <div class="p-3 bg-gray-50 rounded border text-xs font-mono">
+            {{ paper.authors|join:", " }} ({{ paper.year }}). {{ paper.title }}.
+          </div>
+          
+          <button class="btn btn-outline w-full mt-2 text-sm">
+            Copy Citation
+          </button>
+        </div>
+      </div>
 </div>
 
 {% endblock %}

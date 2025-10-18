@@ -34,5 +34,13 @@
         </main>
     </div>
 
+
+    <script>
+document.body.addEventListener('htmx:afterSwap', (e) => {
+    if (e.target.id === 'papers-content') {
+        Alpine.initTree(e.target)
+    }
+})
+    </script>
 </body>
 </html>
