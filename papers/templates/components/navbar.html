@@ -7,14 +7,26 @@
 
     <!-- Dark mode toggle -->
     <button x-data="{ dark: false }"
-            x-cloak
-            x-init="dark = localStorage.getItem('darkMode') === '1'; if(dark){ document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); }"
-            @click="dark = !dark; if(dark){ document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); } localStorage.setItem('darkMode', dark ? '1' : '0');"
-            class="ml-4 px-2 py-1 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 focus:outline-none"
-            title="Toggle dark mode">
-      <span x-show="!dark">🌙</span>
-      <span x-show="dark">☀️</span>
+        x-cloak
+        x-init="dark = localStorage.getItem('darkMode') === '1';
+                 document.documentElement.classList.toggle('dark', dark);"
+        @click="dark = !dark; 
+                document.documentElement.classList.toggle('dark', dark);
+                localStorage.setItem('darkMode', dark ? '1' : '0');"
+        class="ml-4 p-2 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 focus:outline-none"
+        title="Toggle dark mode">
+
+      <!-- Moon icon (light mode) -->
+      <svg x-show="!dark" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M21.64 13.36A9 9 0 0110.64 2.36a9 9 0 1011 11z"/>
+      </svg>
+
+      <!-- Sun icon (dark mode) -->
+      <svg x-show="dark" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 4V2m0 20v-2m8-8h2M2 12h2m15.364 6.364l1.414 1.414M4.222 4.222l1.414 1.414m0 12.728l-1.414 1.414M19.778 4.222l-1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+      </svg>
     </button>
+
 
 <!-- Search with icon -->
 <form action="{% url 'paper_list' %}" method="get" autocomplete="off" role="search" class="flex-1 relative mx-4 flex">
@@ -47,7 +59,7 @@
       hx-swap="innerHTML"
         @autocomplete-select.window="(e) => {
           if(e.detail.type === 'paper' && e.detail.paper_id){
-            window.location.href = '/papers/' + e.detail.paper_id + '/';
+            window.location.href = '/papers/papers/' + e.detail.paper_id + '/';
           } else if(e.detail.type === 'author'){
             // set visible query, set hidden author field, and submit the enclosing form
             document.getElementById('global-search').value = e.detail.value;

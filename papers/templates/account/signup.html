@@ -2,12 +2,12 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-  <div class="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded">
-    <h2 class="text-2xl font-bold mb-4">Register</h2>
+  <div class="max-w-md mx-auto mt-10 p-6 bg-white border border-gray-400 shadow-xl rounded-2xl">
+    <h2 class="text-2xl font-bold mb-4 flex justify-center">Register</h2>
     <form method="post">
       {% csrf_token %}
       {{ form|crispy }}
-      <button type="submit" class="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      <button type="submit" class="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
         Sign Up
       </button>
     </form>

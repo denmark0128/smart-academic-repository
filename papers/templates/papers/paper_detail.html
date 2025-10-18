@@ -109,11 +109,19 @@
     <a href="{{ paper.file.url }}" download class="btn btn-neutral w-full">Download PDF</a>
     <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ paper.file.url }}" target="_blank" class="btn btn-neutral w-full">View in PDF Viewer</a>
 
+    {% if user.is_authenticated %}
     <!-- Save Button -->
     <div id="save-btn-{{ paper.id }}">
       {% include 'partials/_save_button.html' with paper=paper is_saved=is_saved %}
     </div>
+    {% else %}
 
+    <div class="text-center">
+      <a href="{% url 'account_login' %}?next={% url 'paper_detail' paper.pk %}" class="text-sm text-blue-600 hover:underline">
+        Log in to save this paper
+      </a>
+    </div>
+    {% endif %}
     <!-- Tags -->
     <div>
       <h3 class="text-lg font-semibold text-gray-900 mb-2">Tags</h3>

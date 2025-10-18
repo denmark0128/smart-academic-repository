@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'pgvector',  # Ensure pgvector is included
     'rest_framework',
     'corsheaders',
+    "debug_toolbar",
 
     # end INSTALLED_APPS
     # do not add extra closing bracket here
@@ -75,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # testing only
@@ -186,3 +188,9 @@ CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 ALLOWED_HOSTS = ["django-thesis.onrender.com", "localhost", "127.0.0.1"]
+
+INTERNAL_IPS = ["127.0.0.1"]
+
+if DEBUG:
+    import mimetypes
+    mimetypes.add_type("application/javascript", ".js", True)

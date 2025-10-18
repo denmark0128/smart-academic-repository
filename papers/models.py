@@ -27,17 +27,24 @@ class Paper(models.Model):
     authors = models.JSONField(default=list) 
     abstract = models.TextField(blank=True, null=True)
     abstract_embedding = VectorField(dimensions=768, null=True)
-    college = models.CharField(max_length=100, blank=True, null=True, choices=COLLEGE_CHOICES)
-    program = models.CharField(max_length=100, blank=True, null=True, choices=PROGRAM_CHOICES)
+    college = models.CharField(max_length=100, blank=True, null=True, choices=COLLEGE_CHOICES,  db_index=True)
+    program = models.CharField(max_length=100, blank=True, null=True, choices=PROGRAM_CHOICES, db_index=True)
     summary = models.TextField(blank=True, null=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='papers/')
-    tags = models.JSONField(default=list, blank=True)
+    tags = models.JSONField(default=list, blank=True, db_index=True)
     is_indexed = models.BooleanField(default=False)
     is_registered = models.BooleanField(default=False)
     status = models.CharField(max_length=20, default="pending")
-    year = models.PositiveIntegerField(null=True, blank=True) 
+    year = models.PositiveIntegerField(null=True, blank=True, db_index=True)
+    citation_count_cached = models.IntegerField(default=0)
+    matched_count_cached = models.IntegerField(default=0)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["college", "program", "year"]),
+        ]
 
     """
     STATUS_CHOICES = [
@@ -49,7 +56,7 @@ class Paper(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="uploaded")
     """
     def __str__(self):
-        return self.title
+        return self.title or f"Paper {self.id}"
     
     def citations_pointing_here(self):
         return MatchedCitation.objects.filter(matched_paper=self)
@@ -81,14 +88,20 @@ class SavedPaper(models.Model):
         unique_together = ('user', 'paper')
 
 class MatchedCitation(models.Model):
-    source_paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name="matched_citations")
-    matched_paper = models.ForeignKey(Paper, on_delete=models.SET_NULL, null=True, blank=True)
+    source_paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name="matched_citations", db_index=True)
+    matched_paper = models.ForeignKey(Paper, on_delete=models.SET_NULL, null=True, blank=True, related_name="reverse_matched_citations", db_index=True)
     raw_citation = models.TextField()
     score = models.FloatField()
     matched_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.source_paper.title} → {self.matched_paper.title if self.matched_paper else 'Unknown'}"
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=["source_paper"]),
+            models.Index(fields=["matched_paper"]),
+        ]
 
 class ExtractedFigure(models.Model):
     paper = models.ForeignKey("Paper", on_delete=models.CASCADE)  # if linked to a paper

@@ -6,9 +6,12 @@ from django.core.cache import cache
 from django.utils.html import escape
 from django.conf import settings
 from django.utils.http import urlencode
-from django.db.models import Q, Min, Max, Count
+from django.db.models import Q, Min, Max, Count, Prefetch
 from django.contrib.auth.decorators import login_required
 from urllib.parse import urlencode
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
 
 import re
 import os
@@ -16,6 +19,7 @@ import fitz
 import json
 import random
 from collections import Counter
+from random import randint
 
 from papers.models import Paper, PaperChunk, SavedPaper, MatchedCitation
 from papers.forms import PaperForm
@@ -31,20 +35,21 @@ from utils.related import find_related_papers
 from utils.single_paper_rag import query_rag
 
 def random_paper_redirect(request):
-    count = Paper.objects.count()
-    if count == 0:
-        return redirect('paper_list')  # fallback if no papers
+    max_id = Paper.objects.aggregate(max_id=Max('id'))['max_id']
+    if not max_id:
+        return redirect('paper_list')
 
-    random_index = random.randint(0, count - 1)
-    paper = Paper.objects.all()[random_index]
+    while True:
+        random_id = randint(1, max_id)
+        paper = Paper.objects.filter(id=random_id).first()
+        if paper:
+            break
 
     return redirect('paper_detail', pk=paper.id)
 
 def home(request):
-    all_papers = list(Paper.objects.all())
-    random_paper = random.choice(all_papers) if all_papers else None
-
-    return render(request, "home.html", {"random_paper": random_paper})
+    paper = Paper.objects.order_by('?').first()
+    return render(request, "home.html", {"random_paper": paper})
 
 
 def papers_view(request):
@@ -207,7 +212,18 @@ def paper_list(request):
     year = request.GET.get('year')
     
     results = []
-    papers = Paper.objects.all()
+    # === Fetch tags efficiently (no heavy fields) ===
+    tag_data = Paper.objects.only('tags').values_list('tags', flat=True)
+    all_tags = []
+    for tags in tag_data:
+        if isinstance(tags, list):
+            all_tags.extend(tags)
+    tag_counts = dict(Counter(all_tags))
+
+    # === Base query — defer heavy fields ===
+    papers = Paper.objects.defer(
+        'title_embedding', 'abstract_embedding', 'summary', 'file'
+    ).all()
 
     # === Apply filters ===
     if college:
@@ -242,6 +258,7 @@ def paper_list(request):
                 "value": value,
                 "remove_url": urlencode({k:v for k,v in request.GET.items() if k != key})
             })
+
 
     # === Searching ===
     if query:
@@ -326,6 +343,7 @@ def paper_list(request):
         "selected_program": program,
         "selected_year": year,
         "active_filters": active_filters,
+        "tag_counts": tag_counts,
     }
 
     if request.htmx:
@@ -334,41 +352,47 @@ def paper_list(request):
 
 
 def paper_detail(request, pk):
-    paper = get_object_or_404(Paper, pk=pk)
+    paper = (
+        Paper.objects
+        .prefetch_related(
+            Prefetch(
+                "matched_citations",
+                queryset=MatchedCitation.objects.select_related("matched_paper")
+            ),
+            Prefetch(
+                "reverse_matched_citations",
+                queryset=MatchedCitation.objects.select_related("source_paper")
+            )
+        )
+        .get(pk=pk)
+    )
 
-    # PDF viewer
+    # === PDF Viewer ===
     pdf_url = request.build_absolute_uri(paper.file.url)
     viewer_url = f"{settings.STATIC_URL}pdfjs/web/viewer.html?file={pdf_url}"
+
+    # === Figures ===
+    paper_dir = os.path.join(settings.MEDIA_ROOT, f"extracted/paper_{paper.id}")
     paper_folder = os.path.join(settings.MEDIA_URL, f"extracted/paper_{paper.id}")
-    figures = []
-    if os.path.exists(os.path.join(settings.MEDIA_ROOT, f"extracted/paper_{paper.id}")):
-        for fname in os.listdir(os.path.join(settings.MEDIA_ROOT, f"extracted/paper_{paper.id}")):
-            figures.append({
-                "url": os.path.join(paper_folder, fname),
-                "page_number": None,  # unless you track it
-            })
-    # Citations & saved state
-    matched_citations = paper.matched_citations.select_related("matched_paper")
-    matched_citation_count = matched_citations.count()
-    citations_pointing_here = MatchedCitation.objects.filter(matched_paper=paper).select_related("source_paper")
-    citation_count = citations_pointing_here.count()
-    is_saved = SavedPaper.objects.filter(user=request.user, paper=paper).exists()
+    figures = [
+        {"url": os.path.join(paper_folder, fname), "page_number": None}
+        for fname in os.listdir(paper_dir)
+    ] if os.path.exists(paper_dir) else []
 
-    return render(request, 'papers/paper_detail.html', {
-        'paper': paper,
-        'tags': paper.tags,
-        'citations_pointing_here': citations_pointing_here,
-        'citation_count': citation_count,
-        'college': paper.college,
-        'program': paper.program,
-        'matched_citations': matched_citations,
-        'matched_citation_count': matched_citation_count,
-        'viewer_url': viewer_url,
-        'is_saved': is_saved,
-        'figures': figures,
-    })
+    # === Citations ===
+    matched_citations = list(paper.matched_citations.all())
+    citations_pointing_here = list(paper.reverse_matched_citations.all())
 
-    # Track recent papers/authors in session (keep last 10)
+    citation_count = paper.citation_count_cached
+    matched_citation_count = paper.matched_count_cached
+
+    # === Saved State ===
+    is_saved = (
+        request.user.is_authenticated
+        and SavedPaper.objects.filter(paper=paper, user=request.user).exists()
+    )
+
+    # === Track recently viewed papers/authors ===
     try:
         recent_papers = request.session.get('recent_papers', [])
         if paper.id in recent_papers:
@@ -376,18 +400,30 @@ def paper_detail(request, pk):
         recent_papers.insert(0, paper.id)
         request.session['recent_papers'] = recent_papers[:10]
 
-        # Track recent authors (flatten list)
         recent_authors = request.session.get('recent_authors', [])
         for a in (paper.authors or []):
-            if not isinstance(a, str):
-                continue
-            if a in recent_authors:
-                recent_authors.remove(a)
-            recent_authors.insert(0, a)
+            if isinstance(a, str):
+                if a in recent_authors:
+                    recent_authors.remove(a)
+                recent_authors.insert(0, a)
         request.session['recent_authors'] = recent_authors[:20]
     except Exception:
-        # don't fail page view if session storage fails
-        pass
+        pass  # don’t break if sessions fail
+
+    # === Render ===
+    return render(request, "papers/paper_detail.html", {
+        "paper": paper,
+        "tags": paper.tags,
+        "citations_pointing_here": citations_pointing_here,
+        "citation_count": citation_count,
+        "college": paper.college,
+        "program": paper.program,
+        "matched_citations": matched_citations,
+        "matched_citation_count": matched_citation_count,
+        "viewer_url": viewer_url,
+        "is_saved": is_saved,
+        "figures": figures,
+    })
 
 def paper_query(request, pk):
     """HTMX endpoint for paper Q&A chatbot"""
@@ -405,7 +441,7 @@ def paper_query(request, pk):
 
     return JsonResponse({"error": "POST required"}, status=400)
 
-
+@login_required
 def paper_upload(request):
     papers = Paper.objects.filter(uploaded_by=request.user).order_by("-uploaded_at")
     years = Paper.objects.values_list('year', flat=True).distinct().order_by('-year')
