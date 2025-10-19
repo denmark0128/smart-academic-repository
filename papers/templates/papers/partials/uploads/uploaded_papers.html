@@ -6,7 +6,7 @@
     <h3 class="text-lg font-semibold"></h3>
     <button 
       @click="subTab = 'upload'" 
-      class="btn btn-primary">
+      class="btn btn-soft dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 p-4">
       Add Paper
     </button>
   </div>
@@ -16,17 +16,17 @@
     <input 
       type="text" 
       placeholder="Search by title or author..." 
-      class="input input-bordered w-full md:w-1/2" 
+      class="input input-bordered w-full md:w-1/2 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2" 
       x-model="searchQuery">
 
-    <select class="select select-bordered w-full md:w-1/4" x-model="filterYear">
+    <select class="select select-bordered w-full md:w-1/4 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2" x-model="filterYear">
       <option value="">All Years</option>
       {% for paper in papers %}
         <option value="{{ paper.year }}">{{ paper.year }}</option>
         {% endfor %}
     </select>
 
-    <select class="select select-bordered w-full md:w-1/4" x-model="filterStatus">
+    <select class="select select-bordered w-full md:w-1/4 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2" x-model="filterStatus">
       <option value="">All Status</option>
       <option value="success">Indexed</option>
       <option value="processing">Processing</option>
@@ -35,10 +35,10 @@
   </div>
 
   <!-- Papers Table -->
-  <div class="overflow-x-auto">
-    <table class="table table-sm w-full">
+  <div class="overflow-x-auto dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 border border-gray-200 rounded-lg">
+    <table class="table table-sm w-full table-zebra dark:[&>tbody>tr:nth-child(even)]:bg-zinc-800 dark:[&>tbody>tr:nth-child(odd)]:bg-zinc-900">
       <thead>
-        <tr>
+        <tr class="dark:text-zinc-300">
           <th>Title</th>
           <th>Year</th>
           <th>Authors</th>

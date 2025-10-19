@@ -1,40 +1,39 @@
 {% comment %}Partial used by HTMX to render autocomplete suggestions.{% endcomment %}
 {% load static %}
-<div class="bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-80 overflow-auto divide-y divide-gray-100" x-data="{}">
-
+<div class="bg-white border border-gray-200 overflow-hidden rounded-lg shadow-lg mt-1 dark:bg-zinc-900 dark:border-zinc-600" x-data="{}">
   {% if papers %}
-    <div class="px-3 py-2 bg-red-100 border-b">
-      <div class="text-xs font-semibold text-red-700 uppercase">Papers</div>
+    <div class="px-3 py-2 bg-red-100 dark:bg-red-900 dark:border-zinc-700">
+      <div class="text-xs font-semibold text-red-700 uppercase dark:text-zinc-200">Papers</div>
     </div>
     <ul>
       {% for p in papers %}
-        <li class="px-3 py-2 hover:bg-red-50 cursor-pointer transition" 
+        <li class="px-3 py-2 hover:bg-red-50 cursor-pointer transition dark:hover:bg-red-950" 
             @click.prevent="$dispatch('autocomplete-select', {type: 'paper', value: '{{ p.value|escapejs }}', paper_id: {{ p.paper_id }}})">
-          <div class="text-sm text-gray-800">{{ p.display|safe }}</div>
+          <div class="text-sm text-gray-800 dark:text-zinc-200">{{ p.display|safe }}</div>
         </li>
       {% endfor %}
     </ul>
   {% endif %}
 
   {% if authors %}
-    <div class="px-3 py-2 bg-blue-100 border-t">
-      <div class="text-xs font-semibold text-blue-700 uppercase">Authors</div>
+    <div class="px-3 py-2 bg-blue-100 dark:bg-blue-900 dark:border-zinc-700">
+      <div class="text-xs font-semibold text-blue-700 uppercase dark:text-zinc-200">Authors</div>
     </div>
     <ul>
       {% for a in authors %}
-        <li class="px-3 py-2 hover:bg-blue-50 cursor-pointer transition" 
+        <li class="px-3 py-2 hover:bg-blue-50 cursor-pointer transition dark:hover:bg-blue-950" 
             @click.prevent="$dispatch('autocomplete-select', {type: 'author', value: '{{ a.value|escapejs }}', paper_id: null})">
-          <div class="text-sm text-gray-800">{{ a.display|safe }}</div>
+          <div class="text-sm text-gray-800 dark:text-zinc-200">{{ a.display|safe }}</div>
         </li>
       {% endfor %}
     </ul>
   {% endif %}
 
   {% if not papers and not authors %}
-    <div class="p-3 text-sm text-gray-500 italic">No results found :(</div>
+    <div class="p-3 text-sm text-gray-500 italic">Semantic Search enabled</div>
   {% endif %}
 
-  <div class="px-3 py-2 bg-gray-50 border-t text-right">
-    <a href="{% url 'paper_list' %}?q={{ query|urlencode }}" class="text-sm text-blue-600 hover:underline">See all results</a>
+  <div class="px-3 py-2 bg-gray-50 text-right dark:bg-zinc-900 dark:border-zinc-700">
+    <a href="{% url 'paper_list' %}?q={{ query|urlencode }}" class="text-sm text-blue-600 hover:underline dark:text-blue-400">See all results</a>
   </div>
 </div>

@@ -1,50 +1,35 @@
-<nav class="bg-white p-4 shadow flex items-center">
+<nav class="bg-white p-4 shadow flex items-center dark:bg-zinc-900">
   <div class="container mx-auto flex items-center justify-between">
 
 
     <!-- Logo -->
-  <a href="/" class="font-bold text-xl">Academic Repo</a>
+  <a href="/" class="font-bold text-xl dark:text-gray-200">Academic Repo</a>
 
     <!-- Dark mode toggle -->
-    <button x-data="{ dark: false }"
-        x-cloak
-        x-init="dark = localStorage.getItem('darkMode') === '1';
-                 document.documentElement.classList.toggle('dark', dark);"
-        @click="dark = !dark; 
-                document.documentElement.classList.toggle('dark', dark);
-                localStorage.setItem('darkMode', dark ? '1' : '0');"
-        class="ml-4 p-2 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 focus:outline-none"
-        title="Toggle dark mode">
-
-      <!-- Moon icon (light mode) -->
-      <svg x-show="!dark" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M21.64 13.36A9 9 0 0110.64 2.36a9 9 0 1011 11z"/>
-      </svg>
-
-      <!-- Sun icon (dark mode) -->
-      <svg x-show="dark" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12 4V2m0 20v-2m8-8h2M2 12h2m15.364 6.364l1.414 1.414M4.222 4.222l1.414 1.414m0 12.728l-1.414 1.414M19.778 4.222l-1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z"/>
-      </svg>
+    <button id="theme-toggle"
+      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+      🌙
     </button>
 
 
 <!-- Search with icon -->
 <form action="{% url 'paper_list' %}" method="get" autocomplete="off" role="search" class="flex-1 relative mx-4 flex">
   <!-- Search Icon -->
-  <svg class="absolute left-7 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg class="absolute left-7 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-200 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
     <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>
   </svg>
 
-  <!-- Input -->
-  <div x-data="{ open:false }" class="flex-1 relative mx-4">
+  <!-- Input + Clear Button -->
+  <div x-data="{ open:false, query:'{{ request.GET.q|default:'' }}' }" class="flex-1 relative mx-4">
     <input
       type="search"
       name="q"
       id="global-search"
+      x-model="query"
       placeholder="Search papers, authors, or topics..."
       value="{{ request.GET.q }}"
-      class="w-full pl-10 pr-24 py-2 rounded-l-md border border-gray-300"
+      class="w-full pl-10 pr-10 py-2 rounded-md border border-gray-300 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-100"
       autocomplete="off"
       autocorrect="off"
       autocapitalize="off"
@@ -57,40 +42,45 @@
       hx-trigger="keyup changed delay:250ms"
       hx-target="#autocomplete-results"
       hx-swap="innerHTML"
-        @autocomplete-select.window="(e) => {
-          if(e.detail.type === 'paper' && e.detail.paper_id){
-            window.location.href = '/papers/papers/' + e.detail.paper_id + '/';
-          } else if(e.detail.type === 'author'){
-            // set visible query, set hidden author field, and submit the enclosing form
-            document.getElementById('global-search').value = e.detail.value;
-            var authorInput = document.getElementById('search-author');
-            if(!authorInput){
-              authorInput = document.createElement('input');
-              authorInput.type = 'hidden';
-              authorInput.name = 'author';
-              authorInput.id = 'search-author';
-              document.getElementById('global-search').closest('form').appendChild(authorInput);
-            }
-            authorInput.value = e.detail.value;
-            // submit the form to perform author-filtered search
-            document.getElementById('global-search').closest('form').submit();
-          } else {
-            document.getElementById('global-search').value = e.detail.value; $dispatch('input');
+      @autocomplete-select.window="(e) => {
+        if(e.detail.type === 'paper' && e.detail.paper_id){
+          window.location.href = '/papers/papers/' + e.detail.paper_id + '/';
+        } else if(e.detail.type === 'author'){
+          document.getElementById('global-search').value = e.detail.value;
+          var authorInput = document.getElementById('search-author');
+          if(!authorInput){
+            authorInput = document.createElement('input');
+            authorInput.type = 'hidden';
+            authorInput.name = 'author';
+            authorInput.id = 'search-author';
+            document.getElementById('global-search').closest('form').appendChild(authorInput);
           }
-        }"
+          authorInput.value = e.detail.value;
+          document.getElementById('global-search').closest('form').submit();
+        } else {
+          document.getElementById('global-search').value = e.detail.value; $dispatch('input');
+        }
+      }"
       @focus="open = true"
       @blur="setTimeout(()=> open=false,150)"
       @keydown.escape="open=false"
     >
 
+    <!-- Clear (X) button -->
+    <button
+      type="button"
+      x-show="query"
+      @click="query=''; $dispatch('input')"
+      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-200 transition"
+    >
+      ✕
+    </button>
+
+    <!-- Results dropdown -->
     <div id="autocomplete-results" x-show="open" class="absolute left-0 right-0 z-50 mt-1"></div>
   </div>
-
-  <!-- Submit Button -->
-  <button type="submit" class="absolute right-0 top-0 h-full px-4 bg-black text-white rounded-r-md hover:bg-gray-800 transition">
-    Search
-  </button>
 </form>
+
 
   {# HTMX/Alpine/Tailwind are already used in the project; this component uses them. #}
 
@@ -141,3 +131,15 @@
 
   </div>
 </nav>
+<script>
+  const html = document.documentElement;
+  const btn = document.getElementById('theme-toggle');
+
+  // Load saved preference
+  if (localStorage.theme === 'dark') html.classList.add('dark');
+
+  btn.addEventListener('click', () => {
+    html.classList.toggle('dark');
+    localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+  });
+</script>

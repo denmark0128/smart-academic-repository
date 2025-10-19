@@ -8,8 +8,8 @@
 
 <!-- Show heading for query -->
 {% if query %}
-<h2 class="text-lg font-semibold mb-2">
-  {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "<span class="text-black">{{ query }}</span>"
+<h2 class="text-lg font-semibold mb-2 dark:text-zinc-300">
+  {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "<span class="text-black dark:text-zinc-300">{{ query }}</span>"
 </h2>
 {% endif %}
 
@@ -50,34 +50,34 @@
 {% if view_mode == 'compact' %}
   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
     {% for item in page_obj %}
-      <div class="border rounded-xl bg-white p-4 border-gray-200 hover:shadow transition flex flex-col h-full">
+      <div class="border rounded-xl bg-white p-4 border-gray-200 hover:shadow transition flex flex-col h-full dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-300">
         {% if item.paper %}
-          <a href="{% url 'paper_detail' item.paper.pk %}" class="font-semibold text-base text-black hover:underline mb-1">{{ item.paper.title }}</a>
+          <a href="{% url 'paper_detail' item.paper.pk %}" class="font-semibold text-base text-black hover:underline mb-1 dark:text-zinc-300">{{ item.paper.title }}</a>
         {% else %}
           <span class="text-base text-gray-400 font-semibold">[Paper not found]</span>
         {% endif %}
-        <div class="text-xs text-gray-700 mb-1">
+        <div class="text-xs text-gray-700 mb-1 dark:text-zinc-300">
           {% if item.paper and item.paper.authors %}
             {{ item.paper.authors|join:', ' }}
           {% endif %}
         </div>
-        <div class="text-xs text-gray-500 mb-1">
+        <div class="text-xs text-gray-500 mb-1 dark:text-zinc-300">
           {% if item.paper %}{{ item.paper.college }}{% endif %} {% if item.paper %}{{ item.paper.program }}{% endif %} {% if item.paper %}- {{ item.paper.year }}{% endif %}
         </div>
-        <div class="text-xs text-gray-600 mb-1">
+        <div class="text-xs text-gray-600 mb-1 dark:text-zinc-300">
           {% if item.snippet %}{{ item.snippet|truncatechars_html:100|safe }}{% endif %}
         </div>
         <div class="flex flex-wrap gap-1 mb-2">
           {% if item.tags %}
             {% for tag in item.tags %}
-              <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs">{{ tag }}</span>
+              <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs dark:bg-zinc-800 dark:text-zinc-300">{{ tag }}</span>
             {% endfor %}
           {% endif %}
         </div>
         <div class="mt-auto flex gap-2">
           {% if item.paper %}
             <a href="{{ item.paper.file.url }}" download class="btn btn-xs btn-outline text-red-600">PDF</a>
-            <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-xs btn-outline">View</a>
+            <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-xs btn-outline dark:text-zinc-300 dark:hover:zinc-200">View</a>
           {% endif %}
         </div>
       </div>
@@ -87,10 +87,10 @@
   </div>
 {% else %}
   {% for item in page_obj %}
-    <div class="mb-8 border rounded-2xl bg-white p-6 border-gray-200 pb-12 hover:shadow-lg transition">
+    <div class="mb-8 border rounded-2xl bg-white p-6 border-gray-200 pb-12 hover:shadow-lg transition dark:bg-zinc-900 dark:border-zinc-700">
       <!-- Title -->
       {% if item.paper %}
-        <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl text-black font-semibold hover:underline">
+        <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl text-black font-semibold hover:underline dark:text-zinc-300">
           {{ item.paper.title }}
         </a>
       {% else %}
@@ -102,13 +102,13 @@
         {% if paper.authors %}
           <div>
             {% for author in paper.authors %}
-              <span class="p-1 bg-grey-300 text-gray-700 text-sm">{{ author }}</span>{% if not forloop.last %} {% endif %}
+              <span class="p-1 bg-grey-300 text-gray-700 text-sm dark:bg-zinc-800 dark:text-zinc-300">{{ author }}</span>{% if not forloop.last %} {% endif %}
             {% endfor %}
             - 
-            <span class="ml-2 uppercase text-sm text-gray-600">
+            <span class="ml-2 uppercase text-sm text-gray-600 dark:text-zinc-300">
               {{ paper.college }} {{ paper.program }}
             </span>
-            - <span class="text-grey-500">{{ paper.year }}</span>
+            - <span class="text-grey-500 dark:text-zinc-300">{{ paper.year }}</span>
           </div>
         {% endif %}
       {% endwith %}
@@ -136,11 +136,11 @@
         <div x-data="{ expandedAbs: false }" x-cloak class="mt-2 text-gray-700 text-xs leading-relaxed">
           <span class="font-semibold text-gray-500">Abstract:</span>
           {% if item.paper.abstract|length > 400 %}
-            <span x-show="!expandedAbs">
+            <span x-show="!expandedAbs" class="dark:text-zinc-300">
               {{ item.paper.abstract|truncatechars_html:400|safe }}
               <button @click="expandedAbs = true" class="text-blue-600 hover:underline text-xs ml-1">Read more</button>
             </span>
-            <span x-show="expandedAbs">
+            <span x-show="expandedAbs " class="dark:text-zinc-300">
               {{ item.paper.abstract|safe }}
               <button @click="expandedAbs = false" class="text-blue-600 hover:underline text-xs ml-1">See less</button>
             </span>
@@ -162,9 +162,9 @@
           <div
             x-show="open"
             x-transition
-            class="mt-2 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded text-gray-800"
+            class="mt-2 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded text-gray-800 dark:bg-yellow-900 dark:border-yellow-600 dark:text-yellow-200"
           >
-            <span class="font-semibold text-yellow-800">Summary:</span>
+            <span class="font-semibold text-yellow-800 dark:text-yellow-600">Summary:</span>
             <span>{{ item.paper.summary }}</span>
           </div>
         </div>
@@ -172,66 +172,65 @@
 
       <!-- Tags (Alpine mapping) -->
       {% if item.tags %}
-        <div x-data="{
-            // mapping of topic -> {bg, text}
-            topics: {
-              'computer science': {bg: 'bg-blue-100', text: 'text-blue-800', title: 'Computer Science'},
-              'computer': {bg: 'bg-blue-100', text: 'text-blue-800', title: 'Computer Science'},
-              'cs': {bg: 'bg-blue-100', text: 'text-blue-800', title: 'Computer Science'},
-              'machine learning': {bg: 'bg-green-100', text: 'text-green-800', title: 'Machine Learning'},
-              'ml': {bg: 'bg-green-100', text: 'text-green-800', title: 'Machine Learning'},
-              'deep learning': {bg: 'bg-green-100', text: 'text-green-800', title: 'Machine Learning'},
-              'neural': {bg: 'bg-green-100', text: 'text-green-800', title: 'Machine Learning'},
-              'data science': {bg: 'bg-teal-100', text: 'text-teal-800', title: 'Data Science'},
-              'data': {bg: 'bg-teal-100', text: 'text-teal-800', title: 'Data Science'},
-              'mathematics': {bg: 'bg-purple-100', text: 'text-purple-800', title: 'Mathematics'},
-              'math': {bg: 'bg-purple-100', text: 'text-purple-800', title: 'Mathematics'},
-              'statistics': {bg: 'bg-purple-100', text: 'text-purple-800', title: 'Mathematics'},
-              'biology': {bg: 'bg-emerald-100', text: 'text-emerald-800', title: 'Biology'},
-              'bio': {bg: 'bg-emerald-100', text: 'text-emerald-800', title: 'Biology'},
-              'medicine': {bg: 'bg-red-100', text: 'text-red-800', title: 'Medicine'},
-              'medical': {bg: 'bg-red-100', text: 'text-red-800', title: 'Medicine'},
-              'physics': {bg: 'bg-slate-100', text: 'text-slate-900', title: 'Physics'}
-            },
-            // helper to find topic by substring matching
-            findTopic(tag){
-              const t = tag.toLowerCase();
-              for(const k in this.topics){
-                if(t.includes(k)) return this.topics[k];
-              }
-              return null;
-            }
-          }" class="mt-3 flex flex-wrap gap-2 text-xs">
-          {% for tag in item.tags %}
-            <a href="#" 
-               hx-get="{% url 'paper_list' %}"
-               hx-target="#papers-content"
-               hx-push-url="true"
-               hx-include="[name='college'],[name='program'],[name='year']"
-               hx-vals='{"tag": "{{ tag }}"}'>
-              <span x-text="'{{ tag }}'"
-                    x-bind:class="(findTopic('{{ tag }}') ? (findTopic('{{ tag }}').bg + ' ' + findTopic('{{ tag }}').text) : 'bg-gray-200 text-gray-700') + ' font-semibold px-2 py-1 rounded-full hover:opacity-90'"
-                    x-bind:title="(findTopic('{{ tag }}') ? findTopic('{{ tag }}').title : 'Other')">
-                {{ tag }}
-              </span>
-            </a>
-          {% endfor %}
-        </div>
+        <div 
+  x-data="{
+    dark: window.matchMedia('(prefers-color-scheme: dark)').matches,
+    topics: {
+      'computer science': {bg: 'bg-blue-100', text: 'text-blue-800', dark: {bg: 'bg-blue-900', text: 'text-blue-400'}, title: 'Computer Science'},
+      'machine learning': {bg: 'bg-green-100', text: 'text-green-800', dark: {bg: 'bg-green-900', text: 'text-green-400'}, title: 'Machine Learning'},
+      // ...
+    },
+    findTopic(tag){
+      const t = tag.toLowerCase();
+      for(const k in this.topics){
+        if(t.includes(k)) return this.topics[k];
+      }
+      return null;
+    }
+  }"
+  x-init="window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => dark = e.matches)"
+  class="mt-3 flex flex-wrap gap-2 text-xs"
+>
+  {% for tag in item.tags %}
+    <a href="#"
+       hx-get="{% url 'paper_list' %}"
+       hx-target="#papers-content"
+       hx-push-url="true"
+       hx-include="[name='college'],[name='program'],[name='year']"
+       hx-vals='{"tag": "{{ tag }}"}'>
+      <span
+        x-text="'{{ tag }}'"
+        x-bind:class="(() => {
+          const t = findTopic('{{ tag }}');
+          if (!t) return 'bg-gray-200 text-gray-700 dark:bg-zinc-700 dark:text-gray-100 font-semibold px-2 py-1 rounded-full hover:opacity-90';
+          return (dark ? t.dark.bg + ' ' + t.dark.text : t.bg + ' ' + t.text) + ' font-semibold px-2 py-1 rounded-full hover:opacity-90';
+        })()"
+        x-bind:title="findTopic('{{ tag }}')?.title || 'Other'"
+      ></span>
+    </a>
+  {% endfor %}
+</div>
+
       {% endif %}
       <!-- Actions -->
   {% if item.paper %}
-    <div class="mt-4 flex items-center gap-2">
-      <a href="{{ item.paper.file.url }}" download class="btn btn-xs btn-outline text-red-600">
-        Download PDF
-      </a>
-      <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" 
-         target="_blank" class="btn btn-xs btn-outline">
-        View in PDF Viewer
-      </a>
-      <div id="save-btn-{{ item.paper.id }}">
-        {% include 'partials/_save_button_list.html' with paper=item.paper is_saved=is_saved %}
-      </div>
-      </div>
+    <!-- Buttons -->
+        <div class="flex flex-row gap-2 w-full items-center mt-4">
+          <a href="{{ item.paper.file.url }}" download class="btn btn-soft btn-sm bg-blue-600 text-white dark:bg-blue-900">Download PDF</a>
+          <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-soft btn-sm bg-white dark:bg-zinc-800">View in PDF Viewer</a>
+
+          {% if user.is_authenticated %}
+          <div id="save-btn-{{ item.paper.id }}">
+            {% include 'partials/_save_button_list.html' with paper=item.paper is_saved=is_saved %}
+          </div>
+          {% else %}
+          <div class="text-center">
+            <a href="{% url 'account_login' %}?next={% url 'paper_detail' item.paper.pk %}" class="text-sm text-blue-600 hover:underline">
+              Log in to save this paper
+            </a>
+          </div>
+          {% endif %}
+        </div>
   {% endif %}
     </div>
   {% empty %}

@@ -49,27 +49,27 @@ class PaperForm(forms.ModelForm):
 
         self.helper.layout = Layout(
             # File field full width
-            Field('file', css_class="file-input file-input-bordered w-full", id="file-upload"),
+            Field('file', css_class="file-input file-input-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700", id="file-upload"),
 
             # Title + Year side by side (responsive)
             Div(
-                Field('title', css_class="textarea textarea-bordered w-full col-span-2 sm:col-span-2"),
-                Field('year', css_class="input input-bordered w-full sm:w-32"),
+                Field('title', css_class="textarea textarea-bordered w-full col-span-2 sm:col-span-2 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
+                Field('year', css_class="input input-bordered w-full sm:w-32 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
                 css_class="grid grid-cols-1 sm:grid-cols-3 gap-4"
             ),
 
             # Abstract full width
-            Field('abstract', css_class="textarea textarea-bordered w-full"),
+            Field('abstract', css_class="textarea textarea-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
 
             # College + Program side by side (responsive)
             Div(
-                Field('college', css_class="input input-bordered w-full"),
-                Field('program', css_class="input input-bordered w-full"),
+                Field('college', css_class="select select-bordered appearance-none w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
+                Field('program', css_class="select select-bordered appearance-none w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
                 css_class="grid grid-cols-1 sm:grid-cols-2 gap-4"
             ),
 
             # Authors field (full width)
-            Field('authors', css_class="textarea textarea-bordered w-full"),
+            Field('authors', css_class="textarea textarea-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
 
             # Submit button
             Submit('submit', 'Upload Paper', css_class="btn btn-active btn-accent w-full sm:w-auto")

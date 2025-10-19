@@ -1,4 +1,4 @@
-<div id="save-btn-{{ paper.id }}">
+<div id="save-btn-{{ paper.id }}" >
     {% if is_saved %}
     <form 
         hx-post="{% url 'unsave_paper' paper.id %}" 
@@ -8,7 +8,7 @@
                htmx.ajax('GET', '{% url 'toast' %}?message=Paper removed!', '#toast-container')"
     >
         {% csrf_token %}
-        <button type="submit" class="btn btn-xs btn-outline">
+        <button type="submit" class="btn btn-sm btn-soft p-3 text-xs bg-white dark:bg-zinc-800">
             Unsave Paper
         </button>
     </form>
@@ -21,7 +21,7 @@
                htmx.ajax('GET', '{% url 'toast' %}?message=Paper saved!', '#toast-container')"
     >
         {% csrf_token %}
-        <button type="submit" class="btn btn-xs btn-outline">
+        <button type="submit" class="btn btn-sm btn-soft p-3  text-xs bg-white dark:bg-zinc-800">
             Save Paper
         </button>
     </form>
