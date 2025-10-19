@@ -16,6 +16,7 @@
       <!-- Title + Metadata + Authors + Tags + Buttons -->
       <div class="bg-white/80 backdrop-blur-sm border border-gray-200 p-6 rounded-lg bg-white space-y-4 dark:bg-zinc-900 dark:border-zinc-700">
         <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-4 dark:text-gray-300">{{ paper.title }}</h1>
+        <p class="text-sm text-gray-500">Views: {{ paper.views }}</p>
 
         <!-- DOI -->
         {% if paper.local_doi %}

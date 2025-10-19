@@ -40,6 +40,7 @@ class Paper(models.Model):
     year = models.PositiveIntegerField(null=True, blank=True, db_index=True)
     citation_count_cached = models.IntegerField(default=0)
     matched_count_cached = models.IntegerField(default=0)
+    views = models.PositiveIntegerField(default=0)
 
     class Meta:
         indexes = [

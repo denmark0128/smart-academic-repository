@@ -6,7 +6,7 @@ from django.core.cache import cache
 from django.utils.html import escape
 from django.conf import settings
 from django.utils.http import urlencode
-from django.db.models import Q, Min, Max, Count, Prefetch, Sum
+from django.db.models import Q, Min, Max, Count, Prefetch, Sum, F
 from django.contrib.auth.decorators import login_required
 from urllib.parse import urlencode
 from django.db.models.signals import post_save, post_delete
@@ -222,6 +222,7 @@ def paper_list(request):
             all_tags.extend(tlist)
     tag_counts = dict(Counter(all_tags))
 
+
     # === Base queryset — defer heavy fields ===
     papers = Paper.objects.defer(
         'title_embedding', 'abstract_embedding', 'summary', 'file'
@@ -339,6 +340,13 @@ def paper_list(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     view_mode = request.GET.get('view_mode', 'card')
+    saved_paper_ids = []
+    if request.user.is_authenticated:
+        saved_paper_ids = list(request.user.saved_papers.values_list('paper_id', flat=True))
+
+    # pass this info to template
+    for paper in papers:
+        paper.is_saved = paper.id in saved_paper_ids
     context = {
         "results": results,
         "query": query,
@@ -353,6 +361,7 @@ def paper_list(request):
         "active_filters": active_filters,
         "tag_counts": tag_counts,
         "view_mode": view_mode,
+        "saved_paper_ids": saved_paper_ids,
     }
 
     if request.htmx:
@@ -419,6 +428,9 @@ def paper_detail(request, pk):
         request.session['recent_authors'] = recent_authors[:20]
     except Exception:
         pass  # don’t break if sessions fail
+
+    from django.db import models
+    Paper.objects.filter(pk=paper.pk).update(views=models.F('views') + 1)
 
     # === Render ===
     return render(request, "papers/paper_detail.html", {

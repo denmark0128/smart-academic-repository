@@ -221,7 +221,7 @@
 
           {% if user.is_authenticated %}
           <div id="save-btn-{{ item.paper.id }}">
-            {% include 'partials/_save_button_list.html' with paper=item.paper is_saved=is_saved %}
+            {% include 'partials/_save_button_list.html' with paper=item.paper is_saved=item.paper.is_saved %}
           </div>
           {% else %}
           <div class="text-center">
