@@ -24,7 +24,8 @@ from random import randint
 from papers.models import Paper, PaperChunk, SavedPaper, MatchedCitation
 from papers.forms import PaperForm
 from papers.utils.nlp import extract_tags
-from utils.semantic_search import semantic_search, keyword_search, index_paper, get_model
+from utils.extract_metadata_from_abstract import extract_metadata_from_abstract
+from utils.chm_to_html import merge_chm_to_html
 from utils.metadata_extractor import (
     extract_metadata as extract_metadata_from_pdf,
     normalize_college,
@@ -34,23 +35,9 @@ from utils.related import find_related_papers
 
 from utils.single_paper_rag import query_rag
 
-def random_paper_redirect(request):
-    max_id = Paper.objects.aggregate(max_id=Max('id'))['max_id']
-    if not max_id:
-        return redirect('paper_list')
-
-    while True:
-        random_id = randint(1, max_id)
-        paper = Paper.objects.filter(id=random_id).first()
-        if paper:
-            break
-
-    return redirect('paper_detail', pk=paper.id)
 
 def home(request):
-    paper = Paper.objects.order_by('?').first()
-    return render(request, "home.html", {"random_paper": paper})
-
+    return render(request, "home.html")
 
 
 def papers_view(request):
@@ -205,16 +192,16 @@ def autocomplete(request):
     return JsonResponse(res_struct)
 
 def paper_list(request):
+    # Extract filters, query, tags, college, program, year like before
     query = request.GET.get('q')
     author_filter = request.GET.get('author')
-    tags = request.GET.getlist('tag')  # multiple tags
+    tags = request.GET.getlist('tag')
     college = request.GET.get('college')
     program = request.GET.get('program')
     year = request.GET.get('year')
+    view_mode = request.GET.get('view_mode', 'card')
 
-    results = []
-
-    # === Fetch tags efficiently (no heavy fields) ===
+    # Build base context: filters, tag counts, view_mode, etc.
     tag_data = Paper.objects.only('tags').values_list('tags', flat=True)
     all_tags = []
     for tlist in tag_data:
@@ -222,135 +209,13 @@ def paper_list(request):
             all_tags.extend(tlist)
     tag_counts = dict(Counter(all_tags))
 
-
-    # === Base queryset — defer heavy fields ===
-    papers = Paper.objects.defer(
-        'title_embedding', 'abstract_embedding', 'summary', 'file'
-    ).all()
-
-    # === Apply filters ===
-    if college:
-        papers = papers.filter(college=college)
-    if program:
-        papers = papers.filter(program=program)
-    if year:
-        try:
-            papers = papers.filter(year=int(year))
-        except (ValueError, TypeError):
-            pass
-
-    # === Additive multi-tag filtering (OR) ===
-    if tags:
-        tag_filters = Q()
-        for t in tags:
-            tag_filters |= Q(tags__contains=[t])
-        papers = papers.filter(tag_filters)
-
-    # === Get unique values for filters ===
     colleges = Paper.objects.values_list('college', flat=True).distinct()
     programs = Paper.objects.values_list('program', flat=True).distinct()
     years = Paper.objects.values_list('year', flat=True).distinct()
     years = sorted([y for y in years if y is not None], reverse=True)
 
-    # === Build active filters ===
-    active_filters = []
-    # College / Program / Year
-    for label, value, key in [
-        ("College", college, "college"),
-        ("Program", program, "program"),
-        ("Year", year, "year"),
-    ]:
-        if value:
-            query_dict = request.GET.copy()
-            query_dict.pop(key, None)
-            active_filters.append({
-                "label": label,
-                "value": value,
-                "remove_url": query_dict.urlencode()
-            })
-
-    # Tags (individual pills)
-    for t in tags:
-        remaining_tags = [x for x in tags if x != t]
-        query_dict = request.GET.copy()
-        query_dict.setlist('tag', remaining_tags)
-        active_filters.append({
-            "label": "Tag",
-            "value": t,
-            "remove_url": query_dict.urlencode()
-        })
-
-    # === Searching ===
-    if query:
-        try:
-            if author_filter:
-                papers_by_author = Paper.objects.filter(authors__contains=[author_filter])[:10]
-                for paper in papers_by_author:
-                    snippet = extract_matching_snippet(paper.abstract or paper.summary or '', query or author_filter)
-                    results.append({
-                        "query": query,
-                        "paper": paper,
-                        "snippet": snippet,
-                        "tags": paper.tags,
-                        "score": '-',
-                        "page": None,
-                    })
-                search_results = []
-            else:
-                search_results = keyword_search(query, top_k=5)
-
-            if not search_results:
-                search_results = semantic_search(query, top_k=5)
-
-            for res in search_results:
-                paper_obj = Paper.objects.filter(pk=res.get("paper_id")).first()
-                score = res.get('score')
-                results.append({
-                    "query": query,
-                    "paper": paper_obj,
-                    "snippet": res.get("text", ""),
-                    "tags": paper_obj.tags if paper_obj else [],
-                    "score": f"{score:.3f}" if isinstance(score, (int, float)) else "-",
-                    "page": res.get("page"),
-                })
-
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            papers = Paper.objects.filter(Q(title__icontains=query) | Q(abstract__icontains=query))
-            for paper in papers:
-                snippet = extract_matching_snippet(paper.abstract, query)
-                results.append({
-                    "query": query,
-                    "paper": paper,
-                    "snippet": snippet,
-                    "tags": paper.tags,
-                })
-    else:
-        for paper in papers:
-            results.append({
-                "query": query,
-                "paper": paper,
-                "snippet": "",
-                "tags": paper.tags,
-            })
-
-    # === Pagination ===
-    paginator = Paginator(results, 10)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-    view_mode = request.GET.get('view_mode', 'card')
-    saved_paper_ids = []
-    if request.user.is_authenticated:
-        saved_paper_ids = list(request.user.saved_papers.values_list('paper_id', flat=True))
-
-    # pass this info to template
-    for paper in papers:
-        paper.is_saved = paper.id in saved_paper_ids
     context = {
-        "results": results,
         "query": query,
-        "page_obj": page_obj,
         "colleges": colleges,
         "programs": programs,
         "years": years,
@@ -358,16 +223,12 @@ def paper_list(request):
         "selected_program": program,
         "selected_year": year,
         "selected_tags": tags,
-        "active_filters": active_filters,
         "tag_counts": tag_counts,
         "view_mode": view_mode,
-        "saved_paper_ids": saved_paper_ids,
     }
 
-    if request.htmx:
-        return render(request, "papers/partials/paper_list/_paper_list_content.html", context)
+    # The **full page** just contains filters, container, skeleton, etc.
     return render(request, "papers/paper_list.html", context)
-
 
 
 def paper_detail(request, pk):
@@ -465,70 +326,118 @@ def paper_query(request, pk):
 
 @login_required
 def paper_upload(request):
+    print("[1] Entered paper_upload view")
     papers = Paper.objects.filter(uploaded_by=request.user).order_by("-uploaded_at")
-    years = Paper.objects.values_list('year', flat=True).distinct().order_by('-year')
+    years = Paper.objects.values_list("year", flat=True).distinct().order_by("-year")
 
-    if request.method == 'POST':
+    if request.method == "POST":
+        print("[2] POST request detected")
         form = PaperForm(request.POST, request.FILES)
-        if form.is_valid(): 
+
+        if form.is_valid():
+            print("[3] Form is valid")
             paper = form.save(commit=False)
             paper.uploaded_by = request.user
-            paper.is_indexed = False  # Initially set to False
-            
-            # Extract tags from abstract
-            tags = extract_tags(
-                (paper.title or "") + " " +
-                (paper.abstract or "") + " " +
-                (paper.summary or "")
-            )
-            paper.tags = tags
+            paper.is_indexed = False
             paper.save()
+            print(f"[4] Saved new Paper object with ID {paper.id}")
 
-            # --- Auto-summary ---
-            if paper.file:
-                try:
-                    model = get_model()
-                    if paper.title:
-                        paper.title_embedding = model.encode(paper.title).tolist()
-                    if paper.abstract:
-                        paper.abstract_embedding = model.encode(paper.abstract).tolist()
-                    paper.save(update_fields=['title_embedding', 'abstract_embedding'])
-                except Exception as e:
-                    import traceback
-                    print(f"[Metadata Embedding Error] {e}")
-                    traceback.print_exc()
-                try:
-                    from utils.summarize import extract_text_from_pdf, summarize_text
-                    text = extract_text_from_pdf(paper.file.path)
-                    summary = summarize_text(text)
-                    paper.summary = summary
-                    paper.save(update_fields=['summary'])
-                except Exception as e:
-                    import traceback
-                    print(f"[Summary Error] {e}")
-                    traceback.print_exc()
+            ext = os.path.splitext(paper.file.name)[1].lower()
+            print(f"[5] Uploaded file extension: {ext}")
 
+            # --- PDF / DOCX ---
+            if ext in [".pdf", ".docx"]:
+                print("[6] Processing PDF/DOCX")
                 try:
-                    # --- Embed chunks directly into PaperChunk ---
-                    from utils.semantic_search import index_paper
-                    index_paper(paper)  # ✅ pass the Paper instance
-                    paper.is_indexed = True
-                    paper.save(update_fields=['is_indexed'])
-                except Exception as e:
-                    import traceback
-                    print(f"[Embedding Error] {e}")
-                    traceback.print_exc()
+                    metadata = extract_metadata(paper.file.path)
+                    print(f"[7] Extracted metadata: {metadata}")
 
-            return redirect('/papers/upload?status=success')
+                    paper.title = metadata.get("title") or paper.title
+                    paper.abstract = metadata.get("abstract") or paper.abstract
+                    paper.authors = metadata.get("authors") or paper.authors
+                    paper.college = metadata.get("college") or paper.college
+                    paper.program = metadata.get("program") or paper.program
+
+                    year_list = metadata.get("year")
+                    print(f"[8] Year list: {year_list}")
+                    if year_list and len(year_list) > 0:
+                        try:
+                            paper.year = int(year_list[0])
+                        except ValueError:
+                            print(f"[PDF Metadata] Invalid year: {year_list[0]}")
+
+                    paper.save(update_fields=["title", "abstract", "authors", "college", "program", "year"])
+                    print("[9] Saved Paper metadata for PDF/DOCX")
+                except Exception as e:
+                    print(f"[PDF Metadata Error] {e}")
+
+            # --- CHM ---
+            elif ext == ".chm":
+                print("[10] Processing CHM")
+                try:
+                    merged_html_path, _ = merge_chm_to_html(
+                        paper.file.path, settings.MEDIA_ROOT
+                    )
+                    print(f"[11] CHM merged HTML path: {merged_html_path}")
+
+                    # Save relative path to model (for later access by index_paper)
+                    paper.merged_html.name = str(merged_html_path).replace(str(settings.MEDIA_ROOT), "").replace("\\", "/").lstrip("/")
+                    paper.save(update_fields=["merged_html"])
+                    print("[12] Saved merged_html FileField")
+                except Exception as e:
+                    print(f"[CHM Merge Error] {e}")
+
+                # Extract metadata from merged.html
+                try:
+                    if os.path.exists(merged_html_path):
+                        metadata = extract_metadata_from_abstract(merged_html_path)
+                        print(f"[13] Extracted CHM metadata: {metadata}")
+
+                        paper.title = metadata.get("title") or paper.title
+                        paper.abstract = metadata.get("description") or paper.abstract
+                        paper.authors = metadata.get("authors") or paper.authors
+
+                        year = metadata.get("year")
+                        if year:
+                            try:
+                                paper.year = int(year)
+                            except ValueError:
+                                print(f"[CHM Metadata] Invalid year: {year}")
+
+                        paper.save(update_fields=["title", "abstract", "authors", "year"])
+                        print("[15] Saved Paper metadata for CHM")
+                except Exception as e:
+                    print(f"[CHM Metadata Error] {e}")
+
+            # --- Index / embed for semantic search ---
+            try:
+                print("[16] Indexing paper for semantic search")
+                from utils.semantic_search import index_paper
+                index_paper(paper)
+                paper.is_indexed = True
+                paper.save(update_fields=["is_indexed"])
+                print("[17] Paper indexed successfully")
+            except Exception as e:
+                print(f"[Indexing Error] {e}")
+
+            return redirect("/papers/upload?status=success")
+        else:
+            print("[3a] Form is invalid")
+            print(form.errors)
+
     else:
+        print("[2a] GET request detected")
         form = PaperForm()
 
-    status = request.GET.get('status')
-    return render(
-        request,
-        'papers/paper_upload.html',
-        {'form': form, 'status': status, 'papers': papers, 'years': years}
-    )
+    status = request.GET.get("status")
+    print(f"[18] Rendering template with status: {status}")
+    return render(request, "papers/paper_upload.html", {
+        "form": form,
+        "status": status,
+        "papers": papers,
+        "years": years,
+    })
+
 
 
 @login_required
@@ -568,8 +477,7 @@ def toast(request):
 
 @login_required
 def saved_papers(request):
-    saved = SavedPaper.objects.filter(user=request.user).select_related('paper')
-    return render(request, 'profile/saved_papers.html', {'saved_papers': saved})
+    return render(request, 'profile/saved_papers.html')
 
 def pdf_viewer(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
@@ -578,46 +486,54 @@ def pdf_viewer(request, pk):
     })
 
 def extract_metadata(request):
-    if request.method == "POST":
-        uploaded_file = request.FILES.get("file")
+    print("[Extract Metadata] Entered view")  # DEBUG
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Only POST method allowed"}, status=405)
 
-        if not uploaded_file:
-            return JsonResponse({"success": False, "error": "No file uploaded"}, status=400)
+    uploaded_file = request.FILES.get("file")
+    if not uploaded_file:
+        return JsonResponse({"success": False, "error": "No file uploaded"}, status=400)
 
-        # Save the uploaded file temporarily
-        temp_path = os.path.join(settings.MEDIA_ROOT, "temp_upload.pdf")
+    filename = uploaded_file.name
+    ext = os.path.splitext(filename)[1].lower()
+    temp_path = os.path.join(settings.MEDIA_ROOT, f"temp_upload_{filename}")
+    print(f"[Extract Metadata] Saving temp file to {temp_path}")  # DEBUG
+
+    try:
         with open(temp_path, "wb+") as destination:
             for chunk in uploaded_file.chunks():
                 destination.write(chunk)
 
-        try:
-            # Extract structured metadata instead of raw text
+        metadata = {}
+        if ext in [".pdf", ".docx"]:
+            print("[Extract Metadata] PDF/DOCX detected, extracting metadata...")  # DEBUG
             metadata = extract_metadata_from_pdf(temp_path)
 
-            raw_college = metadata.get("college", "")
-            raw_program = metadata.get("program", "")
+        elif ext == ".chm":
+            print("[Extract Metadata] CHM detected, merging CHM...")  # DEBUG
+            merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+            print(f"[Extract Metadata] CHM merged to {merged_html_path}")  # DEBUG
+            metadata = extract_metadata_from_abstract(merged_html_path)
+            print(f"[Extract Metadata] CHM metadata extracted: {metadata}")  # DEBUG
 
-            metadata["college"] = normalize_college(raw_college)
-            metadata["program"] = normalize_program(raw_program)
+        # Normalize college/program
+        raw_college = metadata.get("college", "")
+        raw_program = metadata.get("program", "")
 
-            return JsonResponse({
-                "success": True,
-                "metadata": metadata
-            })
-        except Exception as e:
-            return JsonResponse({
-                "success": False,
-                "error": str(e)
-            }, status=500)
-        finally:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+        metadata["college"] = normalize_college(raw_college)
+        metadata["program"] = normalize_program(raw_program)
 
-    return JsonResponse({
-        "success": False,
-        "error": "Only POST method allowed"
-    }, status=405)
+        print(f"[Extract Metadata] Final metadata: {metadata}")  # DEBUG
+        return JsonResponse({"success": True, "metadata": metadata})
 
+    except Exception as e:
+        print(f"[Extract Metadata ERROR] {e}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+            print("[Extract Metadata] Temp file removed")  # DEBUG
     
 
 def paper_insights(request):

@@ -1,9 +1,8 @@
 <nav class="bg-white p-4 shadow flex items-center dark:bg-zinc-900">
   <div class="container mx-auto flex items-center justify-between">
 
-
     <!-- Logo -->
-  <a href="/" class="font-bold text-xl dark:text-gray-200">Academic Repo</a>
+    <a href="/" class="font-bold text-xl dark:text-gray-200">Academic Repo</a>
 
     <!-- Dark mode toggle -->
     <button id="theme-toggle"
@@ -11,78 +10,79 @@
       🌙
     </button>
 
+    <!-- Search with icon -->
+    <form action="{% url 'paper_list' %}" 
+          method="get" 
+          autocomplete="off" 
+          role="search" 
+          class="flex-1 relative mx-4 flex"
+          id="search-form">
+      <!-- Search Icon -->
+      <svg class="absolute left-7 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-200 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>
+      </svg>
 
-<!-- Search with icon -->
-<form action="{% url 'paper_list' %}" method="get" autocomplete="off" role="search" class="flex-1 relative mx-4 flex">
-  <!-- Search Icon -->
-  <svg class="absolute left-7 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-200 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>
-  </svg>
+      <!-- Input + Clear Button -->
+      <div x-data="{ open:false, query:'{{ request.GET.q|default:'' }}' }" class="flex-1 relative mx-4">
+        <input
+          type="search"
+          name="q"
+          id="global-search"
+          x-model="query"
+          placeholder="Search papers, authors, or topics..."
+          value="{{ request.GET.q }}"
+          class="w-full pl-10 pr-10 py-2 rounded-md border border-gray-300 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-100"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          role="combobox"
+          aria-autocomplete="list"
+          :aria-expanded="open"
+          aria-controls="autocomplete-results"
+          hx-get="{% url 'autocomplete' %}"
+          hx-trigger="keyup changed delay:250ms"
+          hx-target="#autocomplete-results"
+          hx-swap="innerHTML"
+          @autocomplete-select.window="(e) => {
+            if(e.detail.type === 'paper' && e.detail.paper_id){
+              window.location.href = '/papers/papers/' + e.detail.paper_id + '/';
+            } else if(e.detail.type === 'author'){
+              document.getElementById('global-search').value = e.detail.value;
+              var authorInput = document.getElementById('search-author');
+              if(!authorInput){
+                authorInput = document.createElement('input');
+                authorInput.type = 'hidden';
+                authorInput.name = 'author';
+                authorInput.id = 'search-author';
+                document.getElementById('search-form').appendChild(authorInput);
+              }
+              authorInput.value = e.detail.value;
+              document.getElementById('search-form').submit();
+            } else {
+              document.getElementById('global-search').value = e.detail.value;
+            }
+          }"
+          @focus="open = true"
+          @blur="setTimeout(()=> open=false,150)"
+          @keydown.escape="open=false"
+        >
 
-  <!-- Input + Clear Button -->
-  <div x-data="{ open:false, query:'{{ request.GET.q|default:'' }}' }" class="flex-1 relative mx-4">
-    <input
-      type="search"
-      name="q"
-      id="global-search"
-      x-model="query"
-      placeholder="Search papers, authors, or topics..."
-      value="{{ request.GET.q }}"
-      class="w-full pl-10 pr-10 py-2 rounded-md border border-gray-300 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-100"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="off"
-      spellcheck="false"
-      role="combobox"
-      aria-autocomplete="list"
-      :aria-expanded="open"
-      aria-controls="autocomplete-results"
-      hx-get="{% url 'autocomplete' %}"
-      hx-trigger="keyup changed delay:250ms"
-      hx-target="#autocomplete-results"
-      hx-swap="innerHTML"
-      @autocomplete-select.window="(e) => {
-        if(e.detail.type === 'paper' && e.detail.paper_id){
-          window.location.href = '/papers/papers/' + e.detail.paper_id + '/';
-        } else if(e.detail.type === 'author'){
-          document.getElementById('global-search').value = e.detail.value;
-          var authorInput = document.getElementById('search-author');
-          if(!authorInput){
-            authorInput = document.createElement('input');
-            authorInput.type = 'hidden';
-            authorInput.name = 'author';
-            authorInput.id = 'search-author';
-            document.getElementById('global-search').closest('form').appendChild(authorInput);
-          }
-          authorInput.value = e.detail.value;
-          document.getElementById('global-search').closest('form').submit();
-        } else {
-          document.getElementById('global-search').value = e.detail.value; $dispatch('input');
-        }
-      }"
-      @focus="open = true"
-      @blur="setTimeout(()=> open=false,150)"
-      @keydown.escape="open=false"
-    >
+        <!-- Clear (X) button -->
+        <button
+          type="button"
+          x-show="query"
+          @click="query=''; open=false"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-200 transition"
+        >
+          ✕
+        </button>
 
-    <!-- Clear (X) button -->
-    <button
-      type="button"
-      x-show="query"
-      @click="query=''; $dispatch('input')"
-      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-200 transition"
-    >
-      ✕
-    </button>
-
-    <!-- Results dropdown -->
-    <div id="autocomplete-results" x-show="open" class="absolute left-0 right-0 z-50 mt-1"></div>
-  </div>
-</form>
-
-
-  {# HTMX/Alpine/Tailwind are already used in the project; this component uses them. #}
+        <!-- Results dropdown -->
+        <div id="autocomplete-results" x-show="open" class="absolute left-0 right-0 z-50 mt-1"></div>
+      </div>
+    </form>
 
     <!-- Mobile Menu / Login -->
     {% if user.is_authenticated %}
@@ -131,6 +131,7 @@
 
   </div>
 </nav>
+
 <script>
   const html = document.documentElement;
   const btn = document.getElementById('theme-toggle');
@@ -141,5 +142,24 @@
   btn.addEventListener('click', () => {
     html.classList.toggle('dark');
     localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+  });
+
+  // Handle search form submission
+  document.getElementById('search-form').addEventListener('submit', function(e) {
+    const contentTarget = document.getElementById('paper-list-content');
+    
+    // If we're on a page with the paper-list-content div, use HTMX
+    if (contentTarget) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const params = new URLSearchParams(formData).toString();
+      
+      htmx.ajax('GET', '{% url "paper_list_partial" %}?' + params, {
+        target: '#paper-list-content',
+        swap: 'innerHTML',
+        pushUrl: true
+      });
+    }
+    // Otherwise, let it submit normally (will navigate to paper_list page)
   });
 </script>

@@ -33,7 +33,7 @@
           <span>{{ filter.label }}: {{ filter.value }}</span>
           <a href="?{% if query %}q={{ query }}&{% endif %}{{ filter.remove_url }}"
              hx-get="?{% if query %}q={{ query }}&{% endif %}{{ filter.remove_url }}"
-             hx-target="#papers-content"
+             hx-target="#paper-list-container"
              hx-push-url="true"
              class="ml-1 text-xs hover:text-red-600 font-bold">
             ×
@@ -47,12 +47,11 @@
 
 
 <!-- Search Results -->
-{% if view_mode == 'compact' %}
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+  <div x-show="view === 'compact'" class="grid grid-cols-1 md:grid-cols-2 gap-2">
     {% for item in page_obj %}
       <div class="border rounded-xl bg-white p-4 border-gray-200 hover:shadow transition flex flex-col h-full dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-300">
         {% if item.paper %}
-          <a href="{% url 'paper_detail' item.paper.pk %}" class="font-semibold text-base text-black hover:underline mb-1 dark:text-zinc-300">{{ item.paper.title }}</a>
+          <a href="{% url 'paper_detail' item.paper.pk %}" class="font-semibold text-base text-gray-900 tracking-tight hover:underline mb-1 dark:text-zinc-300">{{ item.paper.title }}</a>
         {% else %}
           <span class="text-base text-gray-400 font-semibold">[Paper not found]</span>
         {% endif %}
@@ -70,7 +69,7 @@
         <div class="flex flex-wrap gap-1 mb-2">
           {% if item.tags %}
             {% for tag in item.tags %}
-              <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs dark:bg-zinc-800 dark:text-zinc-300">{{ tag }}</span>
+              <span class="bg-red-200 text-red-700 px-2 py-0.5 rounded-full text-xs dark:bg-zinc-800 dark:text-zinc-300">{{ tag }}</span>
             {% endfor %}
           {% endif %}
         </div>
@@ -78,6 +77,9 @@
           {% if item.paper %}
             <a href="{{ item.paper.file.url }}" download class="btn btn-xs btn-outline text-red-600">PDF</a>
             <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-xs btn-outline dark:text-zinc-300 dark:hover:zinc-200">View</a>
+            {% if item.paper.merged_html %}
+              <a href="{{ item.paper.merged_html.url }}" target="_blank" class="btn btn-xs btn-outline dark:text-zinc-300 dark:hover:zinc-200">HTML</a>
+            {% endif %}
           {% endif %}
         </div>
       </div>
@@ -85,12 +87,12 @@
       <div class="col-span-2 text-center text-gray-500 py-8">No results found.</div>
     {% endfor %}
   </div>
-{% else %}
-  {% for item in page_obj %}
-    <div class="mb-8 border rounded-2xl bg-white p-6 border-gray-200 pb-12 hover:shadow-lg transition dark:bg-zinc-900 dark:border-zinc-700">
+     {% for item in page_obj %}
+    <div x-show="view === 'card'" class="mb-8 border rounded-lg bg-white p-6 border-gray-200 border-l-blue-500 border-l-4 shadow-sm pb-12 hover:shadow-lg transition dark:bg-zinc-900 dark:border-zinc-700">
+  
       <!-- Title -->
       {% if item.paper %}
-        <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl text-black font-semibold hover:underline dark:text-zinc-300">
+        <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl mb-2 text-black font-semibold hover:underline dark:text-zinc-300">
           {{ item.paper.title }}
         </a>
       {% else %}
@@ -100,7 +102,7 @@
       <!-- Author -->
       {% with paper=item.paper %}
         {% if paper.authors %}
-          <div>
+          <div class="mt-3">
             {% for author in paper.authors %}
               <span class="p-1 bg-grey-300 text-gray-700 text-sm dark:bg-zinc-800 dark:text-zinc-300">{{ author }}</span>{% if not forloop.last %} {% endif %}
             {% endfor %}
@@ -133,7 +135,7 @@
       </div>
 
       {% if item.paper and item.paper.abstract %}
-        <div x-data="{ expandedAbs: false }" x-cloak class="mt-2 text-gray-700 text-xs leading-relaxed">
+        <div x-data="{ expandedAbs: false }" x-cloak class="mt-4 text-gray-700 text-xs leading-relaxed">
           <span class="font-semibold text-gray-500">Abstract:</span>
           {% if item.paper.abstract|length > 400 %}
             <span x-show="!expandedAbs" class="dark:text-zinc-300">
@@ -176,9 +178,6 @@
   x-data="{
     dark: window.matchMedia('(prefers-color-scheme: dark)').matches,
     topics: {
-      'computer science': {bg: 'bg-blue-100', text: 'text-blue-800', dark: {bg: 'bg-blue-900', text: 'text-blue-400'}, title: 'Computer Science'},
-      'machine learning': {bg: 'bg-green-100', text: 'text-green-800', dark: {bg: 'bg-green-900', text: 'text-green-400'}, title: 'Machine Learning'},
-      // ...
     },
     findTopic(tag){
       const t = tag.toLowerCase();
@@ -189,12 +188,12 @@
     }
   }"
   x-init="window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => dark = e.matches)"
-  class="mt-3 flex flex-wrap gap-2 text-xs"
->
+  class="mt-3 flex flex-wrap gap-2 text-xs mt-6"
+> 
   {% for tag in item.tags %}
     <a href="#"
-       hx-get="{% url 'paper_list' %}"
-       hx-target="#papers-content"
+       hx-get="{% url 'paper_list_partial' %}"
+       hx-target="#paper-list-container"
        hx-push-url="true"
        hx-include="[name='college'],[name='program'],[name='year']"
        hx-vals='{"tag": "{{ tag }}"}'>
@@ -202,11 +201,12 @@
         x-text="'{{ tag }}'"
         x-bind:class="(() => {
           const t = findTopic('{{ tag }}');
-          if (!t) return 'bg-gray-200 text-gray-700 dark:bg-zinc-700 dark:text-gray-100 font-semibold px-2 py-1 rounded-full hover:opacity-90';
+          if (!t) return 'bg-red-200 text-red-700 dark:bg-zinc-700 dark:text-gray-100 font-semibold px-2 py-1 rounded-full hover:opacity-90';
           return (dark ? t.dark.bg + ' ' + t.dark.text : t.bg + ' ' + t.text) + ' font-semibold px-2 py-1 rounded-full hover:opacity-90';
         })()"
         x-bind:title="findTopic('{{ tag }}')?.title || 'Other'"
       ></span>
+      
     </a>
   {% endfor %}
 </div>
@@ -215,10 +215,18 @@
       <!-- Actions -->
   {% if item.paper %}
     <!-- Buttons -->
-        <div class="flex flex-row gap-2 w-full items-center mt-4">
-          <a href="{{ item.paper.file.url }}" download class="btn btn-soft btn-sm bg-blue-600 text-white dark:bg-blue-900">Download PDF</a>
-          <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-soft btn-sm bg-white dark:bg-zinc-800">View in PDF Viewer</a>
-
+        <div class="flex flex-row justify-end gap-2 w-full items-center mt-6">
+          {% if ".pdf" in item.paper.file.name %}
+            <a href="{{ item.paper.file.url }}" download class="btn btn-soft border bg-white font-light border-gray-200 btn-sm dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300">
+              Download PDF
+            </a>
+            <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-soft btn-sm font-light border border-gray-200 bg-white dark:bg-zinc-800 dark:border-zinc-700">
+              View in PDF Viewer
+            </a>
+          {% endif %}
+          {% if item.paper.merged_html %}
+            <a href="{{ item.paper.merged_html.url }}" target="_blank" class="btn btn-soft btn-sm font-light border border-gray-200 bg-white dark:bg-zinc-800 dark:border-zinc-700">View Merged HTML</a>
+          {% endif %}
           {% if user.is_authenticated %}
           <div id="save-btn-{{ item.paper.id }}">
             {% include 'partials/_save_button_list.html' with paper=item.paper is_saved=item.paper.is_saved %}
@@ -236,7 +244,6 @@
   {% empty %}
     <div class="text-center text-gray-500 mt-12">No results found.</div>
   {% endfor %}
-{% endif %}
 
 
 
@@ -244,29 +251,31 @@
 <div class="mt-8 flex justify-center">
   <nav class="inline-flex rounded-md shadow-sm" aria-label="Pagination">
     {% if page_obj.has_previous %}
-      <a hx-get="{% url 'paper_list' %}"
-         hx-target="#papers-content"
+      <a hx-get="{% url 'paper_list_partial' %}"
+         hx-target="#paper-list-container"
          hx-push-url="true"
          hx-include="[name='college'],[name='program'],[name='year'],[name='tag']"
-         hx-vals='{"page": "{{ page_obj.previous_page_number }}", "view_mode": view}'>
+         hx-vals='{"page": "{{ page_obj.previous_page_number }}", "view_mode": view}'
+         class="dark:text-zinc-300">
          Previous
       </a>
     {% else %}
-      <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-l-md cursor-not-allowed">Previous</span>
+      <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-l-md cursor-not-allowed dark:bg-zinc-800 dark:border-zinc-700">Previous</span>
     {% endif %}
 
-    <span class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-700">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    <span class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-700 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
 
     {% if page_obj.has_next %}
-      <a hx-get="{% url 'paper_list' %}"
-         hx-target="#papers-content"
+      <a hx-get="{% url 'paper_list_partial' %}"
+         hx-target="#paper-list-container"
          hx-push-url="true"
          hx-include="[name='college'],[name='program'],[name='year'],[name='tag']"
-         hx-vals='{"page": "{{ page_obj.next_page_number }}", "view_mode": view}'>
+         hx-vals='{"page": "{{ page_obj.next_page_number }}", "view_mode": view}'
+         class="dark:text-zinc-300">
          Next
       </a>
     {% else %}
-      <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-r-md cursor-not-allowed">Next</span>
+      <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-r-md cursor-not-allowed dark:bg-zinc-800 dark:border-zinc-700">Next</span>
     {% endif %}
   </nav>
 </div>

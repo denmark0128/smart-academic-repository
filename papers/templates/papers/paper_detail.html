@@ -86,9 +86,18 @@
 
         <!-- Buttons -->
         <div class="flex flex-row gap-2 w-full items-center">
+          {% if paper.file %}
+          {% if ".pdf" in paper.file.name %}
           <a href="{{ paper.file.url }}" download class="btn btn-soft bg-blue-600 text-white dark:bg-blue-900">Download PDF</a>
           <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ paper.file.url }}" target="_blank" class="btn btn-soft bg-white dark:bg-zinc-800">View in PDF Viewer</a>
-
+          {% endif %}
+          {% endif %}
+          {% if paper.merged_html %}
+            <a href="{{ paper.merged_html.url }}" target="_blank"
+              class="btn btn-soft bg-white dark:bg-zinc-800">
+              View HTML Version
+            </a>
+          {% endif %}
           {% if user.is_authenticated %}
           <div id="save-btn-{{ paper.id }}">
             {% include 'partials/_save_button.html' with paper=paper is_saved=is_saved %}
@@ -106,7 +115,7 @@
       <!-- Abstract -->
         <div class="bg-white/80 backdrop-blur-sm border border-gray-200 p-6 rounded-lg dark:bg-zinc-900 dark:border-zinc-700">
           <h2 class="text-lg font-semibold">Abstract</h2>
-          <p class="text-gray-700 leading-relaxed">{{ paper.abstract }}</p>
+          <p class="text-gray-700 leading-relaxed dark:text-zinc-300">{{ paper.abstract }}</p>
         </div>
 
         <!-- Summary -->
@@ -131,15 +140,15 @@
             
             <!-- Matched Citations -->
             <div class="border border-gray-200 p-4 rounded-lg shadow-sm bg-white space-y-3 dark:bg-zinc-900 dark:border-zinc-700">
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Matched Citations ({{ matched_citation_count }})</h3>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2 dark:text-zinc-300">Matched Citations ({{ matched_citation_count }})</h3>
               
               {% if matched_citations %}
               <ul class="space-y-2">
                 {% for match in matched_citations %}
-                <li class="p-2 rounded border border-gray-100 bg-gray-50">
-                  <p class="italic text-sm text-gray-700 mb-1">"{{ match.raw_citation }}"</p>
+                <li class="p-2 rounded border border-gray-100 bg-gray-50 dark:bg-zinc-900 dark:border-zinc-700">
+                  <p class="italic text-sm text-gray-700 mb-1 dark:text-zinc-300">"{{ match.raw_citation }}"</p>
                   {% if match.matched_paper %}
-                  <a href="{% url 'paper_detail' match.matched_paper.pk %}" class="block font-medium text-gray-900 hover:text-blue-700 underline text-sm">
+                  <a href="{% url 'paper_detail' match.matched_paper.pk %}" class="block font-medium text-gray-900 hover:text-blue-700 underline text-sm dark:text-zinc-300 dark:hover:text-blue-400">
                     → {{ match.matched_paper.title }}
                   </a>
                   {% else %}
@@ -155,8 +164,8 @@
             </div>
 
             <!-- Cited By -->
-            <div class="border border-gray-200 p-4 rounded-lg shadow-sm bg-white space-y-3">
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Cited By ({{ paper.citation_count }})</h3>
+            <div class="border border-gray-200 p-4 rounded-lg shadow-sm bg-white space-y-3 dark:bg-zinc-900 dark:border-zinc-700">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2 dark:text-zinc-300">Cited By ({{ paper.citation_count }})</h3>
               
               {% if citations_pointing_here %}
               <ul class="space-y-2">

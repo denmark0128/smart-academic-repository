@@ -41,6 +41,8 @@ class Paper(models.Model):
     citation_count_cached = models.IntegerField(default=0)
     matched_count_cached = models.IntegerField(default=0)
     views = models.PositiveIntegerField(default=0)
+    merged_html = models.FileField(upload_to='papers/merged_html/', null=True, blank=True)
+    images_folder = models.CharField(max_length=255, null=True, blank=True)  # store folder path or unique ID
 
     class Meta:
         indexes = [

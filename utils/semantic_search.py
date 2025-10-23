@@ -1,10 +1,13 @@
 import re
+import os
 import fitz  # PyMuPDF
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from papers.models import Paper, PaperChunk
 from django.db.models import Func, FloatField, Value
 from pgvector.django import CosineDistance
+from utils.html_chunker import process_html_to_chunks
+from django.conf import settings
 
 # -------------------------------
 # Settings
@@ -68,29 +71,53 @@ def extract_and_chunk(pdf_path, min_size=100, max_size=500):
 def index_paper(paper: Paper):
     """
     Extract, chunk, embed, and save PaperChunks into DB for a Paper.
+    Supports both PDF (via PyMuPDF) and CHM (via merged.html).
     """
-    chunks = extract_and_chunk(paper.file.path)
     model = get_model()
+    objs = []
+
+    # Detect file type
+    ext = os.path.splitext(paper.file.name)[1].lower()
+
+    if ext == ".pdf":
+        # Normal PDF embedding flow
+        chunks = extract_and_chunk(paper.file.path)
+
+    elif paper.merged_html:
+        # ✅ Make sure merged_html exists and is accessible
+        merged_html_path = os.path.join(settings.MEDIA_ROOT, paper.merged_html.name)
+        if os.path.exists(merged_html_path):
+            print(f"[+] Using merged.html for {paper.title}")
+            chunks = process_html_to_chunks(merged_html_path, f"{paper.title}_chunks.json")
+        else:
+            print(f"[!] merged.html not found for {paper.title} → {merged_html_path}")
+            return
+
+    else:
+        print(f"[!] No valid file found for {paper.title}")
+        return
+
+    # --- Embed and save ---
     texts = [c["text"] for c in chunks]
     embeddings = model.encode(texts, convert_to_numpy=True)
 
-    objs = []
     for i, chunk in enumerate(chunks):
         objs.append(
             PaperChunk(
                 paper=paper,
                 title=paper.title,
                 authors=paper.authors,
-                page=chunk["page"],
+                page=chunk.get("page", 0),
                 chunk_id=i,
                 text=chunk["text"],
-                embedding=embeddings[i],  # pgvector accepts np.ndarray
+                embedding=embeddings[i],
             )
         )
 
     PaperChunk.objects.bulk_create(objs)
     paper.is_indexed = True
     paper.save()
+    print(f"[+] Indexed {len(chunks)} chunks for {paper.title}")
 
 
 # -------------------------------

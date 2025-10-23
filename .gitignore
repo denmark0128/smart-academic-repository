@@ -5,7 +5,7 @@ __pycache__/
 # Ignore uploaded papers
 /media/papers/
 /media/extracted/
-
+/media/chm*
 # Ignore environment files
 .env
 *.env

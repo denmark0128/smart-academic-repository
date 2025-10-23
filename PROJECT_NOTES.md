@@ -25,6 +25,8 @@ This notepad documents all major changes, features, and improvements made to the
 - Score and Page columns in the paper list table are commented out (hidden by default).
 - Paper list: changed the ui from table to whole (June 18)
 - Navbar: changed the style to white bg and black text. (June 18)
+- Darkmode 
+- Mordernized ui 
 
 ## 4. Management & Maintenance
 - Provided instructions for running management commands to update tags.

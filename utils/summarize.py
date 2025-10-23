@@ -29,21 +29,16 @@ def summarize_full_text(text, title=None):
     title_str = f" titled '{title}'" if title else ""
     prompt = textwrap.dedent(f"""
     You are an expert academic summarizer.
-    Summarize the following research paper{title_str}.
-    
-    Rules:
-    - Write only the summary text, nothing else.
-    - Do NOT include any introductions like “Okay, here’s a summary...”.
-    - Do NOT include labels such as “Summary:” or “Keywords:”.
-    - Do NOT use Markdown formatting like **bold** or *italics*.
-    - Preserve paragraph breaks for readability.
+    Summarize the following research paper{title_str} fully.
 
-    --- Paper Text ---
     {text}
     """)
 
     print("💻 Generating full-text summary...")
-    out = llm.create_completion(prompt=prompt)
+    out = llm.create_completion(
+        prompt=prompt,
+        seed=2,
+    )
     content = out["choices"][0]["text"].strip()
 
     # Clean out any hidden thinking tags or markdown stars

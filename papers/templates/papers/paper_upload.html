@@ -5,10 +5,10 @@
 {% block content %}
 
 <div class="" x-data="{ subTab: 'uploaded' }">
-  <h2 class="text-lg font-semibold text-gray-900 mb-4">Upload Section</h2>
+  <h2 class="text-lg font-semibold text-gray-900 mb-4 dark:text-zinc-300">Upload Section</h2>
 
   <!-- DaisyUI Tabs -->
-  <div class="tabs tabs-border mb-4">
+  <div role="tablist" class="tabs tabs-border dar">
     <a @click="subTab = 'uploaded'" 
        :class="subTab === 'uploaded' ? 'tab tab-active' : 'tab'">
       Uploaded Papers
@@ -23,20 +23,29 @@
     </a>
   </div>
 
-  <!-- Uploaded Papers -->
-  <div x-show="subTab === 'uploaded'" 
-       x-data="{ searchQuery: '', filterYear: '', filterStatus: '' }">
-    {% include 'papers/partials/uploads/uploaded_papers.html' %}
+<!-- Uploaded Papers -->
+<div x-show="subTab === 'uploaded'"
+     hx-get="{% url 'uploaded_papers_partial' %}"
+     hx-trigger="load"
+     hx-swap="innerHTML"
+     class="mt-4">
+     
+  <!-- Skeleton placeholder -->
+  <div class="animate-pulse space-y-2">
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
   </div>
+</div>
 
   <!-- Upload Form -->
   <div x-show="subTab === 'upload'">
     {% include 'papers/partials/uploads/upload_form.html' %}
   </div>
 
-  <div x-show="subTab === 'review">
-    {% include 'papers/partials/uploads/review.html' %}
-  </div>
 
 </div>
 {% endblock %}

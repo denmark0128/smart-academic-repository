@@ -1,66 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Plain CSS Marquee with Alpine.js</title>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <style>
-    /* Container styles */
-    .marquee-container {
-      position: relative;
-      overflow: hidden;
-      background-color: white;
-      padding: 1rem 0;
-    }
-
-    /* Marquee track wrapper */
-    .marquee-track {
-      display: flex;
-      white-space: nowrap;
-      animation: scroll-left 20s linear infinite;
-    }
-
-    /* Marquee animation */
-    @keyframes scroll-left {
-      0% {
-        transform: translateX(0%);
-      }
-      100% {
-        transform: translateX(-50%);
-      }
-    }
-
-    /* Gradient overlays */
-    .marquee-overlay-left,
-    .marquee-overlay-right {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 8rem;
-      z-index: 10;
-    }
-
-    .marquee-overlay-left {
-      left: 0;
-      background: linear-gradient(to right, white, transparent);
-    }
-
-    .marquee-overlay-right {
-      right: 0;
-      background: linear-gradient(to left, white, transparent);
-    }
-
-    /* Marquee item style */
-    .marquee-list {
-      display: flex;
-      gap: 4rem;
-      font-size: 20px;
-      font-weight: bold;
-      color: #333;
-    }
-  </style>
-</head>
-<body class="bg-white text-black">
+{% load static %}
 
 <div
   x-data="{
@@ -72,31 +10,36 @@
       });
     }
   }"
-  class="marquee-container"
+  class="relative overflow-hidden py-4 bg-white dark:bg-zinc-900"
 >
-  <!-- Gradient Overlays -->
-  <div class="marquee-overlay-left" aria-hidden="true"></div>
-  <div class="marquee-overlay-right" aria-hidden="true"></div>
 
   <!-- Marquee Track -->
   <div
     x-ref="marqueeTrack"
-    class="marquee-track"
+    class="flex whitespace-nowrap animate-marquee"
     :class="{ 'paused': pauseOnHover }"
     @mouseenter="if(pauseOnHover) $el.style.animationPlayState='paused'"
     @mouseleave="if(pauseOnHover) $el.style.animationPlayState='running'"
   >
     <!-- Marquee List -->
-    <div x-ref="marqueeList" class="marquee-list">
-      <h1>RESEARCH PAPERS</h1>
-      <h1>RESEARCH PAPERS</h1>
-      <h1>RESEARCH PAPERS</h1>
-      <h1>RESEARCH PAPERS</h1>
-      <h1>RESEARCH PAPERS</h1>
-      <h1>RESEARCH PAPERS</h1>
+    <div x-ref="marqueeList" class="flex gap-16 font-bold text-xl text-gray-900 dark:text-zinc-300 dark:bg-zinc-900">
+      {% for i in "123456"|make_list %}
+        <h1>RESEARCH PAPERS</h1>
+      {% endfor %}
     </div>
   </div>
 </div>
 
-</body>
-</html>
+<style>
+  @keyframes scroll-left {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    animation: scroll-left 20s linear infinite;
+  }
+  .paused {
+    animation-play-state: paused;
+  }
+</style>

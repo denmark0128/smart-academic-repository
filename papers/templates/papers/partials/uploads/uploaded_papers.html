@@ -1,9 +1,8 @@
 <!-- papers/partials/uploaded_papers.html -->
-<div class="space-y-4">
+<div x-data="{ searchQuery: '', filterYear: '', filterStatus: '' }" class="space-y-4">
 
   <!-- Header + Add Paper button -->
   <div class="flex justify-between items-center">
-    <h3 class="text-lg font-semibold"></h3>
     <button 
       @click="subTab = 'upload'" 
       class="btn btn-soft dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 p-4">
@@ -11,32 +10,34 @@
     </button>
   </div>
 
-  <!-- Search + Filter -->
+  <!-- Search + Filters -->
   <div class="flex flex-col md:flex-row gap-2 md:gap-4">
     <input 
       type="text" 
       placeholder="Search by title or author..." 
-      class="input input-bordered w-full md:w-1/2 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2" 
-      x-model="searchQuery">
+      x-model="searchQuery"
+      class="input input-bordered w-full md:w-1/2 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2">
 
-    <select class="select select-bordered w-full md:w-1/4 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2" x-model="filterYear">
+    <select x-model="filterYear"
+            class="select select-bordered w-full md:w-1/4 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2">
       <option value="">All Years</option>
       {% for paper in papers %}
         <option value="{{ paper.year }}">{{ paper.year }}</option>
-        {% endfor %}
+      {% endfor %}
     </select>
 
-    <select class="select select-bordered w-full md:w-1/4 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2" x-model="filterStatus">
+    <select x-model="filterStatus"
+            class="select select-bordered w-full md:w-1/4 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2">
       <option value="">All Status</option>
       <option value="success">Indexed</option>
-      <option value="processing">Processing</option>
+      <option value="pending">Pending</option>
       <option value="error">Error</option>
     </select>
   </div>
 
   <!-- Papers Table -->
   <div class="overflow-x-auto dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 border border-gray-200 rounded-lg">
-    <table class="table table-sm w-full table-zebra dark:[&>tbody>tr:nth-child(even)]:bg-zinc-800 dark:[&>tbody>tr:nth-child(odd)]:bg-zinc-900">
+    <table class="table table-sm w-full rounded-lg table-zebra dark:[&>tbody>tr:nth-child(even)]:bg-zinc-800 dark:[&>tbody>tr:nth-child(odd)]:bg-zinc-900">
       <thead>
         <tr class="dark:text-zinc-300">
           <th>Title</th>
@@ -47,26 +48,23 @@
       </thead>
       <tbody>
         {% for paper in papers %}
-        <tr 
-          x-show="(!searchQuery || '{{ paper.title }} {{ paper.authors|join:", " }}'.toLowerCase().includes(searchQuery.toLowerCase())) 
-                   && (!filterYear || filterYear == '{{ paper.year }}') 
-                   && (!filterStatus || filterStatus == '{{ paper.status }}')">
-
+        <tr x-show="(
+                      (!searchQuery || '{{ paper.title|escapejs }} {{ paper.authors|join:', '|escapejs }}'.toLowerCase().includes(searchQuery.toLowerCase()))
+                      && (!filterYear || filterYear == '{{ paper.year }}')
+                      && (!filterStatus || 
+                          (filterStatus === 'success' && '{{ paper.is_indexed }}' === 'True') ||
+                          (filterStatus === 'pending' && '{{ paper.status }}' === 'pending') ||
+                          (filterStatus === 'error' && '{{ paper.status }}' === 'error')
+                         )
+                     )">
           <td>{{ paper.title }}</td>
           <td>{{ paper.year }}</td>
           <td>{{ paper.authors|join:", " }}</td>
           <td>
             {% if paper.is_indexed %}
               <span class="badge badge-dash badge-success">Indexed</span>
-            {% else %}
-              <span class="badge badge-dash badge-warning">Not Indexed</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if paper.status == "pending" %}
-              <span class="badge badge-dash badge-success">pending</span>
-            {% elif paper.status == "approved" %}
-              <span class="badge badge-dash badge-warning">Approved</span>
+            {% elif paper.status == "pending" %}
+              <span class="badge badge-dash badge-warning">Pending</span>
             {% else %}
               <span class="badge badge-dash badge-error">Error</span>
             {% endif %}

@@ -2,10 +2,10 @@
 
 {% block content %}
 <div class="flex flex-col items-center justify-center min-h-[60vh]">
-  <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">
+  <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center dark:text-zinc-300">
     Welcome to the Semantic Academic Paper Repository
   </h1>
-  <h2 class="text-lg text-gray-600 mb-6 text-center">
+  <h2 class="text-lg text-gray-600 mb-6 text-center dark:text-zinc-400">
     Discover, Upload, and Explore Academic Papers
   </h2>
 
@@ -22,20 +22,17 @@
         <input
           type="search"
           name="q"
-          class="w-full p-3 pl-12 border-[2px] border-black rounded-full focus:ring-1 focus:ring-black focus:outline-none transition"
+          class="w-full p-3 pl-12 border-[2px] border-black rounded-full focus:ring-1 focus:ring-black focus:outline-none transition dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-100"
           placeholder="Search papers, authors, or topics..."
           value="{{ request.GET.q }}">
       </div>
     </form>
 
     <div class="mt-6 flex flex-col gap-2 text-center">
-      <a href="{% url 'random_paper_redirect' %}" class="text-black hover:underline font-medium">
-        Show a Random Paper
-      </a>
-      <a href="{% url 'paper_upload' %}" class="text-black hover:underline font-medium">
+      <a href="{% url 'paper_upload' %}" class="text-black hover:underline font-medium dark:text-zinc-300">
         Upload a Paper
       </a>
-      <a href="{% url 'paper_list' %}" class="text-black hover:underline font-medium">
+      <a href="{% url 'paper_list' %}" class="text-black hover:underline font-medium dark:text-zinc-300">
         Browse All Papers
       </a>
     </div>

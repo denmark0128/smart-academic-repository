@@ -1,6 +1,7 @@
 
 from django.urls import path, include
 from .views import views
+from .views.partial_views import uploaded_papers_partial, paper_list_partial, saved_papers_partial
 from rest_framework import routers
 from .api import PaperViewSet, SavedPaperViewSet
 
@@ -25,5 +26,7 @@ urlpatterns = [
     path("processing/tab/", views.processing_tab, name="processing_tab"),
     path("review/tab/", views.review_tab, name="review_tab"),
     path('', include(router.urls)),
-    path('random-paper/', views.random_paper_redirect, name='random_paper_redirect'),
+    path('partials/uploaded-papers/', uploaded_papers_partial, name='uploaded_papers_partial'),
+    path('partials/paper-list/', paper_list_partial, name='paper_list_partial'),
+    path('partials/saved-papers/', saved_papers_partial, name='saved_papers_partial'),
 ]

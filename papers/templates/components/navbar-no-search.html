@@ -1,9 +1,14 @@
-<nav class="bg-white p-4 shadow">
+<nav class="bg-white p-4 shadow dark:bg-zinc-900 dark:border-b dark:border-zinc-700">
   <div class="container mx-auto flex items-center justify-between">
 
     <!-- Logo -->
     <a href="/" class="font-bold text-xl">Academic Repo</a>
 
+        <!-- Dark mode toggle -->
+    <button id="theme-toggle"
+      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+      🌙
+    </button>
     <!-- Search -->
 
     <!-- Mobile Menu / Login -->
@@ -53,4 +58,17 @@
     {% endif %}
 
   </div>
+
+  <script>
+  const html = document.documentElement;
+  const btn = document.getElementById('theme-toggle');
+
+  // Load saved preference
+  if (localStorage.theme === 'dark') html.classList.add('dark');
+
+  btn.addEventListener('click', () => {
+    html.classList.toggle('dark');
+    localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+  });
+</script>
 </nav>

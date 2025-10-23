@@ -1,40 +1,55 @@
 import os
 from django.core.management.base import BaseCommand
 from django.db import close_old_connections
-from papers.models import Paper
-from utils.summarize import summarize_pdf_to_json
-
+from papers.models import Paper, PaperChunk
+from utils.summarize import summarize_full_text  # note: no summarize_pdf_to_json
 
 class Command(BaseCommand):
-    help = "Re-summarize ALL papers: deletes existing summaries and regenerates them using the local llama.cpp model."
+    help = "Re-summarize paper(s) by joining their chunks and summarizing them with the local llama.cpp model."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--title",
+            type=str,
+            help="Title of the paper to summarize (optional). If omitted, summarizes all papers.",
+        )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.WARNING("⚠️  Deleting all existing summaries..."))
-        updated = Paper.objects.update(summary=None)
-        self.stdout.write(self.style.SUCCESS(f"🗑 Cleared summaries for {updated} papers."))
+        title = options.get("title")
 
-        papers = Paper.objects.all()
-        if not papers.exists():
-            self.stdout.write(self.style.WARNING("No papers found to summarize."))
-            return
+        # --- Filter papers ---
+        if title:
+            papers = Paper.objects.filter(title=title)
+            if not papers.exists():
+                self.stdout.write(self.style.ERROR(f"❌ No paper found with title '{title}'"))
+                return
+            self.stdout.write(self.style.SUCCESS(f"🧠 Summarizing paper titled: {title}"))
+        else:
+            self.stdout.write(self.style.WARNING("⚠️  Deleting all existing summaries..."))
+            updated = Paper.objects.update(summary=None)
+            self.stdout.write(self.style.SUCCESS(f"🗑 Cleared summaries for {updated} papers."))
+            papers = Paper.objects.all()
 
-        self.stdout.write(self.style.SUCCESS(f"🧠 Found {papers.count()} paper(s) to summarize."))
-
+        # --- Process each paper ---
         for paper in papers:
             try:
-                pdf_path = paper.file.path
-                self.stdout.write(f"\n📄 Summarizing: {paper.title}")
+                self.stdout.write(f"\n📄 Summarizing from chunks: {paper.title}")
 
-                # Summarize and get structured data
-                data = summarize_pdf_to_json(pdf_path)
+                # Gather all chunks for this paper
+                chunks = PaperChunk.objects.filter(paper=paper).order_by("chunk_id")
+                if not chunks.exists():
+                    self.stdout.write(self.style.WARNING(f"⚠️ No chunks found for {paper.title}, skipping."))
+                    continue
 
-                if not isinstance(data, dict) or "summary" not in data:
-                    raise ValueError("summarize_pdf_to_json() must return a dict containing 'summary'.")
+                full_text = " ".join(chunk.text for chunk in chunks)
+                print(f"📝 Full text length: {len(full_text)} characters")
+                # Summarize using local llama.cpp model
+                summary = summarize_full_text(full_text, title=paper.title)
 
-                # ✅ Reconnect before saving
+                # Reconnect before saving (important for long loops)
                 close_old_connections()
 
-                paper.summary = data["summary"]
+                paper.summary = summary
                 paper.save(update_fields=["summary"])
 
                 self.stdout.write(self.style.SUCCESS(f"✅ Done: {paper.title}"))

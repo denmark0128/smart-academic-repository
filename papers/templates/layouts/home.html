@@ -1,79 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>{% block title %}Academic Repo{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <!-- Prevent white flash on dark mode -->
-        <script>
-            try {
-                if (localStorage.getItem('darkMode') === '1') {
-                    document.documentElement.classList.add('dark');
-                }
-            } catch (e) {}
-        </script>
-        <!-- Tailwind CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Academic Repo{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <script
-    defer
-    src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"
-    ></script>
-  
-  <!-- Alpine Core -->
-    <script
-    defer
-    src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-    ></script>
-    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
-    <style>
-        /* Optional: customize color and thickness */
-        #nprogress .bar {
-            background: #000000; /* Tailwind's blue-600 */
-            height: 3px;
-        }
-    </style>
+  <!-- 🌙 Dark Mode Preload Script -->
+  <script>
+    if (
+      localStorage.getItem("color-theme") === "dark" ||
+      (!("color-theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  </script>
 
-    {% block extra_head %}{% endblock %}
-    {% include 'components/navbar-no-search.html' %}
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { inter: ["Inter", "sans-serif"] },
+        },
+      },
+    };
+  </script>
+
+  <!-- DaisyUI -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- NProgress -->
+  <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
+  <style>
+    #nprogress .bar {
+      background: #000000;
+      height: 3px;
+    }
+    [x-cloak] { display: none !important; }
+
+    mark {
+      background-color: #fde68a; 
+      color: #111827;
+      border-radius: 0.25rem;
+      padding: 0 2px;
+    }
+    .dark mark {
+      background-color: #854d0e;
+      color: #f9fafb;
+    }
+    input[type="search"]::-webkit-search-cancel-button {
+      -webkit-appearance: none; appearance: none; display: none;
+    }
+    input[type="search"]::-ms-clear { display: none; }
+    input[type="search"]::-moz-clear { display: none; }
+
+    select {
+      @apply dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700;
+    }
+  </style>
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  {% load static %}
+  {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-    {% include 'components/marquee.html' %}
-    <div id="main-content" class="container mx-auto p-6">
-        {% block content %}{% endblock %}
-    </div>
 
-    {% block extra_scripts %}{% endblock %}
-    <!-- NProgress JS -->
-    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
-    <script>
-    // Start progress on page navigation
-    window.addEventListener('beforeunload', () => {
-        NProgress.start();
-    });
+<body class="min-h-screen bg-gradient-to-br 
+  from-blue-50 via-white to-indigo-50 
+  dark:from-[#0a0a0a] dark:via-[#0d0d0d] dark:to-[#050505]
+  text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300">
 
-    // Optional: stop progress if navigation is interrupted or error
-    window.addEventListener('load', () => {
-        NProgress.done();
-    });
+  {% include 'components/navbar-no-search.html' %}
+  {% include 'components/marquee.html' %}
 
-    // Optional: also trigger on form submits
-    document.addEventListener('DOMContentLoaded', () => {
-        const forms = document.querySelectorAll("form");
-        forms.forEach(form => {
-        form.addEventListener("submit", () => {
-            NProgress.start();
-        });
-        });
+  <div id="main-content" class="container mx-auto p-6">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
+
+  <!-- NProgress JS -->
+  <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+  <script>
+    window.addEventListener('beforeunload', () => NProgress.start());
+    window.addEventListener('load', () => NProgress.done());
+
+    document.body.addEventListener('htmx:configRequest', (event) => {
+      const token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+      if (token) event.detail.headers['X-CSRFToken'] = token;
     });
-    </script>
+  </script>
+
+  <script>
+    function savePaper(paperId, initialState) {
+      return {
+        isSaved: initialState,
+        async toggleSave() {
+          const url = this.isSaved ? `/unsave/${paperId}/` : `/save/${paperId}/`;
+          try {
+            const response = await fetch(url, {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+              },
+            });
+            if (response.ok) this.isSaved = !this.isSaved;
+          } catch (e) {
+            console.error(e);
+          }
+        },
+      };
+    }
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
 </body>
 
 <footer>
-    {% include 'components/footer.html' %}
+  {% include 'components/footer.html' %}
 </footer>
 </html>
