@@ -202,28 +202,13 @@ def paper_list(request):
     view_mode = request.GET.get('view_mode', 'card')
 
     # Build base context: filters, tag counts, view_mode, etc.
-    tag_data = Paper.objects.only('tags').values_list('tags', flat=True)
-    all_tags = []
-    for tlist in tag_data:
-        if isinstance(tlist, list):
-            all_tags.extend(tlist)
-    tag_counts = dict(Counter(all_tags))
-
-    colleges = Paper.objects.values_list('college', flat=True).distinct()
-    programs = Paper.objects.values_list('program', flat=True).distinct()
-    years = Paper.objects.values_list('year', flat=True).distinct()
-    years = sorted([y for y in years if y is not None], reverse=True)
 
     context = {
         "query": query,
-        "colleges": colleges,
-        "programs": programs,
-        "years": years,
         "selected_college": college,
         "selected_program": program,
         "selected_year": year,
         "selected_tags": tags,
-        "tag_counts": tag_counts,
         "view_mode": view_mode,
     }
 

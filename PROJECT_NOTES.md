@@ -27,6 +27,7 @@ This notepad documents all major changes, features, and improvements made to the
 - Navbar: changed the style to white bg and black text. (June 18)
 - Darkmode 
 - Mordernized ui 
+- added lazy load on components (makes the initial load of pagegs fast)
 
 ## 4. Management & Maintenance
 - Provided instructions for running management commands to update tags.
@@ -57,6 +58,10 @@ This notepad documents all major changes, features, and improvements made to the
 
 ## 9. Staff Page
 - added staff page with dashboard
+
+## 10. Index in Paperchunks for semantic search and bm25
+- added HNSW index with cosine similarity is paperchunk embedding vector field(used in semantic search)
+- added GIN index for paperchunk text field(used in BM25)
 
 
 _Created at: June 17, 2025_  

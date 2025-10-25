@@ -11,17 +11,18 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)9tge2a!r@tj))^w&c@e)@$b+*9+qtwi9ep2w1jeelg-ak3wy1'
-
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -69,7 +70,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'allauth.account.middleware.AccountMiddleware',
@@ -85,8 +85,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'denmarkesmande8737@gmail.com'
-EMAIL_HOST_PASSWORD = 'lvrf cqan tvqo oyut'
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 ROOT_URLCONF = 'paperrepo.urls'
@@ -115,19 +115,12 @@ WSGI_APPLICATION = 'paperrepo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-       # 'NAME': 'thesisdb',           # name of your DB
-        #'USER': 'postgres',            # or the user you created
-        #'PASSWORD': 'walalang01',   # change to your actual password
-       # 'HOST': 'localhost',
-       #'PORT': '5432',                # default PostgreSQL port
-        'NAME': 'postgres',
-        'USER': 'postgres.jpzmsozwfeonoqaxxzja',
-        'PASSWORD': 'Walalang01@mama',
-        'HOST': 'aws-1-ap-southeast-1.pooler.supabase.com',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'NAME': os.getenv("SUPABASE_DB"),
+        'USER': os.getenv("SUPABASE_USER"),
+        'PASSWORD': os.getenv("SUPABASE_PASSWORD"),
+        'HOST': os.getenv("SUPABASE_HOST"),
+        'PORT': os.getenv("SUPABASE_PORT", 5432),
+        'OPTIONS': {'sslmode': 'require'},
     }
 }
 
@@ -166,7 +159,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

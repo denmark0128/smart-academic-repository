@@ -63,14 +63,14 @@ def load_bank_of_words(path='bank_of_words.txt'):
 
 # Add general topic tags
 GENERAL_TOPICS = [
-    "computer science", "psychology", "medicine", "biology",
+    "computer science", "psychology", "", "biology",
     "physics", "mathematics", "engineering", "chemistry", "social science", "economics",
     "education", "political science", "philosophy", "history", "art", "literature"
 ]
 
-BANK_OF_WORDS = load_bank_of_words().union(set(GENERAL_TOPICS))
+BANK_OF_WORDS = load_bank_of_words()
 
-def extract_tags(text, top_n=5, min_score=0.3):
+def extract_tags(text, top_n=5, min_score=0.5):
     # Use the bank of words as tag candidates
     candidates = list(BANK_OF_WORDS)
     if not candidates:

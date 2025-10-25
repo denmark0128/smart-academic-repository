@@ -3,66 +3,101 @@
   .asterisk {
     display: none;
   }
+
+  /* 🔹 Dimmed background effect */
+  .dimmed {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  /* 🔹 Centered spinner overlay */
+  #processing-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(3px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  html.dark #processing-overlay {
+    background: rgba(0, 0, 0, 0.5);
+  }
 </style>
 
-<div class="overflow-hidden">
+<div class="overflow-hidden relative">
   <form id="upload-form" class="p-6 space-y-6" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-
-    <!-- Crispy form fields -->
     <div class="form-section">
       {% crispy form %}
     </div>
-
-    <!-- Info / submit section -->
     <div class="flex items-center justify-between pt-6 border-t border-gray-200">
       <div class="flex items-center text-sm text-gray-500">
         Supported formats: PDF
       </div>
     </div>
   </form>
+</div>
 
-  <!-- Spinner -->
-  <div id="processing-spinner" style="display:none;" class="flex flex-col items-center justify-center mt-8">
-    <svg class="animate-spin h-8 w-8 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-    </svg>
-    <p class="text-blue-700 font-semibold">Processing your paper…</p>
-  </div>
+<!-- 🔹 Fixed overlay spinner -->
+<div id="processing-overlay">
+  <svg class="animate-spin h-10 w-10 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+  </svg>
+  <p class="text-blue-700 font-semibold dark:text-blue-300">Processing your paper…</p>
 </div>
 
 <script>
 document.querySelector("#file-upload").addEventListener("change", async (e) => {
-    let file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    let formData = new FormData();
-    formData.append("file", file);
+  const form = document.querySelector("#upload-form");
+  const overlay = document.querySelector("#processing-overlay");
 
-    document.querySelector("#processing-spinner").style.display = "flex";
+  // 🔹 Show overlay + dim form
+  overlay.style.display = "flex";
+  form.classList.add("dimmed");
 
-    let response = await fetch("{% url 'extract_metadata' %}", {
-        method: "POST", 
-        body: formData,
-        headers: {
-            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch("{% url 'extract_metadata' %}", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
     });
 
-    let data = await response.json();
-    document.querySelector("#processing-spinner").style.display = "none";
+    const data = await response.json();
+
+    // 🔹 Hide overlay + undim
+    overlay.style.display = "none";
+    form.classList.remove("dimmed");
 
     if (data.success) {
-        // Auto-fill crispy form fields
-        const fields = ['title', 'college', 'program','abstract', 'authors', 'year'];
-        fields.forEach(f => {
-            const el = document.querySelector(`#id_${f}`);
-            if (!el) return;
-            if (f === 'authors') el.value = (data.metadata[f] || []).join(", ");
-            else if (f === 'year') el.value = (data.metadata[f] || []).join(", ");
-            else el.value = data.metadata[f] || "";
-        });
+      const fields = ['title', 'college', 'program', 'abstract', 'authors', 'year'];
+      fields.forEach(f => {
+        const el = document.querySelector(`#id_${f}`);
+        if (!el) return;
+        if (f === 'authors' && Array.isArray(data.metadata[f])) {
+          el.value = data.metadata[f].join(", ");
+        } else {
+          el.value = data.metadata[f] || "";
+        }
+      });
     }
+  } catch (err) {
+    console.error(err);
+    overlay.style.display = "none";
+    form.classList.remove("dimmed");
+  }
 });
 </script>

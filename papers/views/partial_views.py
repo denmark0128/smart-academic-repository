@@ -14,6 +14,7 @@ def uploaded_papers_partial(request):
     return render(request, 'papers/partials/uploads/uploaded_papers.html', {'papers': papers})
 
 def paper_list_partial(request):
+    partial = request.GET.get("partial")
     query = request.GET.get('q')
     author_filter = request.GET.get('author')
     tags = request.GET.getlist('tag')
@@ -31,6 +32,14 @@ def paper_list_partial(request):
         if isinstance(tlist, list):
             all_tags.extend(tlist)
     tag_counts = dict(Counter(all_tags))
+
+    # If requesting only tags partial, return early with minimal context
+    if partial == "tags":
+        context = {
+            "tag_counts": tag_counts,
+            "selected_tags": tags,
+        }
+        return render(request, "papers/partials/paper_list/_paper_list_content.html", context)
 
     # --- Base queryset (defer heavy fields) ---
     papers = Paper.objects.defer(

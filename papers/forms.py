@@ -6,18 +6,32 @@ from django.forms import ClearableFileInput
 
 
 class PaperForm(forms.ModelForm):
+    file = forms.FileField(
+        label="Upload Paper File",
+        help_text="Accepted formats: PDF, DOCX, CHM\nIf your file follows the standard layout, metadata will be extracted automatically.",
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "border border-gray-300 rounded-lg p-3 w-full cursor-pointer hover:border-blue-400 focus:ring-2 focus:ring-blue-500",
+                "id": "file-upload", 
+            }
+        ),
+    )
+
+    class Meta:
+        model = Paper  # replace with your actual model name
+        fields = "__all__"
+
     authors = forms.CharField(
         label='Authors',
-        help_text='Separate full names with a newline. Example: Juan Dela Cruz\nMaria Lopez',
+        help_text='Separate full names with a comma (,)',
         widget=forms.Textarea(attrs={
-            'placeholder': "Juan Dela Cruz\nMaria Lopez\nPedro Reyes",
+            'placeholder': "Dela Cruz , Juan A., Lopez, Maria B.,Reyes, Pedro C.",
             'rows': 3
         })
     )
-
     title = forms.CharField(
         widget=forms.Textarea(attrs={
-            'rows': 2,
+            'rows': 3,
             'placeholder': "Your research paper title here"
         })
     )
@@ -36,11 +50,11 @@ class PaperForm(forms.ModelForm):
             'file': ClearableFileInput(attrs={
                 'class': 'custom-file-input',
                 'id': 'file-upload',
-                'accept': '.pdf,.docx',
+                'accept': '.pdf,.docx,.chm',
             })
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs): 
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -48,31 +62,56 @@ class PaperForm(forms.ModelForm):
         self.helper.form_class = 'space-y-6'
 
         self.helper.layout = Layout(
-            # File field full width
-            Field('file', css_class="file-input file-input-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700", id="file-upload"),
-
-            # Title + Year side by side (responsive)
             Div(
-                Field('title', css_class="textarea textarea-bordered w-full col-span-2 sm:col-span-2 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
-                Field('year', css_class="input input-bordered w-full sm:w-32 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
-                css_class="grid grid-cols-1 sm:grid-cols-3 gap-4"
-            ),
+                # 🔹 LEFT COLUMN (File Upload)
+                Div(
+                    Field(
+                        'file',
+                        css_class="file-input file-input-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700",
+                        id="file-upload"
+                    ),
+                    css_class="w-full sm:w-1/3"
+                ),
 
-            # Abstract full width
-            Field('abstract', css_class="textarea textarea-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
+                # 🔹 RIGHT COLUMN (Other fields)
+                Div(
+                    # Title + Year side by side
+                    Div(
+                        Field(
+                            'title',
+                            css_class="textarea textarea-bordered w-full sm:col-span-1.5. dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"
+                        ),
+                        Field(
+                            'year',
+                            css_class="input input-bordered w-full sm:col-span-0.5 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"
+                        ),
+                        css_class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                    ),
 
-            # College + Program side by side (responsive)
-            Div(
-                Field('college', css_class="select select-bordered appearance-none w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
-                Field('program', css_class="select select-bordered appearance-none w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
-                css_class="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            ),
+                    # Abstract full width
+                    Field('abstract', css_class="textarea textarea-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
 
-            # Authors field (full width)
-            Field('authors', css_class="textarea textarea-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
+                    # College + Program
+                    Div(
+                        Field('college', css_class="select select-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
+                        Field('program', css_class="select select-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
+                        css_class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                    ),
 
-            # Submit button
-            Submit('submit', 'Upload Paper', css_class="btn btn-active btn-accent w-full sm:w-auto")
+                    # Authors
+                    Field('authors', css_class="textarea textarea-bordered w-full dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"),
+
+                    # Submit button
+                    Submit(
+                        'submit',
+                        'Upload Paper',
+                        css_class="btn border border-gray-200 dark:border-zinc-700 px-2 dark:text-zinc-300 dark:bg-zinc-800 w-full sm:w-auto"
+                    ),
+                    css_class="space-y-4 w-full sm:w-2/3"
+                ),
+
+                css_class="flex flex-col sm:flex-row gap-6"
+            )
         )
 
     def clean_authors(self):

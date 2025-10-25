@@ -1,55 +1,59 @@
-
 {% load static %}
 
-<!-- OOB swap for Active Filters -->
-<div id="active-filters" hx-swap-oob="true">
-  {% include "papers/partials/paper_list/_active_filters.html" %}
-</div>
-
-<!-- Show heading for query -->
-{% if query %}
-<h2 class="text-lg font-semibold mb-2 dark:text-zinc-300">
-  {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "<span class="text-black dark:text-zinc-300">{{ query }}</span>"
-</h2>
-{% endif %}
-
-{% if active_filters %}
-  <div class="mb-4">
-    <!-- Main filter pill headline -->
-    {% with main_filter=active_filters.0 %}
-      <div class="inline-block bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-full mb-1">
-        {{ main_filter.value }}
-      </div>
-      <p class="text-sm text-gray-600 mb-2">
-        Papers in "{{ main_filter.value }}" • 
-        {{ page_obj.paginator.count }} papers found 
-      </p>
-    {% endwith %}
-
-    <!-- Removable tags -->
-    <div class="flex flex-wrap gap-2">
-      {% for filter in active_filters %}
-        <div class="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">
-          <span>{{ filter.label }}: {{ filter.value }}</span>
-          <a href="?{% if query %}q={{ query }}&{% endif %}{{ filter.remove_url }}"
-             hx-get="?{% if query %}q={{ query }}&{% endif %}{{ filter.remove_url }}"
-             hx-target="#paper-list-container"
-             hx-push-url="true"
-             class="ml-1 text-xs hover:text-red-600 font-bold">
-            ×
-          </a>
-        </div>
-      {% endfor %}
+<!-- Paper List Container - This is what gets swapped -->
+<div id="paper-list-container">
+  <div id="list-content">
+    <!-- OOB swap for Active Filters -->
+    <div id="active-filters" hx-swap-oob="true">
+      {% include "papers/partials/paper_list/_active_filters.html" %}
     </div>
+
+    <!-- Show heading for query -->
+    {% if query %}
+    <h2 class="text-lg font-semibold mb-2 dark:text-zinc-300">
+      {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "<span class="text-black dark:text-zinc-300">{{ query }}</span>"
+    </h2>
+    {% endif %}
+
+    {% if active_filters %}
+      <div class="mb-4">
+        <!-- Main filter pill headline -->
+        {% with main_filter=active_filters.0 %}
+          <div class="inline-block bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-full mb-1">
+            {{ main_filter.value }}
+          </div>
+          <p class="text-sm text-gray-600 mb-2">
+            Papers in "{{ main_filter.value }}" • 
+            {{ page_obj.paginator.count }} papers found 
+          </p>
+        {% endwith %}
+
+        <!-- Removable tags -->
+        <div class="flex flex-wrap gap-2">
+          {% for filter in active_filters %}
+            <div class="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">
+              <span>{{ filter.label }}: {{ filter.value }}</span>
+              <a href="?{% if query %}q={{ query }}&{% endif %}{{ filter.remove_url }}"
+                 hx-get="?{% if query %}q={{ query }}&{% endif %}{{ filter.remove_url }}"
+                 hx-target="#paper-list-container"
+                 hx-select="#paper-list-container"
+                 hx-push-url="true"
+                 class="ml-1 text-xs hover:text-red-600 font-bold">
+                ×
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
   </div>
-{% endif %}
 
-
-
-<!-- Search Results -->
+  <!-- Search Results -->
   <div x-show="view === 'compact'" class="grid grid-cols-1 md:grid-cols-2 gap-2">
     {% for item in page_obj %}
-      <div class="border rounded-xl bg-white p-4 border-gray-200 hover:shadow transition flex flex-col h-full dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-300">
+      <div class="border rounded-lg bg-white p-4 border-gray-200 hover:shadow transition flex flex-col h-full dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-300
+      {% if item.paper.college == 'ccs' %}border-l-4 border-l-slate-800 dark:border-l-gray-400{% elif item.paper.college == 'cba' %}border-l-4  border-l-yellow-400{% endif %}">
+
         {% if item.paper %}
           <a href="{% url 'paper_detail' item.paper.pk %}" class="font-semibold text-base text-gray-900 tracking-tight hover:underline mb-1 dark:text-zinc-300">{{ item.paper.title }}</a>
         {% else %}
@@ -87,9 +91,13 @@
       <div class="col-span-2 text-center text-gray-500 py-8">No results found.</div>
     {% endfor %}
   </div>
-     {% for item in page_obj %}
-    <div x-show="view === 'card'" class="mb-8 border rounded-lg bg-white p-6 border-gray-200 border-l-blue-500 border-l-4 shadow-sm pb-12 hover:shadow-lg transition dark:bg-zinc-900 dark:border-zinc-700">
-  
+
+  <!-- Card View -->
+  {% for item in page_obj %}
+    <div x-show="view === 'card'"
+     class="mb-8 border rounded-lg bg-white p-6 border-gray-200 border-l-4 shadow-sm pb-12 hover:shadow-lg transition dark:bg-zinc-900 dark:border-zinc-700
+     {% if item.paper.college == 'ccs' %}border-l-slate-800 dark:border-l-gray-400{% elif item.paper.college == 'cba' %}border-l-yellow-400{% endif %}">
+
       <!-- Title -->
       {% if item.paper %}
         <a href="{% url 'paper_detail' item.paper.pk %}" class="text-xl mb-2 text-black font-semibold hover:underline dark:text-zinc-300">
@@ -194,6 +202,7 @@
     <a href="#"
        hx-get="{% url 'paper_list_partial' %}"
        hx-target="#paper-list-container"
+       hx-select="#paper-list-container"
        hx-push-url="true"
        hx-include="[name='college'],[name='program'],[name='year']"
        hx-vals='{"tag": "{{ tag }}"}'>
@@ -245,37 +254,73 @@
     <div class="text-center text-gray-500 mt-12">No results found.</div>
   {% endfor %}
 
+  <!-- Pagination Controls -->
+  <div class="mt-8 flex justify-center">
+    <nav class="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+      {% if page_obj.has_previous %}
+        <a hx-get="{% url 'paper_list_partial' %}"
+           hx-target="#paper-list-container"
+           hx-select="#paper-list-container"
+           hx-push-url="true"
+           hx-include="[name='college'],[name='program'],[name='year'],[name='tag']"
+           hx-vals='{"page": "{{ page_obj.previous_page_number }}", "view_mode": view}'
+           class="dark:text-zinc-300">
+           Previous
+        </a>
+      {% else %}
+        <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-l-md cursor-not-allowed dark:bg-zinc-800 dark:border-zinc-700">Previous</span>
+      {% endif %}
 
+      <span class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-700 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
 
-<!-- Pagination Controls -->
-<div class="mt-8 flex justify-center">
-  <nav class="inline-flex rounded-md shadow-sm" aria-label="Pagination">
-    {% if page_obj.has_previous %}
-      <a hx-get="{% url 'paper_list_partial' %}"
-         hx-target="#paper-list-container"
-         hx-push-url="true"
-         hx-include="[name='college'],[name='program'],[name='year'],[name='tag']"
-         hx-vals='{"page": "{{ page_obj.previous_page_number }}", "view_mode": view}'
-         class="dark:text-zinc-300">
-         Previous
-      </a>
-    {% else %}
-      <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-l-md cursor-not-allowed dark:bg-zinc-800 dark:border-zinc-700">Previous</span>
-    {% endif %}
+      {% if page_obj.has_next %}
+        <a hx-get="{% url 'paper_list_partial' %}"
+           hx-target="#paper-list-container"
+           hx-select="#paper-list-container"
+           hx-push-url="true"
+           hx-include="[name='college'],[name='program'],[name='year'],[name='tag']"
+           hx-vals='{"page": "{{ page_obj.next_page_number }}", "view_mode": view}'
+           class="dark:text-zinc-300">
+           Next
+        </a>
+      {% else %}
+        <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-r-md cursor-not-allowed dark:bg-zinc-800 dark:border-zinc-700">Next</span>
+      {% endif %}
+    </nav>
+  </div>
+</div>
 
-    <span class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-700 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-
-    {% if page_obj.has_next %}
-      <a hx-get="{% url 'paper_list_partial' %}"
-         hx-target="#paper-list-container"
-         hx-push-url="true"
-         hx-include="[name='college'],[name='program'],[name='year'],[name='tag']"
-         hx-vals='{"page": "{{ page_obj.next_page_number }}", "view_mode": view}'
-         class="dark:text-zinc-300">
-         Next
-      </a>
-    {% else %}
-      <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-r-md cursor-not-allowed dark:bg-zinc-800 dark:border-zinc-700">Next</span>
-    {% endif %}
-  </nav>
+<!-- Tags Section (separate, loaded independently) -->
+<div id="tags" class="flex flex-wrap gap-3">
+  {% for tag, count in tag_counts.items %}
+    {% cycle 'blue' 'purple' 'green' 'yellow' 'orange' 'red' 'cyan' as color silent %}
+    <a href="#"
+       hx-get="{% url 'paper_list_partial' %}"
+       hx-target="#paper-list-container"
+       hx-select="#paper-list-container"
+       hx-include="#filters"
+       hx-vals='{"tag": ["{{ tag }}"]}'>
+      <span class="flex items-center gap-2 rounded-full font-semibold border border-transparent px-4 py-2 transition duration-200
+                   {% if count > 6 %}text-lg px-5 py-2{% elif count > 3 %}text-base px-4 py-1.5{% else %}text-sm px-3 py-1{% endif %}
+                   {% if color == 'blue' %}bg-blue-100 text-blue-800  hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300{% endif %}
+                   {% if color == 'purple' %}bg-purple-100 text-purple-800  hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-300{% endif %}
+                   {% if color == 'green' %}bg-green-100 text-green-800  hover:bg-green-200 dark:bg-green-900 dark:text-green-300{% endif %}
+                   {% if color == 'yellow' %}bg-yellow-100 text-yellow-800  hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-300{% endif %}
+                   {% if color == 'orange' %}bg-orange-100 text-orange-800  hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-300{% endif %}
+                   {% if color == 'red' %}bg-red-100 text-red-800  hover:bg-red-200 dark:bg-red-900 dark:text-red-300{% endif %}
+                   {% if color == 'cyan' %}bg-cyan-100 text-cyan-800  hover:bg-cyan-200 dark:bg-cyan-900 dark:text-cyan-300{% endif %}">
+        {{ tag }}
+        <span class="opacity-70 text-xs font-bold">({{ count }})</span>
+      </span>
+    </a>
+  {% empty %}
+    <div class="flex flex-col items-center justify-center py-8">
+      <svg class="w-10 h-10 text-blue-100 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="text-gray-600 text-sm font-semibold">No tags found</span>
+      <span class="text-gray-300 text-xs">Tags will appear here when available.</span>
+    </div>
+  {% endfor %}
 </div>

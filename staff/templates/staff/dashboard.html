@@ -3,23 +3,37 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
-            <h2 class="text-sm font-medium text-gray-500 mb-1">Pending Papers</h2>
-            <p class="text-3xl font-bold text-black">{{ stats.pending }}</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
-            <h2 class="text-sm font-medium text-gray-500 mb-1">Registered Papers</h2>
-            <p class="text-3xl font-bold text-black">{{ stats.registered }}</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
-            <h2 class="text-sm font-medium text-gray-500 mb-1">Total Papers</h2>
-            <p class="text-3xl font-bold text-black">{{ stats.total }}</p>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
+        <h2 class="text-sm font-medium text-gray-500 mb-1">Pending Papers</h2>
+        <div hx-get="{% url 'staff_stats_partial' %}" 
+             hx-trigger="load" 
+             hx-select="#pending-stat"
+             hx-swap="innerHTML">
+            <p class="text-3xl font-bold text-gray-400 animate-pulse">...</p>
         </div>
     </div>
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
+        <h2 class="text-sm font-medium text-gray-500 mb-1">Registered Papers</h2>
+        <div hx-get="{% url 'staff_stats_partial' %}" 
+             hx-trigger="load" 
+             hx-select="#registered-stat"
+             hx-swap="innerHTML">
+            <p class="text-3xl font-bold text-gray-400 animate-pulse">...</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-black hover:shadow-lg transition">
+        <h2 class="text-sm font-medium text-gray-500 mb-1">Total Papers</h2>
+        <div hx-get="{% url 'staff_stats_partial' %}" 
+             hx-trigger="load" 
+             hx-select="#total-stat"
+             hx-swap="innerHTML">
+            <p class="text-3xl font-bold text-gray-400 animate-pulse">...</p>
+        </div>
+    </div>
+</div>
 
     <!-- Filters -->
     <div x-data="{ active: 'pending' }" class="flex space-x-4 mb-4">
@@ -52,8 +66,29 @@
 
 
     <!-- Table -->
-    <div id="paper-table" class="bg-white rounded-xl shadow overflow-hidden">
-        {% include "staff/partials/paper_table.html" with papers=papers %}
+    <div id="paper-table-skeleton" class="space-y-2 p-4 hidden">
+        {% for _ in "12345" %}  <!-- 5 rows skeleton -->
+        <div class="h-6 bg-gray-200 rounded animate-pulse"></div>
+        {% endfor %}
     </div>
+
+<!-- Paper table -->
+<!-- Uploaded Papers -->
+<div id="staff-table-container"
+     hx-get="{% url 'staff_table_partial' %}"
+     hx-trigger="load"
+     hx-swap="innerHTML"
+     class="mt-4">
+     
+  <!-- Skeleton placeholder -->
+  <div class="animate-pulse space-y-2">
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+  </div>
+
 </div>
 {% endblock %}

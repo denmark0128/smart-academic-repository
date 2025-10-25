@@ -57,15 +57,4 @@ def approve_paper(request, pk):
     return HttpResponse("<p class='text-green-600 font-semibold'>Paper approved and DOI assigned.</p>")
 
 def staff_dashboard(request):
-    pending = Paper.objects.filter(is_registered=False).count()
-    registered = Paper.objects.filter(is_registered=True).count()
-    total = Paper.objects.count()
-
-    stats = {
-        'pending': pending,
-        'registered': registered,
-        'total': total
-    }
-
-    papers = Paper.objects.filter(is_registered=False)  # default: pending list
-    return render(request, 'staff/dashboard.html', {'stats': stats, 'papers': papers})
+    return render(request, 'staff/dashboard.html')

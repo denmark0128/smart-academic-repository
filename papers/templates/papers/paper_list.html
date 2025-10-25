@@ -153,41 +153,23 @@
 
 
 <!-- Browse Tags Sidebar -->
+<!-- Browse Tags Sidebar -->
 <aside class="w-full">
   <div class="bg-white/80 rounded-lg shadow-sm border border-blue-100 p-4 sticky top-4 dark:bg-zinc-900 dark:border-zinc-700">
     <h3 class="text-lg font-semibold text-gray-900 tracking-tight mb-3 dark:text-zinc-300">Browse Tags</h3>
-    <div class="flex flex-wrap gap-3">
-      {% for tag, count in tag_counts.items %}
-        {% cycle 'blue' 'purple' 'green' 'yellow' 'orange' 'red' 'cyan' as color silent %}
-        <a href="#"
-           hx-get="{% url 'paper_list_partial' %}"
-           hx-target="#paper-list-container"
-           hx-push-url="true"
-           hx-include="#filters"
-           hx-vals='{"tag": ["{{ tag }}"]}'>
-          <span class="flex items-center gap-2 rounded-full font-semibold border border-transparent px-4 py-2 transition duration-200
-                       {% if count > 6 %}text-lg px-5 py-2{% elif count > 3 %}text-base px-4 py-1.5{% else %}text-sm px-3 py-1{% endif %}
-                       {% if color == 'blue' %}bg-blue-100 text-blue-800  hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300{% endif %}
-                       {% if color == 'purple' %}bg-purple-100 text-purple-800  hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-300{% endif %}
-                       {% if color == 'green' %}bg-green-100 text-green-800  hover:bg-green-200 dark:bg-green-900 dark:text-green-300{% endif %}
-                       {% if color == 'yellow' %}bg-yellow-100 text-yellow-800  hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-300{% endif %}
-                       {% if color == 'orange' %}bg-orange-100 text-orange-800  hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-300{% endif %}
-                       {% if color == 'red' %}bg-red-100 text-red-800  hover:bg-red-200 dark:bg-red-900 dark:text-red-300{% endif %}
-                       {% if color == 'cyan' %}bg-cyan-100 text-cyan-800  hover:bg-cyan-200 dark:bg-cyan-900 dark:text-cyan-300{% endif %}">
-            {{ tag }}
-            <span class="opacity-70 text-xs font-bold">({{ count }})</span>
-          </span>
-        </a>
-      {% empty %}
-        <div class="flex flex-col items-center justify-center py-8">
-          <svg class="w-10 h-10 text-blue-100 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <span class="text-gray-600 text-sm font-semibold">No tags found</span>
-          <span class="text-gray-300 text-xs">Tags will appear here when available.</span>
+    <div hx-get="{% url 'paper_list_partial' %}?partial=tags"
+        hx-trigger="load"
+        hx-target="#tags"
+        hx-select="#tags"
+        hx-swap="innerHTML">
+      <div id="tags">
+        <!-- Skeleton placeholder for tags -->
+        <div class="flex flex-wrap gap-3 animate-pulse">
+          <div class="h-8 w-20 bg-gray-300 rounded"></div>
+          <div class="h-8 w-16 bg-gray-300 rounded"></div>
+          <div class="h-8 w-24 bg-gray-300 rounded"></div>
         </div>
-      {% endfor %}
+      </div>
     </div>
   </div>
 </aside>

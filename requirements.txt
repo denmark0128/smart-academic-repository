@@ -3,7 +3,7 @@ Django==5.2.4
 django-allauth
 django-crispy-forms
 crispy-tailwind
-psycopg2-binary  # Needed for PostgreSQL support
+psycopg2-binary
 spacy
 faiss-cpu
 sentence-transformers
@@ -12,16 +12,10 @@ pgvector
 djangorestframework
 gunicorn
 django-cors-headers
-# NLP and semantic search
+pymupdf
 
-
-
-#torch
-#numpy
-
-#langchain
-
-# PDF and text extraction
-pymupdf  # For PDF parsing (aka fitz)
-
-# Optional: pip install -r requirements.txt
+# Force CPU-only torch
+torch==2.3.0+cpu
+torchvision==0.18.0+cpu
+torchaudio==2.3.0+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu

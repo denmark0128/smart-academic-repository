@@ -1,46 +1,105 @@
-<!DOCTYPE html>
-<html lang="en" x-data="{ sidebarOpen: false }" class="bg-gray-100">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Staff Panel{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://unpkg.com/alpinejs" defer></script>
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
 
-    <style>
-    [x-cloak] {
-        display: none !important;
+<script>
+  // Apply stored or preferred theme *before* page renders
+  const storedTheme = localStorage.getItem("color-theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  if (storedTheme === "dark" || (!storedTheme && prefersDark)) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+</script>
+
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { inter: ["Inter", "sans-serif"] },
+        },
+      },
+    };
+  </script>
+
+  <!-- DaisyUI (optional theme components) -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- NProgress -->
+  <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
+  <style>
+    #nprogress .bar {
+      background: #000000;
+      height: 3px;
+    }
+    [x-cloak] { display: none !important; }
+
+    mark {
+    background-color: #fde68a; /* Tailwind's yellow-200 */
+    color: #111827; /* gray-900 */
+    border-radius: 0.25rem;
+    padding: 0 2px;
+    }
+    .dark mark {
+      background-color: #854d0e; /* amber-800 */
+      color: #f9fafb; /* gray-50 */
+    }
+    input[type="search"]::-webkit-search-cancel-button {
+      -webkit-appearance: none;
+      appearance: none;
+      display: none;
     }
 
-    html {
-    overflow-y: scroll; /* Always reserve scrollbar space */
+    input[type="search"]::-ms-clear {
+      display: none;
     }
-</style>
+
+    input[type="search"]::-moz-clear {
+      display: none;
+    }
+    select {
+      @apply dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700;
+    }
+  </style>
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  {% load static %}
+  {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen flex flex-col ">
-    
-    {% include 'components/drawer.html' %}
 
+<body class="min-h-screen bg-gradient-to-br 
+  from-blue-50 via-white to-indigo-50 
+  dark:from-[#0a0a0a] dark:via-[#0d0d0d] dark:to-[#050505]
+  text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300">
 
-    <!-- Main Content -->
-    <div class="flex flex-1">
+  {% if not hide_navbar %}
+    {% include 'components/navbar_staff.html' %}
+    {% include 'components/menu.html' %}
+  {% endif %}
 
+  <div id="main-content" class="container mx-auto p-6">
+    {% block content %}{% endblock %}
+  </div>
 
-        <!-- Page Content -->
-        <main class="flex-1 p-6">
-            {% block content %}{% endblock %}
-        </main>
-    </div>
+  <!-- Toast container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
 
-
-    <script>
-document.body.addEventListener('htmx:afterSwap', (e) => {
-    if (e.target.id === 'papers-content') {
-        Alpine.initTree(e.target)
-    }
-})
-    </script>
+  <!-- NProgress JS -->
+  <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+  
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>
