@@ -1,4 +1,4 @@
-<nav class="bg-white p-4 shadow flex items-center dark:bg-zinc-900">
+<nav class="bg-white p-4 shadow flex items-center dark:bg-zinc-900 dark:border-b dark:border-zinc-700">
   <div class="container mx-auto flex items-center justify-between">
 
     <!-- Logo -->
@@ -80,6 +80,7 @@
         <button
           type="button"
           x-show="query"
+          x-cloak
           @click="query=''; open=false"
           class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-200 transition"
         >
@@ -309,10 +310,7 @@
 
 
 <script>
-  
-  // Wrap everything in DOMContentLoaded to ensure elements exist
-  document.addEventListener('DOMContentLoaded', function() {
-    const html = document.documentElement;
+  const html = document.documentElement;
   const btn = document.getElementById('theme-toggle');
 
   // Load saved preference
@@ -321,6 +319,10 @@
   btn.addEventListener('click', () => {
     html.classList.toggle('dark');
     localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+  
+  // Wrap everything in DOMContentLoaded to ensure elements exist
+  document.addEventListener('DOMContentLoaded', function() {
+    
   });
 
     // Handle search form submission

@@ -18,7 +18,6 @@
     }
   </script>
 
-
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -32,7 +31,7 @@
     };
   </script>
 
-  <!-- DaisyUI (optional theme components) -->
+  <!-- DaisyUI -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
 
   <!-- HTMX -->
@@ -53,32 +52,74 @@
     [x-cloak] { display: none !important; }
 
     mark {
-    background-color: #fde68a; /* Tailwind's yellow-200 */
-    color: #111827; /* gray-900 */
-    border-radius: 0.25rem;
-    padding: 0 2px;
+      background-color: #fde68a; 
+      color: #111827;
+      border-radius: 0.25rem;
+      padding: 0 2px;
     }
     .dark mark {
-      background-color: #854d0e; /* amber-800 */
-      color: #f9fafb; /* gray-50 */
+      background-color: #854d0e;
+      color: #f9fafb;
     }
     input[type="search"]::-webkit-search-cancel-button {
-      -webkit-appearance: none;
-      appearance: none;
-      display: none;
+      -webkit-appearance: none; appearance: none; display: none;
     }
+    input[type="search"]::-ms-clear { display: none; }
+    input[type="search"]::-moz-clear { display: none; }
 
-    input[type="search"]::-ms-clear {
-      display: none;
-    }
-
-    input[type="search"]::-moz-clear {
-      display: none;
-    }
     select {
       @apply dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700;
     }
-  </style>
+
+  /* Custom Scrollbar - Light Mode */
+  html ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  html ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+
+  html ::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+    border: 2px solid #f1f5f9;
+  }
+
+  html ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+
+  /* Custom Scrollbar - Dark Mode */
+  html.dark ::-webkit-scrollbar-track {
+    background: #18181b !important;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #3f3f46 !important;
+    border: 2px solid #18181b !important;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #52525b !important;
+  }
+
+  /* Firefox scrollbar */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 #f1f5f9;
+  }
+
+  html.dark {
+    scrollbar-color: #3f3f46 #18181b !important;
+  }
+   html {
+    overflow-y: scroll; /* Shows scrollbar space */
+  }
+  
+</style>
 
   <!-- Alpine.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -92,9 +133,7 @@
   dark:from-[#0a0a0a] dark:via-[#0d0d0d] dark:to-[#050505]
   text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300">
 
-  {% if not hide_navbar %}
-    {% include 'components/navbar.html' %}
-  {% endif %}
+  {% include 'components/navbar.html' %}
 
   <div id="main-content" class="container mx-auto p-6">
     {% block content %}{% endblock %}
@@ -103,18 +142,7 @@
   <!-- Toast container -->
   <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
 
-  <!-- NProgress JS -->
-  <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
-  <script>
-    window.addEventListener('beforeunload', () => NProgress.start());
-    window.addEventListener('load', () => NProgress.done());
-
-    document.body.addEventListener('htmx:configRequest', (event) => {
-      const token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-      if (token) event.detail.headers['X-CSRFToken'] = token;
-    });
-  </script>
-
+  
   <script>
     function savePaper(paperId, initialState) {
       return {
@@ -136,11 +164,8 @@
       };
     }
   </script>
-  
+
   {% block extra_scripts %}{% endblock %}
 </body>
-<footer>
-  {% include 'components/footer.html' %}
-  
-</footer>
+
 </html>

@@ -70,6 +70,54 @@
     select {
       @apply dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700;
     }
+    /* Custom Scrollbar - Light Mode */
+  html ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  html ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+
+  html ::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+    border: 2px solid #f1f5f9;
+  }
+
+  html ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+
+  /* Custom Scrollbar - Dark Mode */
+  html.dark ::-webkit-scrollbar-track {
+    background: #18181b !important;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #3f3f46 !important;
+    border: 2px solid #18181b !important;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #52525b !important;
+  }
+
+  /* Firefox scrollbar */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 #f1f5f9;
+  }
+
+  html.dark {
+    scrollbar-color: #3f3f46 #18181b !important;
+  }
+   html {
+    overflow-y: scroll; /* Shows scrollbar space */
+  }
+  
   </style>
 
   <!-- Alpine.js -->
@@ -85,7 +133,6 @@
   text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300">
 
   {% include 'components/navbar-no-search.html' %}
-  {% include 'components/marquee.html' %}
 
   <div id="main-content" class="container mx-auto p-6">
     {% block content %}{% endblock %}
@@ -94,7 +141,7 @@
   <!-- Toast container -->
   <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
 
-  <!-- NProgress JS -->
+  <!-- NProgress JS 
   <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
   <script>
     window.addEventListener('beforeunload', () => NProgress.start());
@@ -105,7 +152,7 @@
       if (token) event.detail.headers['X-CSRFToken'] = token;
     });
   </script>
-
+  -->
   <script>
     function savePaper(paperId, initialState) {
       return {
@@ -130,5 +177,7 @@
 
   {% block extra_scripts %}{% endblock %}
 </body>
-
+<footer>
+  {% include 'components/footer.html' %}
+</footer>
 </html>

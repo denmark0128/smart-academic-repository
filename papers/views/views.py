@@ -231,7 +231,9 @@ def paper_detail(request, pk):
         'year', 
         'college', 
         'program',
-        'file',  # for download button
+        'file',
+        'views',      # ← Add this
+        'local_doi',  
     ).get(pk=pk)
     
     context = {

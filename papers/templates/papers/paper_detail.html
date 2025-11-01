@@ -141,7 +141,6 @@
            hx-trigger="load"
            hx-select="#summary-section"
            hx-swap="innerHTML">
-        {% if paper.summary %}
         <div class="border border-gray-200 p-6 rounded-lg bg-yellow-50 border-yellow-400 dark:bg-zinc-900 dark:border-zinc-700">
           <div class="animate-pulse">
             <div class="h-4 bg-yellow-200 rounded w-1/3 mb-4"></div>
@@ -149,7 +148,7 @@
             <div class="h-4 bg-yellow-200 rounded mb-2"></div>
           </div>
         </div>
-        {% endif %}
+
       </div>
 
       <!-- AI Insights (Lazy Load) -->
