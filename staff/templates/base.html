@@ -81,13 +81,12 @@
 </head>
 
 <body class="min-h-screen bg-gradient-to-br 
-  from-blue-50 via-white to-indigo-50 
+  from-gray-100 via-white to-indigo-50 
   dark:from-[#0a0a0a] dark:via-[#0d0d0d] dark:to-[#050505]
   text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300">
 
   {% if not hide_navbar %}
     {% include 'components/navbar_staff.html' %}
-    {% include 'components/menu.html' %}
   {% endif %}
 
   <div id="main-content" class="container mx-auto p-6">
@@ -101,5 +100,11 @@
   <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
   
   {% block extra_scripts %}{% endblock %}
+
+<script>
+document.body.addEventListener('htmx:configRequest', (event) => {
+    event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+});
+</script>
 </body>
 </html>

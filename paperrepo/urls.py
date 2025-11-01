@@ -22,12 +22,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect
-
+from papers.forms import StyledLoginForm
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', lambda request: redirect('/accounts/login/')),
+    path('logout/', auth_views.LogoutView.as_view(template_name='registration/log_out.html'), name='logout'),
     path('', home, name='home'),  # Root path (homepage)
     path('papers/', include('papers.urls')),
     path('api-auth/', include('rest_framework.urls')),

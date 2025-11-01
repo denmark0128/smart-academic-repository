@@ -57,7 +57,12 @@
                           (filterStatus === 'error' && '{{ paper.status }}' === 'error')
                          )
                      )">
-          <td>{{ paper.title }}</td>
+          <td>
+            <a href="{% url 'paper_detail' paper.pk %}"
+              class="text-gray-900 tracking-tight hover:underline mb-1 dark:text-zinc-300">
+              {{ paper.title }}
+            </a>
+          </td>
           <td>{{ paper.year }}</td>
           <td>{{ paper.authors|join:", " }}</td>
           <td>

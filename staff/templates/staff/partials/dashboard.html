@@ -1,0 +1,61 @@
+<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-200">Dashboard</h1>
+<div class="max-w-7xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+
+    <!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+    <div hx-get="{% url 'staff_stats_partial' %}" 
+             hx-trigger="load" 
+             hx-select="#pending-stat"
+             hx-swap="innerHTML">
+            <div class="animate-pulse space-y-2">
+                <div class="h-30 bg-gray-300 rounded-lg w-full animate-pulse"></div>
+            </div>
+        </div>
+    <div hx-get="{% url 'staff_stats_partial' %}" 
+             hx-trigger="load" 
+             hx-select="#registered-stat"
+             hx-swap="innerHTML">
+            <div class="animate-pulse space-y-2">
+                <div class="h-30 bg-gray-300 rounded-lg w-full animate-pulse"></div>
+            </div>
+        </div>
+    
+    <div hx-get="{% url 'staff_stats_partial' %}" 
+             hx-trigger="load" 
+             hx-select="#total-stat"
+             hx-swap="innerHTML">
+            <div class="animate-pulse space-y-2">
+                <div class="h-30 bg-gray-300 rounded-lg w-full animate-pulse"></div>
+            </div>
+        </div>
+    
+</div>
+
+<h1>Recent Papers</h1>
+    <!-- Table -->
+    <div id="paper-table-skeleton" class="space-y-2 p-4 hidden">
+        {% for _ in "12345" %}  <!-- 5 rows skeleton -->
+        <div class="h-6 bg-gray-200 rounded animate-pulse"></div>
+        {% endfor %}
+    </div>
+
+<!-- Paper table -->
+<!-- Uploaded Papers -->
+<div id="staff-table-container"
+     hx-get="{% url 'staff_table_partial' %}"
+     hx-trigger="load"
+     hx-swap="innerHTML"
+     class="mt-4">
+     
+  <!-- Skeleton placeholder -->
+  <div class="animate-pulse space-y-2">
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+  </div>
+
+</div>
+

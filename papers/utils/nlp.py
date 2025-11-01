@@ -1,9 +1,14 @@
+# utils/nlp.py
 import spacy
 import re
 from spacy.lang.en.stop_words import STOP_WORDS
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import util
 import torch
+import json
 from utils.semantic_search import get_model
+from django.core.cache import cache
+from papers.models import Tag
+import numpy as np
 
 nlp = spacy.load("en_core_web_sm")
 _mpnet_model = None
@@ -49,21 +54,31 @@ def clean_tag(tag):
         return None
     return tag
 
-def load_bank_of_words(path='bank_of_words.txt'):
+def load_bank_of_words(path='bank_of_words.json'):
+    """
+    Load tags from JSON file with 'name' and optional 'description'.
+    Returns a set of cleaned tag names and a dict of {name: description}.
+    """
     bank = set()
+    descriptions = {}
     try:
         with open(path, encoding='utf-8') as f:
-            for line in f:
-                word = line.strip().lower()
-                if word and not word.startswith('#'):
-                    bank.add(word)
-    except Exception:
-        pass
-    return bank
+            data = json.load(f)
+            for item in data:
+                name = item.get('name', '').strip()
+                desc = item.get('description', '').strip()
+                clean_name = clean_tag(name)
+                if clean_name:
+                    bank.add(clean_name)
+                    descriptions[clean_name] = desc
+    except Exception as e:
+        print(f"[load_bank_of_words] Error loading JSON: {e}")
+    return bank, descriptions
+
 
 # Add general topic tags
 GENERAL_TOPICS = [
-    "computer science", "psychology", "", "biology",
+    "computer science", "psychology", "biology",
     "physics", "mathematics", "engineering", "chemistry", "social science", "economics",
     "education", "political science", "philosophy", "history", "art", "literature"
 ]
@@ -71,18 +86,81 @@ GENERAL_TOPICS = [
 BANK_OF_WORDS = load_bank_of_words()
 
 def extract_tags(text, top_n=5, min_score=0.5):
-    # Use the bank of words as tag candidates
-    candidates = list(BANK_OF_WORDS)
+    """
+    Extract relevant tags from text using semantic similarity with pre-computed tag embeddings.
+    Uses the tag descriptions (if available) for embedding similarity.
+    """
+    # Try to get cached tags with embeddings
+    cache_key = 'active_tags_with_embeddings'
+    cached_data = cache.get(cache_key)
+    
+    if cached_data is None:
+        print("[extract_tags] Cache miss - loading tags from database")
+        # Get active tags with embeddings from database
+        tags_qs = Tag.objects.filter(is_active=True, embedding__isnull=False).only('name', 'description', 'embedding')
+        
+        candidates = []
+        descriptions = []
+        embeddings = []
+        
+        for tag in tags_qs:
+            candidates.append(tag.name)
+            descriptions.append(tag.description or tag.name)
+            embeddings.append(tag.embedding)
+        
+        if not candidates:
+            print("[extract_tags] No active tags with embeddings found")
+            return []
+        
+        cached_data = {
+            'candidates': candidates,
+            'descriptions': descriptions,
+            'embeddings': embeddings
+        }
+        # Cache for 1 hour
+        cache.set(cache_key, cached_data, 3600)
+        print(f"[extract_tags] Cached {len(candidates)} tags with embeddings")
+    else:
+        print(f"[extract_tags] Cache hit - using {len(cached_data['candidates'])} cached tags")
+    
+    candidates = cached_data['candidates']
+    descriptions = cached_data['descriptions']
+    embeddings = cached_data['embeddings']
+    
     if not candidates:
         return []
-    # Embed document and candidates
+    
+    # Embed document only (not candidates - they're already embedded!)
     model = get_mpnet_model()
     doc_emb = model.encode([text], convert_to_tensor=True)
-    cand_embs = model.encode(candidates, convert_to_tensor=True)
+    
+    # Convert stored embeddings to tensor
+    cand_embs = torch.tensor(np.array(embeddings), dtype=torch.float32)
+    
     # Compute cosine similarity
     scores = util.cos_sim(doc_emb, cand_embs)[0]
+    
+    # Get top K indices
     top_idx = torch.topk(scores, k=min(top_n, len(scores))).indices.tolist()
-    top_tags = [candidates[i] for i in top_idx]
+    
+    # Use both candidate name and description for reference
+    top_tags_with_desc = [
+        {"name": candidates[i], "description": descriptions[i], "score": scores[i].item()}
+        for i in top_idx
+    ]
+    
     # Remove tags that are substrings of longer tags
-    top_tags = [t for t in top_tags if not any((t != o and t in o) for o in top_tags)]
-    return [t for t in top_tags if scores[top_idx[top_tags.index(t)]] >= min_score]
+    filtered_tags = []
+    for tag_data in top_tags_with_desc:
+        tag_name = tag_data['name']
+        if not any((tag_name != other['name'] and tag_name in other['name']) for other in top_tags_with_desc):
+            filtered_tags.append(tag_data)
+    
+    # Filter by minimum score and sort by score (highest first)
+    result = [
+        tag for tag in filtered_tags
+        if tag['score'] >= min_score
+    ]
+    
+    print(f"[extract_tags] Extracted {len(result)} tags: {[t['name'] for t in result]}")
+    return result

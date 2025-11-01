@@ -1,11 +1,17 @@
-from django.shortcuts import render
-from papers.models import Paper
+from django.shortcuts import render, get_object_or_404
+from papers.models import Paper, MatchedCitation, SavedPaper
+from django.db.models import Prefetch, Q, F
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
 from utils.semantic_search import semantic_search, keyword_search, index_paper, get_model
 from collections import Counter
 from .views import extract_matching_snippet
+from django.conf import settings
+import os
+from django.core.cache import cache
+
+def footer_partial(request):
+    return render(request, "components/footer.html")
 
 @login_required
 def uploaded_papers_partial(request):
@@ -202,3 +208,106 @@ def saved_papers_partial(request):
     return render(request, 'profile/partials/saved_papers_partial.html', {
         'saved_papers': saved
     })
+
+
+
+def paper_detail_partials(request, pk):
+    """
+    Returns all partials in one file - HTMX will select what it needs.
+    This handles all the heavy data loading.
+    
+    We cache most sections but keep user-specific parts dynamic.
+    """
+    # Check what section is being requested (if hx-select is in headers)
+    hx_target = request.headers.get('HX-Target', '')
+    
+    # For non-user-specific sections, check cache first
+    if 'save-button' not in hx_target:
+        cache_key = f'paper_partials_{pk}'
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            return cached_response
+    
+    # Cache miss or user-specific request - generate full response
+    paper = (
+        Paper.objects
+        .prefetch_related(
+            Prefetch(
+                "matched_citations",
+                queryset=MatchedCitation.objects.select_related("matched_paper")
+            ),
+            Prefetch(
+                "reverse_matched_citations",
+                queryset=MatchedCitation.objects.select_related("source_paper")
+            )
+        )
+        .get(pk=pk)
+    )
+    
+    # Increment views (async, doesn't block)
+    Paper.objects.filter(pk=paper.pk).update(views=F('views') + 1)
+    
+    # Track recently viewed papers/authors
+    try:
+        recent_papers = request.session.get('recent_papers', [])
+        if paper.id in recent_papers:
+            recent_papers.remove(paper.id)
+        recent_papers.insert(0, paper.id)
+        request.session['recent_papers'] = recent_papers[:10]
+
+        recent_authors = request.session.get('recent_authors', [])
+        for a in (paper.authors or []):
+            if isinstance(a, str):
+                if a in recent_authors:
+                    recent_authors.remove(a)
+                recent_authors.insert(0, a)
+        request.session['recent_authors'] = recent_authors[:20]
+    except Exception:
+        pass  # don't break if sessions fail
+    
+    # === PDF Viewer ===
+    pdf_url = request.build_absolute_uri(paper.file.url)
+    viewer_url = f"{settings.STATIC_URL}pdfjs/web/viewer.html?file={pdf_url}"
+    
+    # === Figures ===
+    paper_dir = os.path.join(settings.MEDIA_ROOT, f"extracted/paper_{paper.id}")
+    paper_folder = os.path.join(settings.MEDIA_URL, f"extracted/paper_{paper.id}")
+    figures = [
+        {"url": os.path.join(paper_folder, fname), "page_number": None}
+        for fname in os.listdir(paper_dir)
+    ] if os.path.exists(paper_dir) else []
+    
+    # === Citations ===
+    matched_citations = list(paper.matched_citations.all())
+    citations_pointing_here = list(paper.reverse_matched_citations.all())
+    
+    citation_count = paper.citation_count_cached
+    matched_citation_count = paper.matched_count_cached
+    
+    # === Saved State ===
+    is_saved = (
+        request.user.is_authenticated
+        and SavedPaper.objects.filter(paper=paper, user=request.user).exists()
+    )
+    
+    context = {
+        "paper": paper,
+        "tags": paper.tags,
+        "citations_pointing_here": citations_pointing_here,
+        "citation_count": citation_count,
+        "college": paper.college,
+        "program": paper.program,
+        "matched_citations": matched_citations,
+        "matched_citation_count": matched_citation_count,
+        "viewer_url": viewer_url,
+        "is_saved": is_saved,
+        "figures": figures,
+    }
+    
+    response = render(request, 'papers/partials/paper_detail_partials.html', context)
+    
+    # Cache the response for non-user-specific requests
+    if 'save-button' not in hx_target:
+        cache.set(cache_key, response, 60 * 10)  # Cache for 10 minutes
+    
+    return response

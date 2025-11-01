@@ -4,8 +4,15 @@
 
 {% block content %}
 
-<div class="" x-data="{ subTab: 'uploaded' }">
-  <h2 class="text-lg font-semibold text-gray-900 mb-4 dark:text-zinc-300">Upload Section</h2>
+<div 
+  class=""
+  x-data="{ subTab: new URLSearchParams(window.location.search).get('subTab') || 'uploaded' }"
+  x-init="$watch('subTab', value => {
+    const url = new URL(window.location);
+    url.searchParams.set('subTab', value);
+    history.pushState({}, '', url);
+  })"
+>
 
   <!-- DaisyUI Tabs -->
   <div role="tablist" class="tabs tabs-border dar">

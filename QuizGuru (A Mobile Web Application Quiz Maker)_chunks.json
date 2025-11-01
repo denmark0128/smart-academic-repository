@@ -1,0 +1,434 @@
+[
+  {
+    "chunk_id": 1,
+    "title": "Abstract",
+    "section_type": "abstract",
+    "text": "ABSTRACT Title\n                         \n: QuizGuru (A Mobile Web Application Quiz Maker) Researchers            : Anis, Patricia Marie B. Eusebio, Louella Tatad, Randy II V. Degree                      : Bachelor of Science in Computer Science Year                          \n: 2017 Project Description : The aim of this project is to create a new environment for both professors and students in creating, organizing and taking quizzes. This project has two parts, first is the QuizGuru website where the subjects and the quizzes under it will be created and managed by the professors. The researchers set the website accessible to professors only so the students use the QuizGuru mobile web application which is also the second part of this project. The students may enrol to subjects and take its quizzes on the said application. The quiz records are available to both teachers and students for viewing.."
+  },
+  {
+    "chunk_id": 2,
+    "title": "Chapter I",
+    "section_type": "introduction",
+    "text": "Chapter I Introduction A. Background of the Study In the 21st century, technological advancements really changed the world. Sending and receiving of information and data became much faster and the use of internet became quite popular because of the vast range of information it offers. Internet is a network of networks that consists of private, public, academic, business, and government networks of local to global scope, linked by a broad array of electronic, wireless, and optical networking technologies. It became an online library that caters to worldwide users mostly students in various fields and made learning and information gathering easier for the students as well as other people from the academe. Since then, the internet evolved from just being an online library into other services such as online tutorial services and web-based trainings."
+  },
+  {
+    "chunk_id": 3,
+    "title": "Chapter I",
+    "section_type": "introduction",
+    "text": "Such trainings made life easier for students, since physical presence within the school is no longer a requirement to learn from lectures and take up assessments or quizzes. Students can enroll and attend lectures from academic institutions without leaving their houses or even when they are on out-of-town or country trips which eventually reduced the time and cost in learning from such institutions. A quiz is a form of game or mind sport, in which the players (as individuals or in teams) attempt to answer questions correctly. In some countries, a quiz is also a brief assessment used in education and similar fields to measure growth in knowledge, abilities, and/or skills (Merriam-Webster.com). Quizzes and examinations are important determinant if a student is already qualified for the next level of training. Thus, it is a must for examination questions to be carefully prepared. The construction of questions as well as accuracy in the checking of answers should be accomplished properly."
+  },
+  {
+    "chunk_id": 4,
+    "title": "Chapter I",
+    "section_type": "introduction",
+    "text": "The instructor needs to determine the type of exam and the topics to be included. But like other things in the world, paper-based test has its own backlashes, undeniably the fact that preparing these tests consumes a lot of time since it needs to be encoded first then printed on for it to be used. Paper-based tests are also prone to human errors especially in checking and scoring. The teachers can be confused while checking or recording the scores. With these problems, the researchers offered an alternative to the paperbased quizzes, The QuizGuru - A Mobile Web Application Quiz Maker is basically an online quiz organizer which makes the tasks of user much easier to accomplish. The QuizGuru Website can help many professors publish and organize their quizzes online. This eliminates the expenses, time and even effort in administering paper-based quizzes (printing, scoring, delivering, collecting, etc.)."
+  },
+  {
+    "chunk_id": 5,
+    "title": "Chapter I",
+    "section_type": "introduction",
+    "text": "On the other hand, the QuizGuru Web Application can offer the published quizzes to large numbers of users (students) all at once, making it handy for the students too since most of the students nowadays have smartphones. QuizGuru online quizzes also makes it possible to give everyone the same actual quiz experience despite their different locations with the use of their computers and mobile devices. With the help of PHP and MySQL (Database), the most widely used and popular open source web development tools in the market, the researchers developed an efficient online quiz. It offers fastest and most economic web development solutions for creating dynamic website and mobile applications what are indeed in demand nowadays. PHP has a unique ability to get embedded in the HTML code as a server-side scripting language and MySQL database management system create a potent pair. PHP is independent of operating systems and server types."
+  },
+  {
+    "chunk_id": 6,
+    "title": "Chapter I",
+    "section_type": "introduction",
+    "text": "As PHP allows the developer to separate HTML code from script elements, development time decreases significantly. As a result, developers created a more flexible and effective web application that are easy to modify and edit. Nowadays many of this dynamic website and applications are widely developed with the help of MySQL database driven features. B. Objectives of the Study The general objective of the study is to develop QuizGuru - A Mobile WebApplication Quiz Maker Specifically, the study aims to: QuizGuru (Website) Develop a tool that can lessen the burden in preparing quizzes with the help of QuizGuru Website. Develop an online web quiz maker that would let the professors create and manage their quizzes. QuizGuru (Mobile Web Application)) Develop a mobile web application that will let the students to organize and take their quizzes. Develop a new environment where students can take quiz using their mobile phones. C."
+  },
+  {
+    "chunk_id": 7,
+    "title": "Chapter I",
+    "section_type": "introduction",
+    "text": "Scope and Limitations of the Study Scope Administrator's Side Professors (on both website and mobile application) Register Manage profile Add and manage subjects Approve or reject students from subjects Create and manage quizzes (min of 10 max of 30) Set the prerequisite quiz for each quiz (students will not be able to take a quiz if they didn't take or didn't pass the prerequisite) Set the availability period of each quiz Manually deactivate or reactivate quizzes View reports generated by the system Create student accounts User's Side Students (on mobile application only) Register Manage profile Reports are generated by the system Enroll to subjects (for teacher’s approval) Take Quizzes (based on subjects enrolled) View quiz records Limitations The QuizGuru project is indeed limited to cater 4 (four) types of quizzes namely Identification, Matching, Type, Multiple Choice and True or False only. Internet/data connection is required when using the QuizGuru."
+  },
+  {
+    "chunk_id": 8,
+    "title": "Chapter I",
+    "section_type": "introduction",
+    "text": "For the purpose of the study, the system is limited to cater college students only. QuizGuru website is only for professors, students may use our mobile application The equivalent grade will be automatically computed by the system using the formula (x/y)50+50, where x = total number of correct answers and y = total number of items. D. Significance of the Study The following are the ones that will benefit from the QuizGuru project: Professors / Instructors The professors who will use the application would definitely benefit from it, the fact that using this application would lessen the time and effort in making the quiz is also a good alternative than the typical paper-based tests. Students The students who will use the application would also benefit from theQuizGuru project, since it would not take too much effort to comply for the quiz."
+  },
+  {
+    "chunk_id": 9,
+    "title": "Chapter I",
+    "section_type": "introduction",
+    "text": "Future Researchers The future researchers will also benefit from the system; they can use this as a reference guide and will stand as their basis for the future studies.."
+  },
+  {
+    "chunk_id": 10,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Chapter II Review of Related Literature and Studies A. Related Studies Design and Development of an Online Examination Maker and Checker A Computer-Based Assessment (CAB), also known as Computer-Based Testing (CT), e-exam, computerized testing and computer-administered testing, is a method of administering tests in which the responses are electronically recorded and assessed, or both. As the name implies, Computer-Based Assessment makes use of a computer or an equivalent electronic device (ire. hand held computer). CAB systems enable educators and trainers to author, schedule, deliver, and report on surveys, quizzes, tests and exams. Computer-Based Assessment may be a stand-alone system or a part of a virtual learning environment than can be accessed through the Internet. According to the study of Baleros, Jerwin, et."
+  },
+  {
+    "chunk_id": 11,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "al., 2008, General advantages of Computer-Based Assessment (CAB) systems over traditional Pen-and-Paper Testing (OPT) have been demonstrated in several comparative works and includes: increased delivery, administration and scoring efficiency; reduced costs for many elements of the testing life cycle; improved test security resulting from electronic transmission and encryption; consistency and reliability; faster and more controlled test revision process with shorter response time; faster decision-making as the result of immediate scoring and reporting; unbiased test administration and scoring; fewer response entry and recognition errors; fewer comprehension errors caused by the testing process; improved translation and localization with universal availability of content; new advanced and flexible item types; increased candidate acceptance and satisfaction; evolutionary step toward future testing methodologies."
+  },
+  {
+    "chunk_id": 12,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "In addition to traditional testing approaches carried out in a paper-pencil mode, there are a variety of aspects needed to be taken into account when computer-based assessment (CAB) is deployed, such as software quality, secure delivery, reliable network (if Internet based), capacities, support, maintenance, software costs for development and test delivery, including licenses. Any of the delivery modes, whether Paper-Pencil and/or computer-based, comprises advantages and challenges which can hardly be compared, especially in relation to estimated costs. The use of CAB includes additional benefits which can be achieved from an organizational, psychological, analytical and pedagogical perspective. Many experts agree on the overall added value and advantages of e-testing in large scale assessments. Another study by Escalation, Judy, et AL., 2008 eliminates the use of paper and pencil type of testing in Lyceum of Bataan."
+  },
+  {
+    "chunk_id": 13,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "It focuses on database design that is capable of storing and retrieving exam results, checking and interpreting school ability indexes (Dais), percentile ranks and standing done automatically. It is also a network-based type which requires registration for students to take the exam. Test questions are randomized so as to minimize cheating and the database is password protected for security purposes. Another study by Ji-Hoon Lee, 2008 presented a system that generates randomized questions on different engineering topics. The system using a set of problem templates that when activated generates different variables for the same questions. The generator program changes the problems' variables and the order of computation. Graphics for the problem are also generated. The program uses PERL, JavaScript, CHI, Flash, HTML, SQ, databases and graphic programs."
+  },
+  {
+    "chunk_id": 14,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "The next study is conducted by Tinoco, 2009 has been developed to support adaptive and standard testing, along with automatic grading, recordkeeping and test administration using the World Wide Web as a delivery vehicle. The authors have applied QUIZIT in connection with their NSF-supported Education Infrastructure Project on Interactive Learning with a Digital Library in Computer Science to help with evaluation in a master's level course as well as large freshmen level service course. Use of Mobile-Quiz Application in different parts of the globe Mobile devices such as cell phones became the widest instrument used in the students' daily activities including browsing the internet, sending e-mails and many more. Several countries such as Japan and US have already applied it in the education and learning processes due to its outstanding characteristics including portability and accessibility."
+  },
+  {
+    "chunk_id": 15,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "In this work, a mobile-quiz application is suggested and described to facilitate the assessment process inside the highdensity classrooms and to increase the interactivity among the instructors and students. In Egypt, a case study of the proposed application in a particular academic Egyptian institution is also applied and discussed for the first time with respect of our best knowledge. Basically, three different methods have been suggested to settle this application inside the Egyptian academia according to the available elearning resources. The preliminary outcomes of the conducted experiment demonstrated the possibility of applying mobile devices within the various academic Egyptian environments. In Japan, a study was conducted by P. Thornton and C. Houser, 2005 registered in the country Universities through mobile devices in addition to a published website."
+  },
+  {
+    "chunk_id": 16,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "The students used their mobile devices to connect to the designed website to practice the main activities of the course including the explanation and quizzes. They also exchanged information and feedbacks with the teachers through emails. Unfortunately, they faced some technical problems in accessing the course materials, especially in accessing the website and downloading the multimedia contents. However, in Malaysia another study by M. Mohamed, 2012 this work introduced a study for utilizing mobile phones in the Malaysian schools. The main objective of this research is to gather information from the educational experts about the possibility of using cell phones within the education process through a real experiment. The study showed some important opportunities and challenges especially that mobile phones can become an ordinary tool in the learning process."
+  },
+  {
+    "chunk_id": 17,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "However, one of the main challenges is that the rules and policies inside the schools need a dramatic change to include the mobile phones in the learning process. A report demonstrated the usage ratio of mobile instruments in education including the high schools and higher education as well as the US expenditure in this field. The report mentioned that smart phones represent the most widespread tool among the students in accessing the online educational contents. The report also predicted that US investment in mobile learning would be increased to $143 million in 2014. Lastly, it introduced several case studies for using mobile devices inside the US classrooms showing its positive impact over the learning process. In Turkey, for instance the authors in conducted an experiment in a particular Turkish University to measure the perception of the teachers about using mobile learning in classrooms."
+  },
+  {
+    "chunk_id": 18,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "The authors mentioned that many teachers have no idea about the mobile learning regardless of their age, gender or department. In the end, they suggested several recommendations for improving the teachers perception about mobile learning through increasing the IT training and increasing their knowledge about the significance of using mobile devices in the education and learning processes. The paper demonstrated a quiz-application installed with the answers in the form of image objects using a steganography technique. After the students completed the quiz, the answers will be verified with the downloaded image on the mobile and the results will be sent to the instructors through SMS. The test environment was Nokia 6680. The work presented a mobile interface quiz application installed on a web server. The students had to connect to the Internet to access the target quiz through a wireless local area network. The answers have been marked at the web server side."
+  },
+  {
+    "chunk_id": 19,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "As previously noticed, another study by O. Serin, 2012 accomplished experiments are run in two different modes: online and offline according to the available resources in each academic environment. Each work is also run on different mobile environments using different technologies with respect to the most available mobile devices with the students as it is a tough task to construct a unified or standardized quiz-application running over all available mobile instruments within the market with its various operating system including iOS and Android in addition to the old versions of cell phones. The Benefits of using Online Quizzes particularly in introductory Biology Courses Most instructors teaching courses in the life sciences would like to engage students in learning outside of class through reading their assignments and other activities."
+  },
+  {
+    "chunk_id": 20,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "However, another study by Cooper et al, 2016 large class sizes, especially in introductory biology courses, make instructors reticent to assign homework because of the inordinate amount of time required to grade and assess assignments. Computer based assignments and assessment offer a mechanism to minimize the time required by instructors to evaluate student performance. A recent research has focused on comparing the effectiveness of online and traditional lecture or paper-based teaching methods. Much of this work has been done in the physical sciences (astronomy, chemistry and physics) where students can be given numerical problems to solve or explain phenomena using equations. In several studies, there was no difference in scores between homework assignments given in a traditional paper-based format and those given online."
+  },
+  {
+    "chunk_id": 21,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Hence, these results suggest that completing homework online is neither inferior nor superior to traditional paper-based assignments but online homework may offer a substantial advantage to the instructor through a reduction in the amount of time required in grading. One of the challenges of online quizzes in the life sciences is that the issues being discussed cannot always be reduced to numerical answers or equations and are often much more conceptual or descriptive than those in the physical sciences. As a result, online quizzes may become tests of rote memorization and factual recall. One solution to this problem is to give students open-ended assignments and homework questions, in the study conducted by Dufresne, R., Mestre, J., Hart, D.M., Rath, 2002 they give an online quiz to assess student completion of the homework assignment and understanding of the material."
+  },
+  {
+    "chunk_id": 22,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Moreover, this permits instructors to show connections between biological concepts and news stories in the popular press, which allows students to see how the theoretical concepts they are learning in class are applied in the real world. Such issues based biology courses are becoming more common, especially for non-majors. Web-based Examination System In one of the study conducted by Hall, R.W., 2005. Math, Physics and Information Engineering College Online examination is the crucial parts among online education. It is efficient and fast enough and reduces the large amount of material resources. Examination system is developed based on web. This paper describes the principle of the designed system that presents the main functions of the system, analyzes the algorithm of auto-generating test paper, and discusses the security of the system. Thus, the quality of the exam questions would determine the quality of the students produced by the institutions."
+  },
+  {
+    "chunk_id": 23,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Preparing exam questions is challenging, tedious and time-consuming for the instructors. Current technologies help instructors to store the questions in computer databases. The issue that arouse is how the current technologies could help the instructors to auto-generate the different sets of questions from time to time without worrying about repetition and duplication from the past exams while the exam bank is growing. This paper describes the use of shuffling algorithm in an Automatic Generator Question paper System (AGQS) as a randomization technique for organizing sets of exam paper. The result displays the shuffling algorithm could be used to overcome randomization issue for AGQS. Implementation and Deployment of Online Examinations A literature review revealed research and studies based on implementation of a variety technology in college courses. Another study by M. S. Shahreza, 2014."
+  },
+  {
+    "chunk_id": 24,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "The internet has opened many possibilities for the classroom instruction but it can also be a barrier to teaching as well. The new innovative technologies provide opportunities to improve learning and create a more exciting and motivating environment. Based on a case study by Ralph, Buskirk, and Schmidt (2007) regarding the use of online projects, students in favor of online projects indicated that the accessibility to the professor for fast and easy feedback was a great asset. Furthermore, the study revealed that with the implementation of technology, students were concerned with the expenses related to the technology, the necessity for internet access, and the reliability of the technology. A research on student perceptions and satisfaction with online courses provided insights to student reactions and satisfaction with implementation of an online exam. In the study of G.S."
+  },
+  {
+    "chunk_id": 25,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Walker, 2007 indicated that the “widespread availability of computers and the Internet provide considerable enrichment in terms of variety of material and formats for presentation over what was possible with the old correspondence courses”. The Chronicle for Higher Education (2007) reported that a university stated that they “use electronic education to add on to their curriculum, but not as the main basis.” This lends to the implementation of an online exam into a traditional classroom where students still get the face-toface interaction with the instructor and classmates but the control of time and location to take their exams. In the study of P. J. Patterson, 2006 conducted a post-examination survey of students completing an online exam. The study found out that “a large majority of students were able to easily access the online exam, found the testing tool easy to use, and were able to complete the comprehensive exam with little difficulty."
+  },
+  {
+    "chunk_id": 26,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "The future use of online assessment for the comprehensive exam was supported by 87% of respondents.” Patterson also stated that “the web-based comprehensive exam procedures employed made it possible for students to take the exam at the time and place of their choosing”. The exam was able to reduce stress for students by giving them the ability to choose time and location of taking the exam according to Patterson. Patterson also acknowledged that the “challenges to test items security and the creation of procedures to minimize the possibility of collaboration and cheating on this type of \"high-stakes\" examination remains to be fully met."
+  },
+  {
+    "chunk_id": 27,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "(Journal of College Teaching and Learning - December 2009 Volume 6, Number 8 3) A study of online exams by Michael Luecht, 2001 identified six challenges of web-based testing: (1) Test-taker identity and testing materials security risks, (2) Measurement of problem-solving and complex skills, (3) Implementation of advanced item selection and test construction algorithms, (4) Management and processing of test response data, (5) Deployment of \"high-bandwidth\" multimedia tests and, (6) Optimization of the \"usability\" of web-based testing interfaces. B. Related Literature Design and Architecture of Mobile Quiz System Azoft developed an engine that lets build independent mobile games — quizzes. The goal of the Mobile Games (quiz) is to provide mobile users with a java quiz game, linked to a remote server on which all questions are stored. User can download mobile quiz application which makes a connection to a remote server to download questions (minimum of 10 per set)."
+  },
+  {
+    "chunk_id": 28,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Application asks the user the downloaded questions, provides multiplechoice answers and remembers the chosen answers. Then it automatically calculates the score of the gamer. At the end of a game (3 mistakes are made, independent of number of questions asked), the MIDlet is an application that uses the Mobile Information Device Profile (MIDP) will allows user to upload his score to a remote server and to take part in the competition. Azoft developed two clients: the first is a J2ME application for GSM/GPRS networks, the second is an I-HTML version for i-mode networks. The logic of IHTML game resembles the logic of J2ME game. Both clients have score upload functionality. User interface was developed in Dutch. A system administration web oriented tool was also developed to manage players, questions and collect statistics. In addition to the features, players and game community members can see high scores on a dedicated web site."
+  },
+  {
+    "chunk_id": 29,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "QuizStar (Online Quiz Maker Application) QuizStar is a free, online quiz maker application that allows you to manage online virtual classes, create and assign online quizzes for class tests, and generate reports of quiz scores and student performance online for evaluation purposes. QuizStar, accessible at (http://quizstar.4teacher.org), is an online free tool for managing classes and test. Teacher can provide feedback on the test and student can review their test after completed it. Multiple languages quiz maker, free access, and free storage are three main aspects from this tool. The purpose of this paper/presentation is to introduce conference participants with potential features and the usability of QuizStar. Furthermore, presentation covers my personal evaluation about usability of QuizStar."
+  },
+  {
+    "chunk_id": 30,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Pinpoints/Needs: Online quiz maker Seeking Feedback in form of Quizzes Multi-lingual, Interactive Quizzes Class Manager Platform: Web based, online tool Usability With QuizStar you can: Manage classes and quizzes Attach multimedia files to questions Ask students of the class to take quizzes and you will be able to access their performance under ‘Report Manager‘ Make quizzes in multiple languages Access from any Internet-connected computer Allow students to complete and review Create multiple classes as per requirement Enter HTML and attach multimedia files in order to create an interesting quiz for students QuizStar is a very useful online quiz maker tool for conducting online tests. The new features allow you to duplicate your quizzes in order to make them editable for different classes and share your quizzes between instructor accounts. QuizStar allows you to have a media repository which stores all your images and lets you attach them to multiple questions or quizzes."
+  },
+  {
+    "chunk_id": 31,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "These can be reused not only by teachers to create free online quizzes, but also help in tracking student performances. The best thing about Quizstar is that it is a Webbased quiz maker that enables you to create, administer and automatically grade your quizzes online. Also, you can now share quizzes across different instructor accounts. Importing or sharing a quiz with another instructor does not in any way change the original quiz. QuizBean (The Online Quiz Creator) QuizBean is a new, free web-app that allows teachers and students to quickly and easily create online quizzes. You can share your quizzes via email or social media and students don't even need to create an account to take a quiz. Quiz Bean has just released a ton of new features that will make their service even better for classroom use. First up, automatic results. As soon as your students complete a quiz, the results are automatically sent to your teacher dashboard so you can see how they did."
+  },
+  {
+    "chunk_id": 32,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Plus, they've updated their \"send\" feature to make it even easier to send out your quizzes. You can also include multiple choice questions now, which is a huge step forward. That feature, plus the ability to include pictures, and randomize questions, makes QuizBean incredibly well suited for education. Finally, they've updated the teacher dashboard to let you manage your quizzes, classes, and students more easily. It's a great addition and makes what was already an easy-to-use interface even better. Pinpoints: Exercise Quiz and Poll Creation Platform:- Web, Android, iOS, Desktop QuizBean is meant to provide instant assessment for K-12 audience through simple and quick quizzes. Its vision is to help teachers instantly know how their students are doing and save them time and resources QuizBean is an online program that can be used in classrooms throughout the year for various lessons."
+  },
+  {
+    "chunk_id": 33,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "It helps teachers check students' understanding of crucial material presented to them during the lesson to measure the level of critical thinking employed, engage students and increase lesson comprehension. It also allows students to study and prepare for upcoming tests by helping them create their own quizzes for self-assessment. It is an easy tool to navigate and use, even for students at the elementary level and helps teachers check learning progress. It can also be used by parents to help and keep track of their children's learning. Trainers can use it to make training fun for their employees with online quizzes, which keep them engaged and quickly communicate basic concepts. Its format is also good for creating quizzes about characters or storylines in a book. You can create a quiz about characters from a book and have the questions be about a particular characteristic or action of the characters."
+  },
+  {
+    "chunk_id": 34,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "QuizBean can be used without registration, but you can sign-up for a free account to easily manage and distribute your quizzes. Upon logging in you can go ahead to create a new quiz, you'll be asked to give your quiz a title and two answer choices. For now, QuizBean only works with two answers, and it is expected that more choices will be added soon. Now, you're ready to start creating questions. To add your questions, just type the question and click \"Add Another Question\". Plus, you can add an answer explanation and an image to be associated with the question as well. You also have the option to randomize the questions. When you're finished with your quiz, you can send it out via link, email, Facebook and/or Twitter. Now, your students can head over to QuizBean and try it out. While the students are taking the quiz they will see a running total of their score and percentage so they can assess their own performance."
+  },
+  {
+    "chunk_id": 35,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Some distinct features of QuizBean are the unlimited questions it offers for a quiz, the provision for an image to be added to the quiz, the ability to provide explanations along with the answers and shareable quizzes. Analysis Process and Development of Online Examination System Most modern online education uses web-based commercial courses management software such as blackboard, a software developed in-house. This software is not used widely for online exams due to security vulnerabilities and the system must rely on students' honesty. Online course exam nowadays becomes more efficient than before but online course exam needs enhancing the security. Jung, I.Y proposed an enhanced secure online exam management environment mediated by group cryptography using remote monitoring and control of ports and input. Holding the online course exam for any substance requires more preparations, either for the teacher or through the support of university students."
+  },
+  {
+    "chunk_id": 36,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "University on the duties assigned to it to provide the necessary environment entrusted to them. Everyone is there to serve the student and we have to encourage students and train them psychologically for a computerized exam. Note that many universities in the world have the complexity of computerized tests on its campus. More of recent research shows the advantage and disadvantage of using online course exam on the university campus. E- Exams System for Nigerian Universities with Emphasis on Security and Result Integrity There is a growing body of research focused on developing better ways to manage e-exams systems and e-learning systems. In the study of John Schramm, 2008 looked at an e-learning web based system that could simply offer and grade mathematical questions with infinite patience. Therefore it needs the capability for input and output of mathematical formulas, the dynamic generation of plots and the generation of random expressions and numbers."
+  },
+  {
+    "chunk_id": 37,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Al- Bayati and Hussein, 2008 presented an applied Generic Software of multiple kinds of e-exam package. This package of e-exam is oriented to Hearing Impaired (HI) persons. Therefore the exam material of this package is translated into language of HI persons like sign language and finger spelling. The idea of the Generic software is to present empty templates to the teacher who would like to develop his required e-exam for the needful topic (mathematics, language, science, etc) and desired set of exam kinds (multiple choices, matching between words, fill in blanks, etc). Web-based Examination System is an effective solution for mass education evaluation by Zhenming et al, 2003. They developed an online examination system based on a browser/server framework which carries out the examination and auto-grading for objective questions and operating questions, such as programming, operating Microsoft Windows, editing Microsoft Word , Excel and PowerPoint, etc."
+  },
+  {
+    "chunk_id": 38,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "It has been successfully applied to the distance evaluation of basic operating skills of computer science, such as the course of computer skills in Universities and the nationwide examination for the high school graduates in Zhejiang Province, China. Another paper by Candy Patterson, 2006 presented a web-based educational assessment system by applying Bloom's taxonomy to evaluatestudent learning outcomes and teacher instructional practices in real time. The system performance is rather encouraging with experimentation in science and mathematics courses of two local high schools. Another paper proposed web based online examination system. In the study of the system carries out the examination and auto-grading for students exams. collection of answers, auto marking the submissions and production of reports for the test. It supports many kinds of questions. It was used via Internet and is therefore suitable for both local and remote examination."
+  },
+  {
+    "chunk_id": 39,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "The system could help lecturers, instructors, teachers and others who are willing to create new exams or edit existing ones as well as students participating in the exams. The system was built using various open-source technologies. AJAX, PHP, HTML and MYSQL database were used in this system. An autograding module was generalized to enable different exam and question types. According to another study by EL Emary and Al Sondos, 2006 system was tested in the Mansoura University Quality Assurance Center. The test proved the validity of using this kind of web-based systems for evaluation of students in the institutions with high population. An online website for tutoring and e-examination of economic course aimed to present a software tool that can be used for online examination and tutorial application of the syllabus of economic course. Among the main interests of the paper is to produce a software to make sure that students have studied all the concepts of economics."
+  },
+  {
+    "chunk_id": 40,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "The proposed software is structured from two major modules: the first one, an online website to review and make self-test for all the material of economic course; and the second, an online examination using a large database containing a bank of questions wherein the intelligence level of students can be evaluated immediately and some statistical evaluations can be obtained. The developed software offers the following features: (1) instructors could add any further questions to maximize the size of the bank of questions; (2) different examinations for each student with randomly selected questions from the bank of questions can be done; (3) different reports for the instructors, students, classes…etc can be obtained; and (4) several students can take their exams simultaneously without any problem inside and outside their campus. The proposed software has been designed to work based on the client server architecture."
+  },
+  {
+    "chunk_id": 41,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Electronic exam is a difficult part of e-learning security (Huszti and Petho, 2008). The paper describes a cryptographic scheme that possesses security requirements such as authenticity, anonymity, secrecy, robustness, correctness without the existence of a Trusted Third Party. The proposed protocol also provides students a receipt as a proof of a successful submission, and it is based on existence of anonymous return channels. Another research work proposed a theoretical approach that incorporates available fingerprint biometrics authentication technologies in conjunction with e-learning environments to curb unethical conduct during elearning exam taking ecam. The proposed approach suggests practical solution that can incorporate a random fingerprint biometrics user authentication during exam taking in elearning courses. Doing so is hypothesized to curb exam cheating in e-learning environments."
+  },
+  {
+    "chunk_id": 42,
+    "title": "Chapter II",
+    "section_type": "rrl",
+    "text": "Based on the study of Ayo et., al, 2007 proposed a model for e- Examination in Nigeria where all applicants are subjected to online entrance examination as a way of curbing the irregularities as proposed by the Joint Admissions Matriculation Board (JAMB), the body saddled with the responsibility of conducting entrance examinations into all the Nigerian universities. This model was designed and tested in Covenant University, one of the private universities in Nigeria. Their findings revealed that the system has the potentials to eliminate some of the problems that are associated with the traditional methods of examination such as impersonation and other forms of examination malpractices.."
+  },
+  {
+    "chunk_id": 43,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "Chapter III Conceptual Framework This chapter deals with theoretical structures of assumptions, principles and rules holds together the ideas comprising a broad concept in computer science/information technology. A. Conceptual model of the Study Figure 1: Input - Process - Output Diagram In knowledge requirements, it is necessary that the researchers know PHP, HTML, CSS and JavaScript since these four languages are the main components to create an effective and responsive website and web application for the project. In software requirements, it is necessary to have Sublime Text or any text editor in which PHP, HTML, CSS and Java Script codes are written to create the desired output. In hardware requirements, the researchers will need a mobile device with Google Chrome App and at least 512MB of RAM and 1GB of ROM. The researchers will also need laptop/desktop with the standard specifications of Windows 7 or higher operating system, 160GB of storage and 2GB of RAM."
+  },
+  {
+    "chunk_id": 44,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "Meeting the standard hardware requirements in each platform will secure the full functionality and effectiveness of the system. In analysis and design process the system was subjected to be keenly analyzed and designed the proper work flow of both web and mobile platforms. While in the testing and revision process, the system has undergone some tests to identify some possible errors and fixed.The QuizGuru (A Mobile Web Application) is the expected output of this study. The Web and Mobile Application platforms must be working and functional and can be used as an online quiz organizer for both professors and students. Figure 2: Data Flow Diagram - Context Diagram The Context Diagram shows the simple work flow and connection of two entities namely the Student and Professor. The exchanging of data/information simply illustrates the process of moving the information."
+  },
+  {
+    "chunk_id": 45,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "Figure 3: Data Flow Diagram - Diagram 0 The Diagram 0 shows the whole work flow and connection of all entities involved in the process. A much complicated yet more thorough and detailed view of the system. From the process of registration, login (and if login fails) down to the process of creating quizzes, taking quizzes, managing quizzes, viewing scores and edit profile are all illustrated through the diagram. As the user register he/she needs to provide the necessary information, after verifying the user may now log in the account and the system will authenticate the credentials if the user enters incorrect username and password an error message will pop-up, else if the user credentials are correct and matched the records in the user database the user may now proceed and do his/her stuff. If the user is a student, he/she may now take the quiz, change his/her profile according to preference and review previous scores of the quiz he/she took."
+  },
+  {
+    "chunk_id": 46,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "Else if the user is a professor, he/she may now create quiz, manage quiz (update some quiz items), view scores and also change like with student the professor profile can be changed depending on his/her preference. Figure 4: Entity Relationship Diagram The ERD (Entity Relationship Diagram) shows the relationship of each table and how they are connected in each other. This gives a brief overview of how the data/information are stored in a storage. The connection of each table depends on how they are used and the components of each table. We will discuss the connections with tblteachers first. The table tblteachers has a one-to-many relationship with the table tblsubjects, passing the primary key teacherid to be a foreign key of the latter. The table tblsubjects will now pass subjectcode and the foreign key teacherid to the table tblquiz through their one-to-many relationship."
+  },
+  {
+    "chunk_id": 47,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "The table tblquiz containing the foreign keys received from the table tblsubjects can now pass its primary key quizid to the tables tbliden, tblmatch, tblmulti or tbltf (depending on the value of its quiztype) through their one-to-many relationship. Alongside the connections mentioned above, the table tblstudents can now have connections. The table tblstudents will pass its primary key studentid as a foreign key and have a one-to-many relationship with the table tblenroll having a one-to-many relationship with the table tblsubject which passed the primary key subjectid as a foreign key to it. Table tblstudents can also pass its primary key as a foreign key and have a one-to-many relationship with the table tblrecords having a one-to-many relationship with the table tblquiz which passed the primary key quizid as a foreign key to it. All elements in each table plays a great role in the system and is useful in the development of the database. B."
+  },
+  {
+    "chunk_id": 48,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "Conceptual Operation Figure 5: Hierarchical Input-Process-Output Diagram This shows a more detailed hierarchical view of the system. From the Authentication process in which the user enters his/her personal information to register and have an account then proceed to the log in process in which the user will now enter his/her log in credentials and validate it if it exist in the user database. Once the log in credentials are verified, the system will check the user type. If the user is a student, he/she can now take quizzes. After submitting the quiz, the score will automatically be computed and saved to update his/her quiz records. The student will also be able to view his/her previous scores. The student will now be redirected to a new page that contains the quiz details including the raw score, number of wrong answers, percentage and remarks. C."
+  },
+  {
+    "chunk_id": 49,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "Methodology of the Study Figure 6: System Development Life Cycle (Waterfall Method) The researchers used the Waterfall Model in order to represent and interpret the logical flow and design. The Waterfall Model suits to describe the flow of the system’s developments since it follows a specific logical and a set if systematic principles in designing the logical design and the structure of the program to achieve good and functional output. This model was named waterfall model because it moves forward from first phase going to another phase in the same manner as a real waterfall does. It has five (5) phases namely the Planning Phase, Analysis Phase, Design Phase, Implementation Phase and Maintenance Phase. Each phase has its own process and output that will help the researchers determine the changes and improvement of the system."
+  },
+  {
+    "chunk_id": 50,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "Waterfall model has advantages too, with this type of model the researchers can go back to the previous phase to fix some errors and continue to the present phase they are working on, also this model identifies system requirements before proceeding to the coding proper stage and it minimizes changes to the requirements as the project proceeds. Planning Phase The first phase of the Waterfall model is the Planning phase in which the researchers studied about the problems encountered and the possible solutions. After reviewing existing system and how it works, the researchers conducted brainstorming method and logically discussed and evaluated the gathered information and come up possible solutions to the current problem. The researchers carefully planned, the things that will be necessary to coordinate activities and manage project risks effectively."
+  },
+  {
+    "chunk_id": 51,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "The system plans help to refine the information gathered during the initial phase by further identifying the other specific activities, tasks and resources required to complete the system. Together with the users, the researchers discussed the matters to identify and document any errors that the researchers need to consider as the development goes on. Analysis Phase The second phase of Waterfall model is the Analysis phase where the researchers performed some reviews at the beginning of the project to confirm the current system and determine the possible solutions. The researchers gathered information and carefully analyzed the logical flow of an online quiz maker and how to implement both web and mobile platforms. Design Phase This is the phase were in the researchers transformed information and functional requirements considered during planning phase into joined design specifications."
+  },
+  {
+    "chunk_id": 52,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "The researchers started to design and conceptualize the workflow of the web and mobile based platforms to conduct and implement each service. Also by using a high-powered programming language, such as PHP, JAVA and MySQL (Server) to enhance the program design of its program interfaces which will be included for the system. The user/design interface is already developed in this phase. Implementation Phase The researchers in this phase have implemented the system. The researchers used the resources needed (mobile phones for students and desktop/laptop for professors). The implementation stage also involves approved system into production environments. The implementation stage will set as the output of the process through which the tested system will attain objectives given in the feasibility study. This is also the phase were the system has been deployed to the hands of the users for further error detection."
+  },
+  {
+    "chunk_id": 53,
+    "title": "Chapter III",
+    "section_type": "methodology",
+    "text": "Maintenance Phase This is the last phase in which a system is already accomplished and ready to use. The end users will now test and use the QuizGuru application in both mobile and web platforms. Regular monitoring and checking is under the end user such as personnel to be able to run the system properly and simultaneously.."
+  },
+  {
+    "chunk_id": 54,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Chapter IV Results and Discussions A. Project Description QuizGuru is a web and mobile application that aims to cater the needs of both professor and students. The researchers thought carefully of the existing problems and then constructed potential ideas and new solutions that can solve the needs of their target clients. The researchers created QuizGuru, an alternative to the traditional quiz we use until today. The main goal of QuizGuru is to provide wholesome experience not only for teachers but also the students in making and taking quizzes. The QuizGuru website can help many professors to easily publish and manage their quizzes online. This also eliminates the expenses, time and even effort in administering paper-based quizzes. The QuizGuru web application can offer quiz to large numbers of users (students) all at once, this makes answering quiz much easier since students will just login into the application and then start the transaction."
+  },
+  {
+    "chunk_id": 55,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "With the use of PHP and MySQL (Database), the most widely used and popular open source web development tools with the full effort of the development team plus the undying support of thesis adviser the development of this project is possible. B. Project Capabilities QuizGuru is an online quiz maker that will help professors to create and organize their quizzes that their students will take, with the help of programming tools like PHP and MySQL the development of this system is feasible. The QuizGuru project is divided into two parts. The first part is the QuizGuru website. Upon discussion, the researchers agreed that the website will only be accessible to the professors. This would mean that the students are not allowed to login to the web platform, though they can view the website's homepage to send inquiries and find the link to install the app there.."
+  },
+  {
+    "chunk_id": 56,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "In the QuizGuru Website professors can create their own account, enroll students to their subjects, view the quiz records, create and manage quizzes. QuizGuru offers four (4) types of quizzes from which the professors can choose from namely (1) Identification, (2) Matching Type, (3) Multiple Choice and (4) True or False. On the other hand, the second part of the QuizGuru project is the QuizGuru Mobile Web Application. The said mobile app is accessible to both professors and students. The professors can do everything on the mobile app but we encourage them to use the website version in creating quizzes because it may be inconvenient to type questions and answers using their mobile phones. The main target of the mobile application are the students who will take their quizzes using it. In QuizGuru Web Application students can register account, view their quiz results, manage their account information and enroll to subjects to be able to take their respective quizzes. C."
+  },
+  {
+    "chunk_id": 57,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Process This section deals with the walkthrough and proper use of the QuizGuru- A Mobile Web Application Quiz Maker. Here are the simple steps and procedures to properly use the QuizGuru project: Website (for Teachers only) If the user has an existing account, he/she can login directly. Otherwise, the user should register first then proceed to login. (Upon finishing the registration, the user will automatically be logged in) When logged in, the professors can add and manage their subjects and quizzes. The professors can also approve or reject the requests from students to enroll to their subjects. They can also drop enrolled students or re-enroll dropped students. The professors can view the records of students who took their quizzes. The website version provides a tutorial on how to make a quiz."
+  },
+  {
+    "chunk_id": 58,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Creating Quiz Subject Code - The subject which the professor wants the quiz to fall under Prerequisite - One of the previously created quizzes under the same subject that students must pass before taking this quiz. Quiz Code - The quiz' unique code that the professors would tell their students in order for them to take this quiz. Quiz Description/Notes - a short description of this quiz (ex: First Quiz in PHP101). Can also be used to write notes that students must read before taking the quiz. Quiz Type - Select among four (4) types of quiz Identification - The students will have to enter the correct answer. Matching Type - The students can choose the answer from a box containing all the answers. Multiple Choice - The students should choose one among the four choices given True or False - The students will analyze whether the statement is True or False. Time Limit - This is the total time (in minutes) that the students will have to complete the quiz."
+  },
+  {
+    "chunk_id": 59,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "If the time limit is over and the student wasn't able to answer some questions, those will be marked blank (wrong). Availability - The quiz will automatically be deactivated after the chosen period of time but you can manually deactivate or activate it again afterwards. You can also choose to not deactivate it. Modify quiz: Delete quiz - Professors has the privilege to delete quiz. Edit quiz - Professors has the privilege to delete quiz. Add quiz - Professors has the privilege to add quiz. View all quiz - Professors can view all quizzes under specific subject they created. Mobile Web Application (for both Professors and Students) If the user has an existing account, he/she can login directly. Otherwise, the user should register first then proceed to login. (Upon finishing the registration, the user will automatically be logged in) The system will check if the user is a Professor or a Student."
+  },
+  {
+    "chunk_id": 60,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "The mobile application functions the same as the website for Professors, except that the mobile app doesn't contain the tutorial on how to create quizzes. The students must enroll first to the subject to be able to take its quizzes. The students can enroll to their subjects by searching using the Subject Code given by the professor. A list of subjects with the same code may come up so the students should look for their professor's name before enrolling. The students aren't automatically enrolled. They will have to wait for their professor to accept them on the subject. Once enrolled, the students can take quizzes with no prerequisite. Otherwise, the student will have to pass the prerequisite before taking the quiz. The students can also drop out of a subject. The students can view their previous quiz records. QuizGuru Website Screenshots Figure 7: Home Page - Professors This is the home page of the QuizGuru website."
+  },
+  {
+    "chunk_id": 61,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Figure 8: Register - Professors This is the page where new professors sign up to access the QuizGuru website. Figure 9: Register Account for Student - Professors This is the page where professor create account for their students. Figure 10: Profile - Professors This is the page where professors can view their account details, all information gathered from the registration are also displayed here. Figure 11: Profile (edit) - Professors The profile page will change into this when the professors click the detail they want to edit. Figure 12: Account Recovery - Professors This is the page where professors submit request for password recovery provided that the user provide the username associated to the valid email address registered. Figure 13: Add Subjects - Professors This is the page where professors can add new subjects they offer, subject code and subject description fields need to be filled before proceeding to the creation of subject."
+  },
+  {
+    "chunk_id": 62,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Figure 14: Subjects (Delete) - Professors A popup will come up if the professors click the delete button on the subject they want to delete. Figure 15: Edit Subjects - Professors This is the page where professors can edit subject information that needs to be updated. Figure 16: Tutorial (Guide) - Professors This is the page where the professors are being oriented on how they can create their quizzes. Figure 17: View All Students (under specific subject) - Professors This is the page where professors can monitor all pending requests, enrolled and the dropped students in a specific subject. Figure 18: View Students (Enroll) - Professors A popup for enrollment approval will come up if the professors click the Approve button next to the student they want to enroll. Figure 19: View Students (Reject) - Professors A popup for confirmation will come up if the professors click the Reject button next to the student they want to reject."
+  },
+  {
+    "chunk_id": 63,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Figure 20: Edit Quiz Details (under specific subject) - Professors This is the page where professors can edit quiz details and select what score should be recorded upon submission of records. Figure 21: Create Quiz (Quiz Information) - Professors This is the page where professors take the first step in creating their quizzes ̶ providing the quiz information. Figure 22: Create Quiz (Add Items - First Slide) - Professors After providing the quiz information, the professors will be allowed to add 10 items to the quiz. The first slide contains the quiz type Figure 23: Create Quiz (Add items - Identification or Matching Type) - Professors After selecting quiz type the next slide will look like this if the selected quiz type is Identification or Matching Type. Figure 24: Create Quiz (Add items - Multiple Choice) - Professors After selecting quiz type the next slide will look like this if the selected quiz type is Identification or Multiple Choice."
+  },
+  {
+    "chunk_id": 64,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Figure 25: Create Quiz (Add items - True or False) - Professors After selecting quiz type the next slide will look like this if the selected quiz type is Identification or True or False. Figure 26: Create Quiz (Add items - Last Slide) - Professors After filling out the ten items, the last slide will show the submit button to add the items to the quiz. Figure 27: View Created Quiz (Matching Type) - Professors This the page where professors can view all information about the created quiz (for Matching Type). Figure 28: View Created Quiz (Multiple Choice) - Professors This the page where professors can view all information about the created quiz (for Multiple Choice). Figure 29: View Created Quiz (Identification) - Professors This the page where professors can view all information about the created quiz (for Identification). Figure 30: View Created Quiz (True or False) - Professors This the page where professors can view all information about the created quiz (for True or False)."
+  },
+  {
+    "chunk_id": 65,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Figure 31: View Records - Professors This is the page where professors can view and download the records of an specific subject. Figure 32: View Records (No Records Found) - Professors This is the page where professors can view if their students taken the quiz or not, this will display if none of their students took the quiz. QuizGuru Website Screenshots Figure 33: Log in - Students This is the page where students log in to start taking quiz, if the student doesn't have account they need to sign up first after signing up they can now log in and use the QuizGuru Web Application. Figure 34: Register - Students This is the page where students can sign up and create their accounts, all fields are needed to be filled in order to successfully register themselves. Figure 35: Profile Screen - Students This is the page where students can see the all information about themselves, and review all information about the student."
+  },
+  {
+    "chunk_id": 66,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Figure 36: Menu Screen - Students This is the page contains all the links to the actions the student can take within the QuizGuru application. Figure 37: Enroll Screen - Students This is the page where students can search for their professor's subject code then enroll in their class to take quiz. Figure 38: Subjects Screen - Students This is the page where students can see an overview of all the subjects which they are enrolled. Figure 39: Take Quiz (Identification) - Students This is the page where students can take quiz (identification) in mobile web view. Figure 40: Take Quiz (Matching Type) - Students This is the page where students can take quiz (Matching Type) in mobile web view. Figure 41: Take Quiz (Multiple Choice) - Students This is the page where students can take quiz (Multiple Choice) in mobile web view. Figure 42: Take Quiz (True of False) - Students This is the page where students can take quiz (True of False)) in mobile web view."
+  },
+  {
+    "chunk_id": 67,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Figure 43: View Results - Students This is the page where students can view their records, this page also display information about the quiz the student take and etc. Figure 44: View Results (item analyzation) - Students This is the page where students can view correct and wrong items (after taking quiz) for them to analyze their answers and review it once again. D. Project Evaluation This chapter presents the data collected from the respondents, taken from (10) Students, (5) IT Experts and (5) Professors a total of 20 respondents. The survey was presented along with the beta testing of QuizGuru. Official Evaluation Sheet for QuizGuru (A Mobile Web Application Quiz Maker) Dear Sir/ Ma'am, Greetings! Kindly evaluate the QuizGuru (A Mobile Web Application Quiz Maker) using the rating scale below. Shade the circle for your answer. Your honest response will be highly appreciated. Thank you and God Bless. Table 1: Evaluation Scale Directions: Kindly shade the circle on each statement."
+  },
+  {
+    "chunk_id": 68,
+    "title": "Chapter IV",
+    "section_type": "results",
+    "text": "Each alphabet corresponds to its verbal interpretation Table 2: Actual Survey Sheet for QuizGuru The researchers conducted a survey to test repeatedly the project to ensure its consistency and functionality while being used. The evaluation also help the researchers to find out bugs/errors that the system has, the table below shows the results of the tests. Table 3: Assessment of the Respondents for QuizGuru The Table 3 represents assessment of the respondents on the efficiency of the website and mobile application. It shows that statements 2 and 3, in \"the level of performance of the systems functions\" and \"the system presents accurate information according to its functions\", got the highest remark B which is \"Very Good\", and the overall ratings gathered got an average score of B which is also \"Very Good\".."
+  },
+  {
+    "chunk_id": 69,
+    "title": "Chapter V",
+    "section_type": "conclusion",
+    "text": "Chapter V Summary of Findings, Conclusions and Recommendations This chapter presents brief summary of key findings, the recommendation for future studies and the conclusion. A. Project Description Upon testing the system researchers found out that both professors and students didn't encounter any major issues or fatal errors while using the Mobile and Web application. Most of the student respondents find the system easy to use, user friendly and handy (satisfied). The aim of this study was to develop a quiz maker tool which can help teachers to create their quizzes and manage it with the help of QuizGuru website, on the other hand the study also covers the students which the researchers provide a separate web application for them. The researchers used Waterfall Method as the methodology. Requirements Gathering and Analysis phase wherein the researchers gathered and documented all the possible requirements for developing system."
+  },
+  {
+    "chunk_id": 70,
+    "title": "Chapter V",
+    "section_type": "conclusion",
+    "text": "Quick Design is where requirements are known, a preliminary design or quick design for the system is created. Evaluation of the system is also defined in this phase. System Refinement is where the system is refined according to the requirement. In Design Phase, upon the development process and user evaluation, the new system design will be generated. Implementation phase, with inputs from the new system design, the system is developed in a bit programs call units, which are integrated in the next phase. In testing phase, the system is tested to detect the faults and failures. Maintenance phase is the modification stage. Flaws identified will be adjusted and/or updated according to the requirements of the system. The following findings are composed of Implementation wherein software is tested for functionality and acceptability and efficiency based on the issues that are solved during the implementation."
+  },
+  {
+    "chunk_id": 71,
+    "title": "Chapter V",
+    "section_type": "conclusion",
+    "text": "The following findings were taken while using the QuizGuru project: The QuizGuru system caters 4 types of quizzes only. It displays the records for both parties for evaluation purposes. Both web and mobile application only works with the help of internet connection. B. Conclusions The QuizGuru (A Mobile Web Application Quiz Maker) was designed and developed using locally available materials, and a high-level programming language. Based on the findings of the study, the following conclusions are drawn: The QuizGuru project is created for professors and students in tertiary level. The system has been successfully accomplished by using HTML, PHP and JavaScript as the programming language and MySQL as the database to handle the information. The proposed system can lessen the work of preparing quizzes for professors, also lessen the time of taking quiz for the students. C."
+  },
+  {
+    "chunk_id": 72,
+    "title": "Chapter V",
+    "section_type": "conclusion",
+    "text": "Recommendation Based on the findings and conclusion presented, the QuizGuru (A Mobile Web Application Quiz Maker) should be implemented. The improvement of the system entitles further based on the following: Include the application a notification if there's new update especially in both users. Enhance the system capabilities by adding more quiz types in order to sustain the needs of the target audience.."
+  }
+]

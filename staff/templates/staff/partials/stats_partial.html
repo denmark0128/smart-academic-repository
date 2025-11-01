@@ -1,5 +1,15 @@
-<p id="pending-stat" class="text-3xl font-bold text-black">{{ stats.pending }}</p>
 
-<p id="registered-stat" class="text-3xl font-bold text-black">{{ stats.registered }}</p>
+<div  id="pending-stat"class="bg-orange-500/80  rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition dark:bg-orange-500/60 dark:border-zinc-700">
+    <h2 class="text-sm font-medium text-gray-800 mb-1 dark:text-zinc-300">Pending Papers</h2>
+    <p  class="text-3xl font-bold text-white dark:text-zinc-300">{{ stats.pending }}</p>
+</div>
 
-<p id="total-stat" class="text-3xl font-bold text-black">{{ stats.total }}</p>
+<div id="registered-stat" class="bg-green-500/80  rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition dark:bg-green-500/60 dark:border-zinc-700">
+    <h2 class="text-sm font-medium text-gray-800 mb-1 dark:text-zinc-300">Registered Papers</h2>
+    <p  class="text-3xl font-bold text-white dark:text-zinc-300">{{ stats.registered }}</p>
+</div>
+
+<div id="total-stat" class="bg-blue-500/80  rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition dark:bg-blue-500/60 dark:border-zinc-700">
+    <h2 class="text-sm font-medium text-gray-800 mb-1 dark:text-zinc-300 ">Total Papers</h2>
+    <p class="text-3xl font-bold text-white dark:text-zinc-300">{{ stats.total }}</p>
+</div>

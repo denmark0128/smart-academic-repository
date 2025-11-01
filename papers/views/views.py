@@ -6,12 +6,12 @@ from django.core.cache import cache
 from django.utils.html import escape
 from django.conf import settings
 from django.utils.http import urlencode
-from django.db.models import Q, Min, Max, Count, Prefetch, Sum, F
+from django.db.models import Count, Sum
 from django.contrib.auth.decorators import login_required
 from urllib.parse import urlencode
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-
+from django.views.decorators.cache import cache_page
 
 import re
 import os
@@ -21,9 +21,9 @@ import random
 from collections import Counter
 from random import randint
 
-from papers.models import Paper, PaperChunk, SavedPaper, MatchedCitation
+from papers.models import Paper, SavedPaper, MatchedCitation, Tag
 from papers.forms import PaperForm
-from papers.utils.nlp import extract_tags
+from papers.utils.nlp import extract_tags, get_mpnet_model
 from utils.extract_metadata_from_abstract import extract_metadata_from_abstract
 from utils.chm_to_html import merge_chm_to_html
 from utils.metadata_extractor import (
@@ -31,10 +31,10 @@ from utils.metadata_extractor import (
     normalize_college,
     normalize_program,
 )
+from utils.summarize import generate_summary
 from utils.related import find_related_papers
 
 from utils.single_paper_rag import query_rag
-
 
 def home(request):
     return render(request, "home.html")
@@ -216,82 +216,29 @@ def paper_list(request):
     return render(request, "papers/paper_list.html", context)
 
 
+@cache_page(30 * 1, key_prefix='paper_detail_public')  # Cache for all users
 def paper_detail(request, pk):
-    paper = (
-        Paper.objects
-        .prefetch_related(
-            Prefetch(
-                "matched_citations",
-                queryset=MatchedCitation.objects.select_related("matched_paper")
-            ),
-            Prefetch(
-                "reverse_matched_citations",
-                queryset=MatchedCitation.objects.select_related("source_paper")
-            )
-        )
-        .get(pk=pk)
-    )
+    """
+    Main paper detail view - loads instantly with minimal data.
+    Only fetches fields needed for initial render (title, authors, year, college, program).
+    Everything else deferred to partials view.
+    """
 
-    # === PDF Viewer ===
-    pdf_url = request.build_absolute_uri(paper.file.url)
-    viewer_url = f"{settings.STATIC_URL}pdfjs/web/viewer.html?file={pdf_url}"
-
-    # === Figures ===
-    paper_dir = os.path.join(settings.MEDIA_ROOT, f"extracted/paper_{paper.id}")
-    paper_folder = os.path.join(settings.MEDIA_URL, f"extracted/paper_{paper.id}")
-    figures = [
-        {"url": os.path.join(paper_folder, fname), "page_number": None}
-        for fname in os.listdir(paper_dir)
-    ] if os.path.exists(paper_dir) else []
-
-    # === Citations ===
-    matched_citations = list(paper.matched_citations.all())
-    citations_pointing_here = list(paper.reverse_matched_citations.all())
-
-    citation_count = paper.citation_count_cached
-    matched_citation_count = paper.matched_count_cached
-
-    # === Saved State ===
-    is_saved = (
-        request.user.is_authenticated
-        and SavedPaper.objects.filter(paper=paper, user=request.user).exists()
-    )
-
-    # === Track recently viewed papers/authors ===
-    try:
-        recent_papers = request.session.get('recent_papers', [])
-        if paper.id in recent_papers:
-            recent_papers.remove(paper.id)
-        recent_papers.insert(0, paper.id)
-        request.session['recent_papers'] = recent_papers[:10]
-
-        recent_authors = request.session.get('recent_authors', [])
-        for a in (paper.authors or []):
-            if isinstance(a, str):
-                if a in recent_authors:
-                    recent_authors.remove(a)
-                recent_authors.insert(0, a)
-        request.session['recent_authors'] = recent_authors[:20]
-    except Exception:
-        pass  # don’t break if sessions fail
-
-    from django.db import models
-    Paper.objects.filter(pk=paper.pk).update(views=models.F('views') + 1)
-
-    # === Render ===
-    return render(request, "papers/paper_detail.html", {
-        "paper": paper,
-        "tags": paper.tags,
-        "citations_pointing_here": citations_pointing_here,
-        "citation_count": citation_count,
-        "college": paper.college,
-        "program": paper.program,
-        "matched_citations": matched_citations,
-        "matched_citation_count": matched_citation_count,
-        "viewer_url": viewer_url,
-        "is_saved": is_saved,
-        "figures": figures,
-    })
+    paper = Paper.objects.only(
+        'id',
+        'title', 
+        'authors', 
+        'year', 
+        'college', 
+        'program',
+        'file',  # for download button
+    ).get(pk=pk)
+    
+    context = {
+        'paper': paper,
+    }
+    
+    return render(request, 'papers/paper_detail.html', context)
 
 def paper_query(request, pk):
     """HTMX endpoint for paper Q&A chatbot"""
@@ -324,6 +271,7 @@ def paper_upload(request):
             paper = form.save(commit=False)
             paper.uploaded_by = request.user
             paper.is_indexed = False
+            paper.status = "processing"
             paper.save()
             print(f"[4] Saved new Paper object with ID {paper.id}")
 
@@ -394,7 +342,9 @@ def paper_upload(request):
                 except Exception as e:
                     print(f"[CHM Metadata Error] {e}")
 
-            # --- Index / embed for semantic search ---
+            # --- POST-PROCESSING PIPELINE ---
+            
+            # 1. Semantic Search Indexing (creates embeddings + chunks)
             try:
                 print("[16] Indexing paper for semantic search")
                 from utils.semantic_search import index_paper
@@ -404,6 +354,91 @@ def paper_upload(request):
                 print("[17] Paper indexed successfully")
             except Exception as e:
                 print(f"[Indexing Error] {e}")
+
+            # 2. Tag/Keyword Extraction
+            try:
+                # 1) get plain text to pass to tagger (reuse your helper from staff_paper_regenerate_tags)
+                text_for_tagging = _get_paper_text_for_tagging(paper)
+                if not text_for_tagging.strip():
+                    print("[19] No text available for tagging")
+                else:
+                    # 2) call extract_tags correctly (pass text, not the Paper)
+                    # adjust top_n/min_score to taste
+                    from papers.utils.nlp import extract_tags
+                    tag_names = extract_tags(text_for_tagging, top_n=6, min_score=0.45)
+
+                    if not tag_names:
+                        print("[19] extract_tags returned no tags")
+                    else:
+                        print(f"[19] Tags extracted: {tag_names}")
+
+                        # 3) ensure Tag rows exist and have embeddings (same pattern as your working code)
+                        model = get_mpnet_model()
+                        for tag_name in tag_names:
+                            tag, created = Tag.objects.get_or_create(
+                                name=tag_name,
+                                defaults={"is_active": True}
+                            )
+                            if tag.embedding is None:
+                                try:
+                                    emb = model.encode(tag.name, convert_to_numpy=True)
+                                    tag.embedding = emb
+                                    tag.save(update_fields=["embedding"])
+                                    print(f"[19] Generated embedding for tag: {tag.name}")
+                                except Exception as e:
+                                    print(f"[19] Embedding error for {tag.name}: {e}")
+
+                        # 4) save as JSONField list of strings
+                        paper.tags = tag_names
+                        paper.save(update_fields=["tags"])
+                        print(f"[19] Tags saved to paper.tags: {tag_names}")
+
+            except Exception as e:
+                # print full traceback to help debugging
+                import traceback
+                print(f"[Tag Extraction Error] {e}")
+                traceback.print_exc()
+
+            # 3. Summary Generation
+            try:
+                print("[3] Generating summary using local Llama model...")
+                summary = generate_summary(paper)  # 👈 call it here
+
+                if summary:
+                    paper.summary = summary  # save to model if you have a field
+                    paper.save(update_fields=["summary"])
+                    print("[3] ✅ Summary generated and saved.")
+                else:
+                    print("[3] ⚠️ No summary generated.")
+            except Exception as e:
+                print(f"[3] ❌ Summary generation failed: {e}")
+            
+            # 4. Citation Extraction and Matching
+            try:
+                print("[22] Extracting and matching citations")
+                from utils.citation_matcher import extract_and_match_citations
+                
+                # This function will:
+                # - Extract citations from the paper text
+                # - Match them against existing papers in database
+                # - Create MatchedCitation records
+                matched_citations = extract_and_match_citations(paper)
+                
+                # Update cached citation counts
+                paper.matched_count_cached = len(matched_citations)
+                paper.save(update_fields=["matched_count_cached"])
+                
+                print(f"[23] Found and saved {len(matched_citations)} citations")
+            except Exception as e:
+                print(f"[Citation Matching Error] {e}")
+
+            # Mark processing complete
+            try:
+                paper.status = "complete"
+                paper.save(update_fields=["status"])
+                print("[24] All processing complete - status set to 'complete'")
+            except Exception as e:
+                print(f"[Status Update Error] {e}")
 
             return redirect("/papers/upload?status=success")
         else:
@@ -415,7 +450,7 @@ def paper_upload(request):
         form = PaperForm()
 
     status = request.GET.get("status")
-    print(f"[18] Rendering template with status: {status}")
+    print(f"[25] Rendering template with status: {status}")
     return render(request, "papers/paper_upload.html", {
         "form": form,
         "status": status,
@@ -424,6 +459,23 @@ def paper_upload(request):
     })
 
 
+def _get_paper_text_for_tagging(paper):
+    """Helper to safely extract text from paper for tagging"""
+    text_parts = []
+    
+    if paper.title:
+        text_parts.append(str(paper.title))
+    
+    if paper.abstract:
+        text_parts.append(str(paper.abstract))
+    
+    if paper.authors:
+        if isinstance(paper.authors, (list, tuple)):
+            text_parts.append(" ".join(str(a) for a in paper.authors))
+        else:
+            text_parts.append(str(paper.authors))
+    
+    return " ".join(text_parts)
 
 @login_required
 def profile_page(request):
@@ -453,6 +505,39 @@ def unsave_paper(request, pk):
             'is_saved': False
         })
     return JsonResponse({'status': 'unsaved'})
+
+@login_required
+def save_paper_list(request, pk):
+    paper = get_object_or_404(Paper, pk=pk)
+    
+    # Your logic to save the paper for the user
+    SavedPaper.objects.get_or_create(user=request.user, paper=paper)
+    
+    # Create the context for the *new* state
+    context = {
+        'paper': paper,
+        'is_saved': True  # The new state is 'saved'
+    }
+    
+    # Return the rendered partial, not the whole page
+    return render(request, 'partials/save_button_list.html', context)
+
+@login_required
+def unsave_paper_list(request, pk):
+    paper = get_object_or_404(Paper, pk=pk)
+    
+    # Your logic to unsave the paper
+    SavedPaper.objects.filter(user=request.user, paper=paper).delete()
+    
+    # Create the context for the *new* state
+    context = {
+        'paper': paper,
+        'is_saved': False  # The new state is 'not saved'
+    }
+    
+    # Return the rendered partial
+    return render(request, 'partials/save_button_list.html', context)
+
 
 @login_required
 def toast(request):

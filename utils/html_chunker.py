@@ -1,10 +1,14 @@
 import os
 import json
 from bs4 import BeautifulSoup
-from django.conf import settings
+import re
 
+# --- CONFIG ---
+MERGED_HTML = r"chm_e326c8ff/merged.html"
+OUTPUT_JSON = "merged_chunks2.json"
+
+# --- STEP 1: Extract sections from merged.html ---
 def extract_sections_from_merged_html(merged_path):
-    """Extract relevant sections from merged.html inside CHM folder."""
     with open(merged_path, "r", encoding="utf-8", errors="ignore") as f:
         soup = BeautifulSoup(f, "html.parser")
 
@@ -16,30 +20,38 @@ def extract_sections_from_merged_html(merged_path):
     current_title = None
     current_text = []
 
+    # Iterate through direct children of <div id="content">
     for elem in content_div.children:
-        if elem.name == "h2":  # detect new section
-            if current_title and current_text:
-                if is_valid_section(current_title):
-                    sections.append({
-                        "title": current_title.strip(),
-                        "text": " ".join(current_text).strip()
-                    })
-            current_title = elem.get_text().strip()
+        if elem.name == "h2":
+            # Save previous section if valid
+            if current_title and current_text and is_valid_section(current_title):
+                section_type = classify_section(current_title)
+                sections.append({
+                    "title": current_title.strip(),
+                    "text": " ".join(current_text).strip(),
+                    "section_type": section_type
+                })
+            # Start new section
+            current_title = elem.get_text(strip=True)
             current_text = []
         elif elem.name:
             current_text.append(elem.get_text(separator=" ", strip=True))
 
+    # Add last section
     if current_title and current_text and is_valid_section(current_title):
+        section_type = classify_section(current_title)
         sections.append({
             "title": current_title.strip(),
-            "text": " ".join(current_text).strip()
+            "text": " ".join(current_text).strip(),
+            "section_type": section_type
         })
 
+    print(f"[+] Extracted {len(sections)} sections")
     return sections
 
 
+# --- STEP 2: Section filter ---
 def is_valid_section(title):
-    """Keep Abstract and Chapters I–V only."""
     t = title.lower()
     keep = (
         "abstract" in t
@@ -53,8 +65,28 @@ def is_valid_section(title):
     return keep and not skip
 
 
+# --- STEP 3: Section classifier ---
+def classify_section(title):
+    t = title.lower().strip()
+
+    if "abstract" in t:
+        return "abstract"
+    elif re.match(r"chapter\s*i\b", t):
+        return "introduction"
+    elif re.match(r"chapter\s*ii\b", t) or "review of related" in t or "related studies" in t:
+        return "rrl"
+    elif re.match(r"chapter\s*iii\b", t):
+        return "methodology"
+    elif re.match(r"chapter\s*iv\b", t):
+        return "results"
+    elif re.match(r"chapter\s*v\b", t):
+        return "conclusion"
+    else:
+        return "other"
+
+
+# --- STEP 4: Chunk text ---
 def chunk_text(text, max_chars=1000):
-    """Split text into 1000-character chunks (sentence-aware)."""
     sentences = text.split(". ")
     chunks, current = [], ""
 
@@ -70,12 +102,9 @@ def chunk_text(text, max_chars=1000):
     return chunks
 
 
-def process_html_to_chunks(merged_html_path, paper_title):
-    """
-    Process merged.html into JSON chunks for storage or embedding.
-    Returns a Python list of chunks.
-    """
-    sections = extract_sections_from_merged_html(merged_html_path)
+# --- STEP 5: Process and save ---
+def process_html_to_chunks(merged_html, output_json):
+    sections = extract_sections_from_merged_html(merged_html)
     chunks = []
     chunk_id = 1
 
@@ -84,16 +113,25 @@ def process_html_to_chunks(merged_html_path, paper_title):
             chunks.append({
                 "chunk_id": chunk_id,
                 "title": section["title"],
+                "section_type": section["section_type"],
                 "text": chunk
             })
             chunk_id += 1
 
-    # Save to media folder, next to CHM
-    output_dir = os.path.join(settings.MEDIA_ROOT, f"chm_{paper_title}")
-    os.makedirs(output_dir, exist_ok=True)
-    output_json_path = os.path.join(output_dir, "merged_chunks.json")
-
-    with open(output_json_path, "w", encoding="utf-8") as f:
+    with open(output_json, "w", encoding="utf-8") as f:
         json.dump(chunks, f, ensure_ascii=False, indent=2)
 
+    print(f"[+] Saved {len(chunks)} total chunks to {output_json}")
     return chunks
+
+
+# --- STEP 6: Run ---
+if __name__ == "__main__":
+    if not os.path.exists(MERGED_HTML):
+        print(f"[!] File not found: {MERGED_HTML}")
+    else:
+        chunks = process_html_to_chunks(MERGED_HTML, OUTPUT_JSON)
+        print("\n[Sample Output Preview]")
+        for c in chunks[:3]:
+            print(f"\n--- {c['title']} ({c['section_type']}) | Chunk {c['chunk_id']} ---")
+            print(c['text'][:300] + ("..." if len(c['text']) > 300 else ""))

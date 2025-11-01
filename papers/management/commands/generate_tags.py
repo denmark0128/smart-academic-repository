@@ -13,24 +13,24 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.NOTICE(f"Found {papers.count()} papers. Starting tag update..."))
 
-        # Use a transaction so all updates are atomic
         with transaction.atomic():
             for paper in papers:
                 try:
-                    combined_text = " ".join([
-                        paper.title or "",
-                    ]).strip()
-
-                    if not combined_text:
+                    text = " ".join([paper.title or "", paper.abstract or ""]).strip()
+                    if not text:
                         self.stdout.write(self.style.WARNING(f"Skipping '{paper.title}' (no content)"))
                         continue
 
-                    tags = extract_tags(combined_text)
-                    paper.tags = tags
-                    paper.save(update_fields=["tags"])
+                    # extract_tags returns list of dicts with name, description, score
+                    tags_data = extract_tags(text)
+
+                    # Store only the tag names in the JSONField
+                    tag_names = [tag['name'] for tag in tags_data]
+                    paper.tags = tag_names
+                    paper.save(update_fields=['tags'])
 
                     updated_count += 1
-                    self.stdout.write(f"✅ Updated: {paper.title} ({len(tags)} tags)")
+                    self.stdout.write(f"✅ Updated: {paper.title} ({len(tag_names)} tags)")
 
                 except Exception as e:
                     error_count += 1

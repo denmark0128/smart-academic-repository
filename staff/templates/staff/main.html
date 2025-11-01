@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen" 
+     x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'dashboard' }"
+     x-init="$watch('tab', value => {
+       const url = new URL(window.location);
+       url.searchParams.set('tab', value);
+       history.pushState({}, '', url);
+     })">
+
+  <!-- Tabs -->
+  <div class="flex space-x-4">
+    <button 
+      @click="tab = 'dashboard'"
+      :class="tab === 'dashboard' 
+        ? 'border-b-2 border-indigo-600 text-indigo-600' 
+        : 'border-transparent text-zinc-800 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-200'">
+      Dashboard
+    </button>
+
+    <button 
+      @click="tab = 'tags'"
+      :class="tab === 'tags' 
+        ? 'border-b-2 border-indigo-600 text-indigo-600' 
+        : 'border-transparent text-zinc-800 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-200'">
+      Manage Tags
+    </button>
+    <button 
+      @click="tab = 'papers'"
+      :class="tab === 'papers' 
+        ? 'border-b-2 border-indigo-600 text-indigo-600' 
+        : 'border-transparent text-zinc-800 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-200'">
+      Manage Papers
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Dashboard Tab -->
+    <div 
+      x-show="tab === 'dashboard'" 
+      hx-get="{% url 'staff_dashboard_partial' %}"
+      hx-trigger="load"
+      hx-swap="innerHTML"
+      class="mt-4"
+      x-transition>
+      <div class="animate-pulse space-y-4">
+        <template x-for="i in 6" :key="i">
+          <div class="h-10 bg-gray-300 rounded w-full"></div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Manage Tags Tab -->
+    <div 
+      x-show="tab === 'tags'"
+      hx-get="{% url 'staff_tags_partial' %}"
+      hx-trigger="revealed"
+      hx-swap="innerHTML"
+      class="mt-4"
+      x-transition>
+      <div class="animate-pulse space-y-4">
+        <template x-for="i in 6" :key="i">
+          <div class="h-10 bg-gray-300 rounded w-full"></div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Manage Papers Tab -->
+    <div 
+      x-show="tab === 'papers'"
+      hx-get="{% url 'staff_papers_partial' %}"
+      hx-trigger="revealed"
+      hx-swap="innerHTML"
+      class="mt-4"
+      x-transition>
+      <div class="animate-pulse space-y-4">
+        <template x-for="i in 6" :key="i">
+          <div class="h-10 bg-gray-300 rounded w-full"></div>
+        </template>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

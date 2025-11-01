@@ -3,7 +3,22 @@ from .models import Paper
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Field, Div
 from django.forms import ClearableFileInput
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.validators import RegexValidator
 
+class StyledLoginForm(AuthenticationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
+            "class": "input input-bordered w-full dark:bg-zinc-800 dark:border-zinc-700",
+            "placeholder": "Username",
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            "class": "input input-bordered w-full dark:bg-zinc-800 dark:border-zinc-700",
+            "placeholder": "Password",
+        })
+    )
 
 class PaperForm(forms.ModelForm):
     file = forms.FileField(
@@ -35,6 +50,13 @@ class PaperForm(forms.ModelForm):
             'placeholder': "Your research paper title here"
         })
     )
+    year = forms.IntegerField(
+        required=False,  # allow blank
+        widget=forms.TextInput(attrs={
+            'placeholder': 'YYYY',
+            'oninput': 'this.value = this.value.slice(0,4)',  # limit typing
+        })
+    )
     abstract = forms.CharField(
         widget=forms.Textarea(attrs={
             'rows': 4,
@@ -59,6 +81,7 @@ class PaperForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_id = 'upload-form'
+        self.helper.label_class = "block text-sm font-semibold text-gray-700 dark:text-zinc-300"
         self.helper.form_class = 'space-y-6'
 
         self.helper.layout = Layout(

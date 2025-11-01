@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from pgvector.django import VectorField
+from django.core.cache import cache
+from django.core.validators import RegexValidator
 
 COLLEGE_CHOICES = [
     ('ccs', 'College of Computer Studies'),
@@ -37,7 +39,12 @@ class Paper(models.Model):
     is_indexed = models.BooleanField(default=False)
     is_registered = models.BooleanField(default=False)
     status = models.CharField(max_length=20, default="pending")
-    year = models.PositiveIntegerField(null=True, blank=True, db_index=True)
+    year = models.PositiveIntegerField(null=True, blank=True, db_index=True,validators=[
+            RegexValidator(
+                regex=r'^\d{4}$',
+                message='Year must be exactly 4 digits.',
+            )
+        ])
     citation_count_cached = models.IntegerField(default=0)
     matched_count_cached = models.IntegerField(default=0)
     views = models.PositiveIntegerField(default=0)
@@ -111,3 +118,28 @@ class ExtractedFigure(models.Model):
     image = models.ImageField(upload_to="extracted/")
     page_number = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+    embedding = VectorField(dimensions=768, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
+    
+    def __str__(self):
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Clear cache when tags are modified
+        cache.delete('active_tags_list')
+    
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        # Clear cache when tags are deleted
+        cache.delete('active_tags_list')

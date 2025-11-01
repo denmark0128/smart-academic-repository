@@ -8,11 +8,11 @@
       type="text" 
       placeholder="Search by title or author..."
       x-model="searchQuery"
-      class="input input-bordered border border-gray-300 rounded-lg w-full shadow-sm md:w-1/2 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2">
+      class="input input-bordered w-full border border-gray-300 rounded-lg shadow-sm md:w-1/2 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2">
 
     <select 
       x-model="filterStatus"
-      class="select select-bordered border border-gray-300 rounded-lg w-full shadow-sm md:w-1/3 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2">
+      class="select select-bordered w-full border border-gray-300 rounded-lg shadow-sm md:w-1/3 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700 p-2">
       <option value="">All Status</option>
       <option value="registered">Registered</option>
       <option value="pending">Pending</option>
@@ -26,15 +26,16 @@
   </div>
 
   <!-- Table -->
-  <div class="overflow-x-auto  border border-gray-300 shadow-sm rounded-lg dark:bg-zinc-800 dark:border-zinc-700">  
-    <table class="table table-xs w-full rounded-lg dark:[&>tbody>tr:nth-child(even)]:bg-zinc-800 dark:[&>tbody>tr:nth-child(odd)]:bg-zinc-900 dark:border-zinc-700 " x-ref="tagsTable">
+  <div class="overflow-x-auto border border-gray-300 rounded-lg dark:bg-zinc-800 dark:border-zinc-700">  
+    <table class="table table-xs w-full rounded-lg dark:[&>tbody>tr:nth-child(even)]:bg-zinc-800 dark:[&>tbody>tr:nth-child(odd)]:bg-zinc-900" x-ref="paperTable">
       <thead>
-        <tr class="border-b border-gray-200 dark:bg-zinc-800 dark:border-zinc-700">
-          <th class="py-3 px-6 text-left text-sm font-semibold text-black dark:text-zinc-300">Title</th>
-          <th class="py-3 px-6 text-left text-sm font-semibold text-black dark:text-zinc-300">Author(s)</th>
-          <th class="py-3 px-6 text-left text-sm font-semibold text-black dark:text-zinc-300">Tags</th>
-          <th class="py-3 px-6 text-left text-sm font-semibold text-black dark:text-zinc-300">Status</th>
-          <th class="py-3 px-6 text-left text-sm font-semibold text-black dark:text-zinc-300">DOI</th>
+        <tr class="bg-gray-50 border-b border-gray-200 dark:bg-zinc-800 dark:border-zinc-700">
+          <th class="py-3 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Title</th>
+          <th class="py-3 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Author(s)</th>
+          <th class="py-3 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Tags</th>
+          <th class="py-3 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Status</th>
+          <th class="py-3 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">DOI</th>
+          <th class="py-3 px-6 text-right text-sm font-semibold text-gray-700 dark:text-zinc-300">Actions</th>
         </tr>
       </thead>
 
@@ -63,8 +64,18 @@
 
           <!-- Tags -->
           <td class="py-3 px-6 text-sm text-gray-600 dark:text-zinc-300">
-            {{ paper.tags }}
+            {% if paper.tags %}
+              {% for tag in paper.tags %}
+                <span class="badge badge-soft badge-primary badge-sm p-2 text-sm items-center gap-1 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
+                  {{ tag }}
+                </span>
+              {% endfor %}
+            {% else %}
+              <span class="text-gray-400 text-xs">No tags</span>
+            {% endif %}
+
           </td>
+
 
           <!-- Status -->
           <td class="py-3 px-6">
@@ -83,10 +94,23 @@
           <td class="py-3 px-6 text-sm text-blue-600 hover:underline dark:text-zinc-300">
             {{ paper.local_doi }}
           </td>
+
+          <!-- Actions -->
+          <td class="py-3 px-6 text-right">
+            <button 
+              hx-post="{% url 'staff_paper_regenerate_tags' paper.id %}"
+              hx-target="closest tbody"
+              hx-swap="outerHTML"
+              class="btn text-xs px-3 py-1 rounded bg-green-100 text-green-800 hover:bg-green-200 transition dark:text-green-300 dark:bg-green-900"
+              title="Regenerate tags using AI">
+              <span class="htmx-indicator loading loading-spinner loading-xs"></span>
+              Regenerate Tags
+            </button>
+          </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5" class="py-6 px-6 text-center text-gray-500 text-sm">
+          <td colspan="6" class="py-6 px-6 text-center text-gray-500 text-sm">
             No papers found.
           </td>
         </tr>

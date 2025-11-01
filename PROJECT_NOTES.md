@@ -63,6 +63,8 @@ This notepad documents all major changes, features, and improvements made to the
 - added HNSW index with cosine similarity is paperchunk embedding vector field(used in semantic search)
 - added GIN index for paperchunk text field(used in BM25)
 
+## 11. added .env
 
+## 12. added dockerfiles 
 _Created at: June 17, 2025_  
 _Last updated: August 4, 2025_

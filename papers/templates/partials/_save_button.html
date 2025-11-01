@@ -1,14 +1,12 @@
-<div id="save-btn-{{ paper.id }}" >
+<div id="save-btn-{{ paper.id }}">
     {% if is_saved %}
     <form 
         hx-post="{% url 'unsave_paper' paper.id %}" 
         hx-target="#save-btn-{{ paper.id }}" 
         hx-swap="outerHTML"
-        hx-on="htmx:afterRequest: 
-               htmx.ajax('GET', '{% url 'toast' %}?message=Paper removed!', '#toast-container')"
     >
         {% csrf_token %}
-        <button class="btn btn-soft bg-white text-sm p-4 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-800 text-gray-800 dark:text-zinc-200">
+        <button type="submit" class="btn btn-soft bg-white text-sm p-4 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-800 text-gray-800 dark:text-zinc-200">
             Unsave Paper
         </button>
     </form>
@@ -17,11 +15,9 @@
         hx-post="{% url 'save_paper' paper.id %}" 
         hx-target="#save-btn-{{ paper.id }}" 
         hx-swap="outerHTML"
-        hx-on="htmx:afterRequest: 
-               htmx.ajax('GET', '{% url 'toast' %}?message=Paper saved!', '#toast-container')"
     >
         {% csrf_token %}
-        <button class="btn btn-soft bg-white text-sm p-4 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-800 text-gray-800 dark:text-zinc-200">
+        <button type="submit" class="btn btn-soft bg-white text-sm p-4 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-800 text-gray-800 dark:text-zinc-200">
             Save Paper
         </button>
     </form>

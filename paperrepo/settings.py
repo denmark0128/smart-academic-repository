@@ -181,10 +181,21 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
-ALLOWED_HOSTS = ["django-thesis.onrender.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["django-thesis.onrender.com", "localhost", "127.0.0.1", '.ngrok-free.dev' ]
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.dev']
 
 INTERNAL_IPS = ["127.0.0.1"]
 
 if DEBUG:
     import mimetypes
     mimetypes.add_type("application/javascript", ".js", True)
+
+
+# Simplest - works immediately, no setup
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'

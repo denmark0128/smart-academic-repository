@@ -1,0 +1,17 @@
+<div class="space-y-6">
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-200">Manage Papers</h1>
+  <div id="papers-partial-container"
+          hx-get="{% url 'staff_papers_table_partial' %}"
+          hx-trigger="load"
+          hx-swap="innerHTML">
+        <!-- Loading skeleton -->
+        <div class="p-6">
+          <div class="animate-pulse space-y-3">
+            <div class="h-10 bg-gray-300 rounded"></div>
+            <div class="h-10 bg-gray-300 rounded"></div>
+            <div class="h-10 bg-gray-300 rounded"></div>
+            <div class="h-10 bg-gray-300 rounded"></div>
+          </div>
+        </div>
+  </div>
+</div>

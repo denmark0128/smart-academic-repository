@@ -12,7 +12,7 @@ from django.conf import settings
 # -------------------------------
 # Settings
 # -------------------------------
-EMBED_MODEL = "google/embeddinggemma-300m"
+EMBED_MODEL = "ibm-granite/granite-embedding-english-r2"
 _model = None
 
 
@@ -26,43 +26,60 @@ def get_model():
 # -------------------------------
 # PDF extraction & chunking
 # -------------------------------
-def extract_and_chunk(pdf_path, min_size=100, max_size=500):
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+import fitz
+import re
+
+def extract_and_chunk(pdf_path, chunk_size=1000, chunk_overlap=200):
     """
-    Extracts text from a PDF and chunks into paragraphs of reasonable size.
+    Extracts text from PDF and chunks recursively, ignoring appendices after 5000 chars.
     """
     doc = fitz.open(pdf_path)
-    all_chunks = []
-
+    full_text = ""
+    page_map = []  # Track which page each character belongs to
+    
     for page_num, page in enumerate(doc, start=1):
-        text = page.get_text("text").replace("\r", "").strip()
-        # Split into paragraphs by double newlines
-        raw_paragraphs = re.split(r"\n\s*\n", text)
-        paragraphs = [
-            re.sub(r"\s+", " ", p).strip()
-            for p in raw_paragraphs if p.strip()
-        ]
-
-        buffer = ""
-        for para in paragraphs:
-            if len(buffer.split()) + len(para.split()) < min_size:
-                buffer += " " + para
-            else:
-                if buffer:
-                    all_chunks.append({"text": buffer.strip(), "page": page_num})
-                    buffer = ""
-                while len(para.split()) > max_size:
-                    split_point = para[:max_size].rfind(".")
-                    if split_point == -1:
-                        split_point = max_size
-                    all_chunks.append({"text": para[:split_point+1].strip(), "page": page_num})
-                    para = para[split_point+1:]
-                buffer = para
-        if buffer:
-            all_chunks.append({"text": buffer.strip(), "page": page_num})
-
-    return [
-        {**chunk, "chunk_id": i} for i, chunk in enumerate(all_chunks)
-    ]
+        text = page.get_text("text")
+        
+        # After 5000 chars, start looking for appendices to ignore
+        if len(full_text) > 5000:
+            if re.search(r'(^|\n)\s*(APPENDIX|APPENDICES)', text, re.IGNORECASE | re.MULTILINE):
+                # Stop here, ignore rest
+                break
+        
+        full_text += text
+        page_map.extend([page_num] * len(text))
+    
+    doc.close()
+    
+    # Recursive chunking with LangChain
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separators=["\n\n", "\n", ". ", " ", ""]
+    )
+    
+    chunks = text_splitter.split_text(full_text)
+    
+    # Add metadata
+    result = []
+    char_position = 0
+    for i, chunk in enumerate(chunks):
+        # Find approximate page for this chunk
+        chunk_start = full_text.find(chunk, char_position)
+        page_num = page_map[chunk_start] if chunk_start < len(page_map) else page_map[-1]
+        
+        result.append({
+            "text": chunk,
+            "chunk_id": i,
+            "page": page_num
+        })
+        char_position = chunk_start + len(chunk)
+    
+    return result
 
 
 # -------------------------------

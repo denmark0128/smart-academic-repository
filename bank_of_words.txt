@@ -1,8 +1,0 @@
-machine learning
-computer vision
-convolutional neural network
-semantic search
-financial study
-health study
-environmental study
-web development

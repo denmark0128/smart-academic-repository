@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Machine Learning",
+    "description": "Machine Learning involves designing algorithms and models that can learn patterns from data and make predictions or decisions without being explicitly programmed. It is widely used in applications such as image recognition, natural language processing, recommendation systems, and predictive analytics. Students often explore supervised, unsupervised, and reinforcement learning techniques in their projects."
+  },
+  {
+    "name": "Data Science",
+    "description": "Data Science focuses on extracting meaningful insights from complex and large datasets using statistical methods, data visualization, and computational tools. It combines knowledge from mathematics, programming, and domain-specific expertise to solve real-world problems. Common applications include data analysis for business, healthcare, education, and scientific research."
+  },
+  {
+    "name": "Computer Vision",
+    "description": "Computer Vision is the study of enabling computers to interpret and understand visual information from the world, such as images and videos. This field includes image processing, object detection, facial recognition, and motion tracking. Projects often involve deep learning models and neural networks to solve practical problems like automated surveillance or medical imaging analysis."
+  },
+  {
+    "name": "Natural Language Processing",
+    "description": "Natural Language Processing (NLP) deals with understanding, interpreting, and generating human language using computational methods. It is applied in tasks such as sentiment analysis, language translation, text summarization, and chatbot development. NLP projects often combine linguistics, computer science, and machine learning techniques."
+  },
+  {
+    "name": "Web Development",
+    "description": "Web Development involves creating and maintaining websites and web applications using technologies like HTML, CSS, JavaScript, and server-side programming. Students often develop interactive and responsive web apps, e-commerce platforms, content management systems, and portals for various domains including education and business."
+  },
+  {
+    "name": "Mobile Applications",
+    "description": "Mobile Application Development focuses on designing and building apps for mobile devices, primarily using Android or iOS platforms. Projects often include user interface design, backend integration, and performance optimization. Applications range from educational apps, productivity tools, games, and utilities for daily life."
+  },
+  {
+    "name": "Database Systems",
+    "description": "Database Systems cover the design, implementation, and management of structured data storage using relational or non-relational databases. Students learn about database modeling, SQL queries, data normalization, indexing, and transaction management. Typical projects include school management systems, e-commerce databases, and research data repositories."
+  },
+  {
+    "name": "Information Security",
+    "description": "Information Security focuses on protecting computer systems and digital information from unauthorized access, misuse, or attacks. This includes encryption, authentication, secure coding practices, and network security. Projects often explore vulnerabilities, ethical hacking, and creating secure applications or networks."
+  },
+  {
+    "name": "Artificial Intelligence",
+    "description": "Artificial Intelligence (AI) is the development of systems that can perform tasks that typically require human intelligence, such as reasoning, learning, and decision-making. AI projects include robotics, recommendation systems, predictive analytics, and autonomous systems, combining machine learning, logic, and computer science principles."
+  },
+  {
+    "name": "Software Engineering",
+    "description": "Software Engineering applies systematic engineering approaches to the design, development, testing, and maintenance of software. Students work on software development life cycles, version control, requirement analysis, and deployment practices. Common projects include full-stack applications, enterprise systems, and collaborative development tools."
+  }
+]

@@ -57,7 +57,7 @@
         {% if item.paper %}
           <a href="{% url 'paper_detail' item.paper.pk %}" class="font-semibold text-base text-gray-900 tracking-tight hover:underline mb-1 dark:text-zinc-300">{{ item.paper.title }}</a>
         {% else %}
-          <span class="text-base text-gray-400 font-semibold">[Paper not found]</span>
+          <span class="text-base text-gray-400 font-semibold dark:text-zinc-300">[Paper not found]</span>
         {% endif %}
         <div class="text-xs text-gray-700 mb-1 dark:text-zinc-300">
           {% if item.paper and item.paper.authors %}
@@ -67,7 +67,7 @@
         <div class="text-xs text-gray-500 mb-1 dark:text-zinc-300">
           {% if item.paper %}{{ item.paper.college }}{% endif %} {% if item.paper %}{{ item.paper.program }}{% endif %} {% if item.paper %}- {{ item.paper.year }}{% endif %}
         </div>
-        <div class="text-xs text-gray-600 mb-1 dark:text-zinc-300">
+        <div class="text-xs mb-1 ">
           {% if item.snippet %}{{ item.snippet|truncatechars_html:100|safe }}{% endif %}
         </div>
         <div class="flex flex-wrap gap-1 mb-2">
@@ -124,7 +124,7 @@
       {% endwith %}
         
       <!-- Snippet -->
-      <div x-data="{ expanded: false }" x-cloak class="mt-2 text-gray-600 text-sm leading-relaxed">
+      <div x-data="{ expanded: false }" x-cloak class="mt-2 text-gray-600  text-sm leading-relaxed dark:text-zinc-300 ">
         {% if item.snippet|length > 180 %}
           <!-- Collapsed view -->
           <span x-show="!expanded">
@@ -133,7 +133,7 @@
           </span>
 
           <!-- Expanded view -->
-          <span x-show="expanded">
+          <span x-show="expanded" class="dark:text-zinc-300">
             {{ item.snippet|safe }} 
             <button @click="expanded = false" class="text-blue-600 hover:underline text-xs ml-1">See less</button>
           </span>
@@ -229,16 +229,16 @@
             <a href="{{ item.paper.file.url }}" download class="btn btn-soft border bg-white font-light border-gray-200 btn-sm dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300">
               Download PDF
             </a>
-            <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-soft btn-sm font-light border border-gray-200 bg-white dark:bg-zinc-800 dark:border-zinc-700">
-              View in PDF Viewer
+            <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-soft btn-sm font-light border bg-red-600 text-white  border-gray-200 bg-white dark:bg-red-900/50 dark:border-red-800">
+              PDF 
             </a>
           {% endif %}
           {% if item.paper.merged_html %}
-            <a href="{{ item.paper.merged_html.url }}" target="_blank" class="btn btn-soft btn-sm font-light border border-gray-200 bg-white dark:bg-zinc-800 dark:border-zinc-700">View Merged HTML</a>
+            <a href="{{ item.paper.merged_html.url }}" target="_blank" class="btn btn-soft btn-sm font-light border border-gray-200 bg-blue-600 text-white dark:bg-blue-900/50 dark:border-blue-800">HTML</a>
           {% endif %}
           {% if user.is_authenticated %}
           <div id="save-btn-{{ item.paper.id }}">
-            {% include 'partials/_save_button_list.html' with paper=item.paper is_saved=item.paper.is_saved %}
+            {% include 'partials/save_button_list.html' with paper=item.paper is_saved=item.paper.is_saved %}
           </div>
           {% else %}
           <div class="text-center">
