@@ -23,7 +23,7 @@ from random import randint
 
 from papers.models import Paper, SavedPaper, MatchedCitation, Tag
 from papers.forms import PaperForm
-from papers.utils.nlp import extract_tags, get_mpnet_model
+from papers.utils.nlp import extract_tags, get_embedding_model
 from utils.extract_metadata_from_abstract import extract_metadata_from_abstract
 from utils.chm_to_html import merge_chm_to_html
 from utils.metadata_extractor import (
@@ -345,7 +345,41 @@ def paper_upload(request):
                     print(f"[CHM Metadata Error] {e}")
 
             # --- POST-PROCESSING PIPELINE ---
-            
+            # 0. Embedding the title and abstract
+            try:
+                print("[15a] Generating title and abstract embeddings...")
+                
+                # (Ensure this import is at the top of your view file)
+                model = get_embedding_model()
+                
+                fields_to_update = []
+                
+                # Embed the title
+                if paper.title:
+                    try:
+                        paper.title_embedding = model.encode(paper.title, convert_to_numpy=True)
+                        fields_to_update.append("title_embedding")
+                        print("[15b] Generated title embedding")
+                    except Exception as e:
+                        print(f"[Title Embedding Error] {e}")
+                
+                # Embed the abstract
+                if paper.abstract:
+                    try:
+                        paper.abstract_embedding = model.encode(paper.abstract, convert_to_numpy=True)
+                        fields_to_update.append("abstract_embedding")
+                        print("[15c] Generated abstract embedding")
+                    except Exception as e:
+                        print(f"[Abstract Embedding Error] {e}")
+                
+                # Save the new embeddings to the database
+                if fields_to_update:
+                    paper.save(update_fields=fields_to_update)
+                    print(f"[15d] Saved new embeddings: {fields_to_update}")
+                    
+            except Exception as e:
+                print(f"[Metadata Embedding Error] {e}")
+
             # 1. Semantic Search Indexing (creates embeddings + chunks)
             try:
                 print("[16] Indexing paper for semantic search")
@@ -359,48 +393,41 @@ def paper_upload(request):
 
             # 2. Tag/Keyword Extraction
             try:
-                # 1) get plain text to pass to tagger (reuse your helper from staff_paper_regenerate_tags)
-                text_for_tagging = _get_paper_text_for_tagging(paper)
-                if not text_for_tagging.strip():
-                    print("[19] No text available for tagging")
-                else:
-                    # 2) call extract_tags correctly (pass text, not the Paper)
-                    # adjust top_n/min_score to taste
-                    from papers.utils.nlp import extract_tags
-                    tag_names = extract_tags(text_for_tagging, top_n=6, min_score=0.45)
+                print("[18] Using pre-computed embeddings for tagging...")
+                
+                # 1) ✅ Get the embedding we already created
+                embedding_for_tagging = None
+                if paper.abstract_embedding is not None:
+                    embedding_for_tagging = paper.abstract_embedding
+                    print("[18] Using abstract_embedding for tags.")
+                elif paper.title_embedding is not None:
+                    embedding_for_tagging = paper.title_embedding
+                    print("[18] No abstract_embedding, using title_embedding for tags.")
 
-                    if not tag_names:
+                
+                if embedding_for_tagging is None:
+                    print("[19] No text or embeddings available for tagging")
+                else:
+                    # 2) ✅ Call extract_tags WITH the embedding (not text)
+                    from papers.utils.nlp import extract_tags
+                    tags_with_scores = extract_tags(doc_emb=embedding_for_tagging)
+
+                    if not tags_with_scores:
                         print("[19] extract_tags returned no tags")
                     else:
+                        # 3) "Unwrap" the list of dicts into a simple list of names
+                        tag_names = [t['name'] for t in tags_with_scores]
                         print(f"[19] Tags extracted: {tag_names}")
-
-                        # 3) ensure Tag rows exist and have embeddings (same pattern as your working code)
-                        model = get_mpnet_model()
-                        for tag_name in tag_names:
-                            tag, created = Tag.objects.get_or_create(
-                                name=tag_name,
-                                defaults={"is_active": True}
-                            )
-                            if tag.embedding is None:
-                                try:
-                                    emb = model.encode(tag.name, convert_to_numpy=True)
-                                    tag.embedding = emb
-                                    tag.save(update_fields=["embedding"])
-                                    print(f"[19] Generated embedding for tag: {tag.name}")
-                                except Exception as e:
-                                    print(f"[19] Embedding error for {tag.name}: {e}")
-
-                        # 4) save as JSONField list of strings
+                        
+                        # 4) Save the simple list of strings
                         paper.tags = tag_names
                         paper.save(update_fields=["tags"])
                         print(f"[19] Tags saved to paper.tags: {tag_names}")
 
             except Exception as e:
-                # print full traceback to help debugging
                 import traceback
                 print(f"[Tag Extraction Error] {e}")
                 traceback.print_exc()
-
             # 3. Summary Generation
             try:
                 print("[3] Generating summary using local Llama model...")
@@ -471,13 +498,6 @@ def _get_paper_text_for_tagging(paper):
     if paper.abstract:
         text_parts.append(str(paper.abstract))
     
-    if paper.authors:
-        if isinstance(paper.authors, (list, tuple)):
-            text_parts.append(" ".join(str(a) for a in paper.authors))
-        else:
-            text_parts.append(str(paper.authors))
-    
-    return " ".join(text_parts)
 
 @login_required
 def profile_page(request):
@@ -568,7 +588,11 @@ def extract_metadata(request):
 
     filename = uploaded_file.name
     ext = os.path.splitext(filename)[1].lower()
+
+    # --- DEFINE ALL TEMP PATHS HERE ---
     temp_path = os.path.join(settings.MEDIA_ROOT, f"temp_upload_{filename}")
+    merged_html_path = None  # <-- Initialize CHM path as None
+
     print(f"[Extract Metadata] Saving temp file to {temp_path}")  # DEBUG
 
     try:
@@ -583,7 +607,10 @@ def extract_metadata(request):
 
         elif ext == ".chm":
             print("[Extract Metadata] CHM detected, merging CHM...")  # DEBUG
+            
+            # --- This will now assign to the variable defined outside the try block ---
             merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+            
             print(f"[Extract Metadata] CHM merged to {merged_html_path}")  # DEBUG
             metadata = extract_metadata_from_abstract(merged_html_path)
             print(f"[Extract Metadata] CHM metadata extracted: {metadata}")  # DEBUG
@@ -603,9 +630,25 @@ def extract_metadata(request):
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     finally:
+        # --- UPDATED FINALLY BLOCK ---
+        
+        # 1. Delete the initial temp file
         if os.path.exists(temp_path):
-            os.remove(temp_path)
-            print("[Extract Metadata] Temp file removed")  # DEBUG
+            try:
+                os.remove(temp_path)
+                print(f"[Extract Metadata] Temp file removed: {temp_path}")  # DEBUG
+            except Exception as e:
+                # Log error but don't crash
+                print(f"[Extract Metadata Cleanup Error] Failed to remove {temp_path}: {e}")
+
+        # 2. Delete the secondary CHM temp file, if it was created
+        if merged_html_path and os.path.exists(merged_html_path):
+            try:
+                os.remove(merged_html_path)
+                print(f"[Extract Metadata] Merged CHM file removed: {merged_html_path}")  # DEBUG
+            except Exception as e:
+                # Log error but don't crash
+                print(f"[Extract Metadata Cleanup Error] Failed to remove {merged_html_path}: {e}")
     
 
 def paper_insights(request):

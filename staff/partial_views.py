@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from papers.models import Paper, Tag
+from .models import SearchSettings, LlamaSettings
+from .forms import SearchSettingsForm, LlamaSettingsForm
 from django.http import HttpResponse
 from django.core.cache import cache
 from django.contrib import messages
 from django.core.paginator import Paginator
-from papers.utils.nlp import get_mpnet_model, extract_tags
+from papers.utils.nlp import get_embedding_model, extract_tags
 import re
 
 def staff_table_partial(request):
@@ -67,7 +69,7 @@ def staff_tags_table(request):
     
     # Pagination
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(tags_list, 20)  # 20 tags per page
+    paginator = Paginator(tags_list, 50)  # 20 tags per page
     tags = paginator.get_page(page_number)
     
     context = {
@@ -151,7 +153,7 @@ def staff_tags_generate_embedding(request, tag_id):
         
         try:
             print(f"[Embedding] Generating embedding for tag: {tag.name}")
-            model = get_mpnet_model()
+            model = get_embedding_model()
             
             # Use description for embedding if available, otherwise fallback to name
             text_to_embed = tag.description or tag.name
@@ -184,54 +186,58 @@ def staff_papers_table_partial(request):
 
 
 def staff_paper_regenerate_tags(request, paper_id):
-    """Regenerate tags for a paper using AI"""
+    """Regenerate tags for a paper using AI (optimized)"""
     if request.method == 'POST':
         paper = get_object_or_404(Paper, id=paper_id)
         
         try:
             print(f"[Regenerate Tags] Processing paper: {paper.title}")
             
-            # Get text for tagging
-            text_for_tagging = _get_paper_text_for_tagging(paper)
+            # (Ensure these are imported at the top of your file)
+            # from papers.utils.nlp import extract_tags
+            # from papers.utils.helpers import _get_paper_text_for_tagging
+            # from django.contrib import messages
             
-            if text_for_tagging.strip():
-                # Extract tags (returns list of tag name strings)
-                tag_names = extract_tags(text_for_tagging, top_n=5, min_score=0.5)
+            tags_with_scores = None
+
+            # 1. ✅ FAST PATH: Try to use pre-computed abstract embedding
+            if paper.abstract_embedding is not None:
+                print("[Regenerate Tags] Using pre-computed abstract_embedding.")
+                tags_with_scores = extract_tags(doc_emb=paper.abstract_embedding)
+            
+            # 2. ✅ FAST PATH 2: Try to use pre-computed title embedding
+            elif paper.title_embedding is not None:
+                print("[Regenerate Tags] Using pre-computed title_embedding.")
+                tags_with_scores = extract_tags(doc_emb=paper.title_embedding)
+            
+            # 3. ✅ SLOW PATH (Fallback): No embeddings, use full text
+            else:
+                print("[Regenerate Tags] No pre-computed embeddings, falling back to full-text.")
+                text_for_tagging = _get_paper_text_for_tagging(paper)
+                
+                if text_for_tagging and text_for_tagging.strip():
+                    tags_with_scores = extract_tags(text=text_for_tagging)
+                else:
+                    messages.error(request, f'No text available for tag extraction')
+                    return staff_papers_table_partial(request) # Stop here
+            
+            # 4. Process the results
+            if tags_with_scores:
+                tag_names = [t['name'] for t in tags_with_scores]
                 print(f"[Regenerate Tags] Extracted tag names: {tag_names}")
                 
-                if tag_names:
-                    # Ensure all tags exist in database with embeddings
-                    model = get_mpnet_model()
-                    
-                    for tag_name in tag_names:
-                        tag, created = Tag.objects.get_or_create(
-                            name=tag_name,
-                            defaults={'is_active': True}
-                        )
-                        
-                        # Generate embedding if missing
-                        if tag.embedding is None:
-                            try:
-                                embedding = model.encode(tag.name)
-                                tag.embedding = embedding
-                                tag.save(update_fields=['embedding'])
-                                print(f"[Regenerate Tags] Generated embedding for: {tag.name}")
-                            except Exception as e:
-                                print(f"[Regenerate Tags] Embedding error for {tag.name}: {e}")
-                    
-                    # Assign tags list directly (not using .set() since it's a JSONField)
-                    paper.tags = tag_names
-                    paper.save(update_fields=['tags'])
-                    
-                    messages.success(
-                        request, 
-                        f'✓ Regenerated {len(tag_names)} tag(s) for "{paper.title[:50]}..."'
-                    )
-                    print(f"[Regenerate Tags] Successfully updated tags: {tag_names}")
-                else:
-                    messages.warning(request, f'No suitable tags found')
+                paper.tags = tag_names
+                paper.save(update_fields=['tags'])
+                
+                messages.success(
+                    request, 
+                    f'✓ Regenerated {len(tag_names)} tag(s) for "{paper.title[:50]}..."'
+                )
             else:
-                messages.error(request, f'No text available for tag extraction')
+                print("[Regenerate Tags] No suitable tags found.")
+                messages.warning(request, f'No suitable tags found')
+                paper.tags = [] # Clear existing tags
+                paper.save(update_fields=['tags'])
                 
         except Exception as e:
             messages.error(request, f"Error: {str(e)}")
@@ -240,7 +246,6 @@ def staff_paper_regenerate_tags(request, paper_id):
             traceback.print_exc()
     
     return staff_papers_table_partial(request)
-
 
 def _get_paper_text_for_tagging(paper):
     """Helper to safely extract text from paper for tagging"""
@@ -259,3 +264,59 @@ def _get_paper_text_for_tagging(paper):
             text_parts.append(str(paper.authors))
     
     return " ".join(text_parts)
+
+
+def search_settings_view(request):
+    """View for managing search settings"""
+    settings = SearchSettings.get_settings()
+    
+    if request.method == 'POST':
+        form = SearchSettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            form.save()
+            # ✅ CORRECTED: Use the same key defined in utils.py
+            cache.delete('active_search_settings') 
+            
+            # ✅ For HTMX: return just the form fields with fresh data
+            form = SearchSettingsForm(instance=settings)
+            if request.headers.get('HX-Request'):
+                return render(request, 'staff/partials/settings_search_form_fields.html', {
+                    'form': form,
+                    'success_message': '✅ Search Settings updated successfully!'
+                })
+    else:
+        form = SearchSettingsForm(instance=settings)
+    
+    return render(request, 'staff/search_settings.html', {
+        'form': form,
+        'settings': settings
+    })
+
+# staff/views.py (add this function to the same file)
+
+def llama_settings_view(request):
+    """View for managing Llama settings"""
+    settings = LlamaSettings.get_settings()
+    
+    if request.method == 'POST':
+        form = LlamaSettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            form.save()
+            # ✅ Use the correct cache key for Llama settings
+            cache.delete('active_llama_settings') 
+            
+            # ✅ For HTMX: return just the form fields with fresh data
+            form = LlamaSettingsForm(instance=settings)
+            # You can reuse the same partial if its structure is generic
+            return render(request, 'staff/partials/settings_llama_form_fields.html', {
+                'form': form,
+                'success_message': '✅ Llama Settings updated successfully!'
+            })
+    else:
+        form = LlamaSettingsForm(instance=settings)
+    
+    # You'll need a separate template for the full page
+    return render(request, 'staff/llama_settings.html', {
+        'form': form,
+        'settings': settings
+    })

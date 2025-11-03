@@ -120,10 +120,12 @@ def paper_list_partial(request):
                 search_results = []
             else:
                 print('Performing search for query:', query)
-                search_results = keyword_search(query, top_k=50)
+                # ✅ Remove top_k=50, let it use database settings (default 5)
+                search_results = keyword_search(query)
                 if not search_results:
                     print('No keyword search results, falling back to semantic search')
-                    search_results = semantic_search(query, top_k=50)
+                    # ✅ Remove top_k=50, let it use database settings (default 5)
+                    search_results = semantic_search(query)
 
             # Build result objects
             paper_ids = [r.get("paper_id") for r in search_results]
@@ -168,7 +170,7 @@ def paper_list_partial(request):
                 "score": "-",
                 "page": None,
             })
-
+    
     # --- Pagination ---
     paginator = Paginator(results, 10)
     page_number = request.GET.get("page")

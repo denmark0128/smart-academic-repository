@@ -1,7 +1,9 @@
-{% load crispy_forms_tags %}
+<!-- partials/uploads/upload_form.html -->
+{% comment %} We no longer need crispy_forms_tags {% endcomment %}
 <style>
-  .asterisk {
-    display: none;
+  /* 🔹 Hide the default ':' from labels */
+  .django-form label {
+    suffix: "";
   }
 
   /* 🔹 Dimmed background effect */
@@ -27,23 +29,198 @@
   html.dark #processing-overlay {
     background: rgba(0, 0, 0, 0.5);
   }
+
+  /* 🔹 Style for form errors */
+  .form-errors ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 4px;
+    color: #ef4444; /* red-500 */
+    font-size: 0.875rem; /* text-sm */
+  }
+
+  /* --- NEW STYLES FOR DRAG & DROP --- */
+
+  /* 1. The wrapper holds the visuals and the hidden input */
+  .file-dropzone-wrapper {
+    position: relative;
+    padding-top: 2rem; /* Give space for the label */
+  }
+
+  /* 2. The visual dropzone box */
+  .file-dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #d1d5db; /* gray-300 */
+    border-radius: 0.5rem; /* rounded-lg */
+    padding: 2.5rem;
+    text-align: center;
+    background-color: #f9fafb; /* gray-50 */
+    transition: background-color 0.2s ease;
+  }
+
+  html.dark .file-dropzone-content {
+    background-color: #1f2937; /* gray-800 */
+    border-color: #4b5563; /* gray-600 */
+  }
+
+  /* 3. The icon inside the dropzone */
+  .file-dropzone-icon {
+    width: 3rem; /* w-12 */
+    height: 3rem; /* h-12 */
+    color: #9ca3af; /* gray-400 */
+    margin-bottom: 0.75rem; /* mb-3 */
+  }
+
+  /* 4. The text inside the dropzone */
+  .file-dropzone-text {
+    font-size: 1rem; /* text-base */
+    font-weight: 500; /* medium */
+    color: #374151; /* gray-700 */
+  }
+  html.dark .file-dropzone-text {
+    color: #d1d5db; /* gray-300 */
+  }
+  .file-dropzone-text-sub {
+    font-size: 0.875rem; /* text-sm */
+    color: #6b7280; /* gray-500 */
+    margin-top: 0.25rem; /* mt-1 */
+  }
+
+  /* 5. The actual file input, hidden but functional */
+  #file-upload {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* 6. The visual state when dragging a file over */
+  .file-dropzone-wrapper.dragover .file-dropzone-content {
+    background-color: #ebf8ff; /* blue-50 */
+    border-color: #3b82f6; /* blue-500 */
+  }
+  html.dark .file-dropzone-wrapper.dragover .file-dropzone-content {
+    background-color: #27374D; /* A dark blue shade */
+  }
+  /* --- END OF NEW STYLES --- */
+
 </style>
 
 <div class="overflow-hidden relative">
-  <form id="upload-form" class="p-6 space-y-6" method="POST" enctype="multipart/form-data">
+  <form id="upload-form" class="p-6 space-y-6 django-form" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="form-section">
-      {% crispy form %}
-    </div>
-    <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-      <div class="flex items-center text-sm text-gray-500">
-        Supported formats: PDF
+
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <!-- 🔹 LEFT COLUMN (File Upload) -->
+      <!-- This is the new Drag and Drop UI -->
+      <div class="w-full lg:w-1/3 space-y-2">
+        <label for="{{ form.file.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
+          {{ form.file.label }}
+        </label>
+        
+        <div class="file-dropzone-wrapper" id="file-dropzone-wrapper">
+          <!-- The Visual Part -->
+          <div class="file-dropzone-content">
+            <svg class="file-dropzone-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+            </svg>
+            <p class="file-dropzone-text" id="file-dropzone-text">Drag & drop your paper here</p>
+            <!-- 
+              FIX: Added id="file-dropzone-text-sub" to match the JavaScript selector 
+            -->
+            <p class="file-dropzone-text-sub" id="file-dropzone-text-sub">or click to browse</p>
+          </div>
+          
+          <!-- The (Hidden) Functional Part -->
+          {{ form.file }} 
+        </div>
+
+        {% if form.file.help_text %}
+          <p class="text-xs text-gray-500 dark:text-zinc-400" id="file-help-text">{{ form.file.help_text }}</p>
+        {% endif %}
+        <div class="form-errors">{{ form.file.errors }}</div>
       </div>
+      <!-- 🔹 END OF LEFT COLUMN -->
+
+      <!-- 🔹 RIGHT COLUMN (Metadata) -->
+      <div class="w-full lg:w-2/3 space-y-4">
+        
+        <!-- Title & Year -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="form-field-group space-y-2 sm:col-span-2">
+            <label for="{{ form.title.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
+              {{ form.title.label }}
+            </label>
+            {{ form.title }}
+            <div class="form-errors">{{ form.title.errors }}</div>
+          </div>
+          <div class="form-field-group space-y-2 sm:col-span-1">
+            <label for="{{ form.year.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
+              {{ form.year.label }}
+            </label>
+            {{ form.year }}
+            <div class="form-errors">{{ form.year.errors }}</div>
+          </div>
+        </div>
+
+        <!-- Abstract -->
+        <div class="form-field-group space-y-2">
+          <label for="{{ form.abstract.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
+            {{ form.abstract.label }}
+          </label>
+          {{ form.abstract }}
+          <div class="form-errors">{{ form.abstract.errors }}</div>
+        </div>
+
+        <!-- College & Program -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="form-field-group space-y-2">
+            <label for="{{ form.college.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
+              {{ form.college.label }}
+            </label>
+            {{ form.college }}
+            <div class="form-errors">{{ form.college.errors }}</div>
+          </div>
+          <div class="form-field-group space-y-2">
+            <label for="{{ form.program.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
+              {{ form.program.label }}
+            </label>
+            {{ form.program }}
+            <div class="form-errors">{{ form.program.errors }}</div>
+          </div>
+        </div>
+
+        <!-- Authors -->
+        <div class="form-field-group space-y-2">
+          <label for="{{ form.authors.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
+            {{ form.authors.label }}
+          </label>
+          {{ form.authors }}
+          {% if form.authors.help_text %}
+            <p class="text-xs text-gray-500 dark:text-zinc-400">{{ form.authors.help_text }}</p>
+          {% endif %}
+          <div class="form-errors">{{ form.authors.errors }}</div>
+        </div>
+
+      </div>
+    </div>
+    
+    <!-- 🔹 FORM FOOTER & SUBMIT BUTTON -->
+    <div class="flex items-center justify-end pt-6 border-t border-gray-200 dark:border-zinc-700">
+      <button type="submit" class="btn bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+        Upload and Save Paper
+      </button>
     </div>
   </form>
 </div>
 
-<!-- 🔹 Fixed overlay spinner -->
+<!-- 🔹 Fixed overlay spinner (no changes needed) -->
 <div id="processing-overlay">
   <svg class="animate-spin h-10 w-10 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -52,9 +229,20 @@
   <p class="text-blue-700 font-semibold dark:text-blue-300">Processing your paper…</p>
 </div>
 
+<!-- 🔹 JavaScript (MODIFIED to support drag/drop) -->
 <script>
-document.querySelector("#file-upload").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
+// --- Get elements ---
+const fileInput = document.querySelector("#file-upload");
+const dropzoneWrapper = document.querySelector("#file-dropzone-wrapper");
+const dropzoneText = document.querySelector("#file-dropzone-text");
+const dropzoneSubText = document.querySelector("#file-dropzone-text-sub");
+const helpText = document.querySelector("#file-help-text");
+const defaultDropzoneText = "Drag & drop your paper here";
+const defaultDropzoneSubText = "or click to browse";
+const defaultHelpText = helpText ? helpText.innerText : "";
+
+// --- Metadata extraction logic (moved to a function) ---
+async function handleFileSelect(file) {
   if (!file) return;
 
   const form = document.querySelector("#upload-form");
@@ -63,6 +251,13 @@ document.querySelector("#file-upload").addEventListener("change", async (e) => {
   // 🔹 Show overlay + dim form
   overlay.style.display = "flex";
   form.classList.add("dimmed");
+
+  // 🔹 Update dropzone text
+  dropzoneText.innerText = file.name;
+  // This line should no longer cause an error
+  dropzoneSubText.innerText = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+  if (helpText) helpText.innerText = "Processing file for metadata...";
+
 
   const formData = new FormData();
   formData.append("file", file);
@@ -81,23 +276,70 @@ document.querySelector("#file-upload").addEventListener("change", async (e) => {
     // 🔹 Hide overlay + undim
     overlay.style.display = "none";
     form.classList.remove("dimmed");
+    if (helpText) helpText.innerText = defaultHelpText;
 
     if (data.success) {
+      if (helpText) helpText.innerText = "Metadata extracted successfully!";
       const fields = ['title', 'college', 'program', 'abstract', 'authors', 'year'];
       fields.forEach(f => {
         const el = document.querySelector(`#id_${f}`);
         if (!el) return;
+        
         if (f === 'authors' && Array.isArray(data.metadata[f])) {
           el.value = data.metadata[f].join(", ");
         } else {
           el.value = data.metadata[f] || "";
         }
       });
+    } else {
+      if (helpText) helpText.innerText = "Could not extract metadata. Please fill manually.";
     }
   } catch (err) {
     console.error(err);
     overlay.style.display = "none";
     form.classList.remove("dimmed");
+    if (helpText) helpText.innerText = "An error occurred. Please try again.";
+  }
+}
+
+// --- Event Listeners ---
+
+// 1. Click/Browse (Stays on the hidden input)
+fileInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  handleFileSelect(file);
+});
+
+// 2. Drag Events (add/remove visual class)
+//    ATTACH TO THE WRAPPER (THE VISUAL ELEMENT)
+['dragenter', 'dragover'].forEach(eventName => {
+  dropzoneWrapper.addEventListener(eventName, (e) => { // <-- CHANGED
+    e.preventDefault();
+    e.stopPropagation();
+    dropzoneWrapper.classList.add('dragover');
+  });
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+  dropzoneWrapper.addEventListener(eventName, (e) => { // <-- CHANGED
+    e.preventDefault();
+    e.stopPropagation();
+    dropzoneWrapper.classList.remove('dragover');
+  });
+});
+
+// 3. Drop Event (get file and trigger logic)
+//    ATTACH TO THE WRAPPER (THE VISUAL ELEMENT)
+dropzoneWrapper.addEventListener("drop", (e) => { // <-- CHANGED
+  // e.dataTransfer.files holds the files
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    // Manually assign the dropped file(s) to the input
+    fileInput.files = e.dataTransfer.files; 
+    
+    // Call the handler function directly
+    const file = e.dataTransfer.files[0];
+    handleFileSelect(file);
   }
 });
 </script>
+

@@ -1,0 +1,45 @@
+<!-- staff/templates/staff/search_settings.html -->
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-200">Search Settings</h1>
+  </div>
+
+<div class="max-w-5xl mx-auto mt-8 px-4">
+
+    <!-- Message Area for HTMX responses -->
+    <div id="message-area">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-3 rounded-lg 
+                            {% if message.tags == 'success' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                            {% elif message.tags == 'error' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                            {% else %}bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if success_message %}
+            <div class="mb-4 p-3 rounded-lg bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                {{ success_message }}
+            </div>
+        {% endif %}
+    </div>
+
+    <form method="post" 
+          hx-post="{% url 'search_settings' %}" 
+          hx-target="#form-content"
+          hx-swap="innerHTML">
+        {% csrf_token %}
+
+        <div id="form-content" class="space-y-8">
+            {% include 'staff/partials/settings_search_form_fields.html' %}
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-between items-center mt-8">
+            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
+                Save Settings
+            </button>
+        </div>
+    </form>
+</div>

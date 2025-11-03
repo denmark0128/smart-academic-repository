@@ -1,36 +1,30 @@
 <nav class="bg-white p-4 shadow flex items-center dark:bg-zinc-900 dark:border-b dark:border-zinc-700">
   <div class="container mx-auto flex items-center justify-between">
 
-    <!-- Logo -->
     <a href="/" class="font-bold text-xl dark:text-gray-200">Prot</a>
 
-    <!-- Dark mode toggle -->
-    <button id="theme-toggle"
-      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
-      <!-- Sun icon (shown in dark mode) -->
-      <svg class="h-5 w-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-      </svg>
-      <!-- Moon icon (shown in light mode) -->
-      <svg class="h-5 w-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+ 
+    
+    <button x-data @click="$dispatch('toggle-mobile-search')" 
+            class="md:hidden ml-auto mr-4 p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md" 
+            title="Search">
+      <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>
       </svg>
     </button>
 
-    <!-- Search with icon -->
     <form action="{% url 'paper_list' %}" 
           method="get" 
           autocomplete="off" 
           role="search" 
-          class="flex-1 relative mx-4 flex"
+          class="hidden md:flex flex-1 relative mx-4"
           id="search-form">
-      <!-- Search Icon -->
       <svg class="absolute left-7 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-200 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>
       </svg>
 
-      <!-- Input + Clear Button -->
       <div x-data="{ open:false, query:'{{ request.GET.q|default:'' }}' }" class="flex-1 relative mx-4">
         <input
           type="search"
@@ -76,7 +70,6 @@
           @keydown.escape="open=false"
         >
 
-        <!-- Clear (X) button -->
         <button
           type="button"
           x-show="query"
@@ -87,18 +80,25 @@
           ✕
         </button>
 
-        <!-- Results dropdown -->
         <div id="autocomplete-results" x-show="open" class="absolute left-0 right-0 z-50 mt-1"></div>
       </div>
     </form>
 
-    <!-- Mobile Menu / Login -->
+    <div class="flex flex-row gap-3">
+       <button id="theme-toggle"
+      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+      <svg class="h-5 w-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+      </svg>
+      <svg class="h-5 w-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+      </svg>
+    </button>
     {% if user.is_authenticated %}
-      <!-- Logged in: Hamburger menu -->
       <div x-data="{ open: false }" class="relative sm:hidden">
         <button @click="open = !open" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 dark:text-gray-200" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor">
+                viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -112,7 +112,7 @@
             <span>Library</span>
           </a>
           <a href="{% url 'saved_papers' %}" class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-zinc-700 flex items-center gap-3 dark:text-gray-200">
-             <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
             <span>Insights</span>
@@ -150,7 +150,6 @@
         </div>
       </div>
 
-      <!-- Desktop Links with Icons -->
       <ul class="hidden sm:flex gap-4 justify-center items-center">
         <li>
           <a href="{% url 'saved_papers' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Library">
@@ -203,11 +202,10 @@
         </li>
       </ul>
     {% else %}
-      <!-- Not logged in: Hamburger menu for mobile -->
       <div x-data="{ open: false }" class="relative sm:hidden">
         <button @click="open = !open" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 dark:text-gray-200" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor">
+                viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -221,7 +219,7 @@
             <span>Library</span>
           </a>
           <a href="{% url 'paper_insights' %}" class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-zinc-700 flex items-center gap-3 dark:text-gray-200">
-             <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
             <span>Insights</span>
@@ -259,7 +257,6 @@
         </div>
       </div>
       
-      <!-- Desktop Links with Icons -->
       <ul class="hidden sm:flex gap-4 items-center">
         <li>
           <a href="{% url 'saved_papers' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Library">
@@ -305,8 +302,109 @@
         </li>
       </ul>
     {% endif %}
-
+      </div>
   </div>
+</nav>
+
+<div x-data="{ searchOpen: false, query: '{{ request.GET.q|default:'' }}', resultsOpen: false }" 
+     @toggle-mobile-search.window="searchOpen = !searchOpen; if(searchOpen) { $nextTick(() => $refs.mobileSearchInput.focus()) }"
+     x-show="searchOpen" 
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 bg-white dark:bg-zinc-900 z-50 md:hidden"
+     style="display: none;"
+     x-cloak>
+  
+  <div class="p-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold dark:text-gray-200">Search</h2>
+      <button @click="searchOpen = false; resultsOpen = false; query = ''" 
+              class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md">
+        <svg class="h-6 w-6 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <form action="{% url 'paper_list' %}" 
+          method="get" 
+          autocomplete="off" 
+          role="search" 
+          id="mobile-search-form"
+          class="relative">
+      
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-200 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <circle cx="11" cy="11" r="8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>
+        </svg>
+
+        <input
+          type="search"
+          name="q"
+          id="mobile-global-search"
+          x-ref="mobileSearchInput"
+          x-model="query"
+          placeholder="Search papers, authors, or topics..."
+          value="{{ request.GET.q }}"
+          class="w-full pl-10 pr-10 py-3 rounded-md border border-gray-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 text-base"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          role="combobox"
+          aria-autocomplete="list"
+          :aria-expanded="resultsOpen"
+          aria-controls="mobile-autocomplete-results"
+          hx-get="{% url 'autocomplete' %}"
+          hx-trigger="keyup changed delay:250ms"
+          hx-target="#mobile-autocomplete-results"
+          hx-swap="innerHTML"
+          @autocomplete-select.window="(e) => {
+            if(e.detail.type === 'paper' && e.detail.paper_id){
+              window.location.href = '/papers/papers/' + e.detail.paper_id + '/';
+            } else if(e.detail.type === 'author'){
+              document.getElementById('mobile-global-search').value = e.detail.value;
+              var authorInput = document.getElementById('mobile-search-author');
+              if(!authorInput){
+                authorInput = document.createElement('input');
+                authorInput.type = 'hidden';
+                authorInput.name = 'author';
+                authorInput.id = 'mobile-search-author';
+                document.getElementById('mobile-search-form').appendChild(authorInput);
+              }
+              authorInput.value = e.detail.value;
+              document.getElementById('mobile-search-form').submit();
+            } else {
+              document.getElementById('mobile-global-search').value = e.detail.value;
+            }
+          }"
+          @focus="resultsOpen = true"
+          @blur="setTimeout(()=> resultsOpen=false, 150)"
+          @keydown.escape="resultsOpen = false"
+        >
+
+        <button
+          type="button"
+          x-show="query"
+          @click="query=''; resultsOpen=false"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-200 transition"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div id="mobile-autocomplete-results" 
+           x-show="resultsOpen" 
+           class="mt-2 max-h-96 overflow-y-auto">
+      </div>
+    </form>
+  </div>
+</div>
 
 
 <script>
@@ -319,13 +417,12 @@
   btn.addEventListener('click', () => {
     html.classList.toggle('dark');
     localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
-  
+  });
+
   // Wrap everything in DOMContentLoaded to ensure elements exist
   document.addEventListener('DOMContentLoaded', function() {
     
-  });
-
-    // Handle search form submission
+    // Handle search form submission (Desktop)
     const searchForm = document.getElementById('search-form');
     if (searchForm) {
       searchForm.addEventListener('submit', function(e) {
@@ -346,6 +443,27 @@
         // Otherwise, let it submit normally (will navigate to paper_list page)
       });
     }
+
+    // Handle mobile search form submission
+    const mobileSearchForm = document.getElementById('mobile-search-form');
+    if (mobileSearchForm) {
+      mobileSearchForm.addEventListener('submit', function(e) {
+        const contentTarget = document.getElementById('paper-list-content');
+        
+        // If we're on a page with the paper-list-content div, use HTMX
+        if (contentTarget) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          const params = new URLSearchParams(formData).toString();
+          
+          htmx.ajax('GET', '{% url "paper_list_partial" %}?' + params, {
+            target: '#paper-list-content',
+            swap: 'innerHTML',
+            pushUrl: true
+          });
+        }
+        // Otherwise, let it submit normally (will navigate to paper_list page)
+      });
+    }
   });
 </script>
-</nav>

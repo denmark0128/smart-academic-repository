@@ -23,6 +23,9 @@ urlpatterns = [
     path('staff/tags/<int:tag_id>/toggle/', staff_tags_toggle, name='staff_tags_toggle'),
     path('staff/tags/<int:tag_id>/delete/', staff_tags_delete, name='staff_tags_delete'),
     path('staff/tags/<int:tag_id>/generate-embedding/', staff_tags_generate_embedding, name='staff_tags_generate_embedding'),
-]
+    path('settings/search/', search_settings_view, name='search_settings'),
+    path('settings/llama/', llama_settings_view, name='llama_settings'),
+
+]   
 
 

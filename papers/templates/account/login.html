@@ -1,17 +1,111 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/home.html" %}
 {% load socialaccount %}  {# only if using social logins #}
-{% load crispy_forms_tags %}
 
 {% block content %}
-  <div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg border border-gray-400 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700">
-    <h2 class="text-2xl font-bold mb-4 flex justify-center">Login</h2>
+  <div class="max-w-md mx-auto mt-10 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6">
+    <h2 class="text-2xl font-bold mb-6 text-center text-zinc-700 dark:text-zinc-200">Login</h2>
+    
+    {% if form.non_field_errors %}
+      <div class="bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl mb-4" role="alert">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+    
     <form method="post" action="{% url 'account_login' %}">
       {% csrf_token %}
-      {{ form|crispy }}
-      <button type="submit" class="mt-4 bg-neutral-900 text-white px-4 py-2 border rounded-full w-full dark:bg-zinc-900 dark:border-zinc-700">Login</button>
+      
+      <div class="mb-4">
+        <label for="{{ form.login.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">
+          Username or Email
+        </label>
+        <input 
+          type="text" 
+          name="{{ form.login.name }}" 
+          id="{{ form.login.id_for_label }}"
+          value="{{ form.login.value|default:'' }}"
+          class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        >
+        {% if form.login.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ form.login.errors.0 }}</p>
+        {% endif %}
+      </div>
+      
+      <div class="mb-4">
+        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">
+          Password
+        </label>
+        <div class="relative">
+          <input 
+            type="password" 
+            name="{{ form.password.name }}" 
+            id="{{ form.password.id_for_label }}"
+            class="w-full px-3 py-2 pr-10 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+          <button 
+            type="button"
+            onclick="togglePassword('{{ form.password.id_for_label }}')"
+            class="absolute inset-y-0 right-0 px-3 flex items-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+          >
+            <svg id="{{ form.password.id_for_label }}-eye-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <svg id="{{ form.password.id_for_label }}-eye-closed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+            </svg>
+          </button>
+        </div>
+        {% if form.password.errors %}
+          <p class="text-red-500 text-xs mt-1">{{ form.password.errors.0 }}</p>
+        {% endif %}
+      </div>
+      
+      {% if form.remember %}
+      <div class="mb-4 flex items-center">
+        <input 
+          type="checkbox" 
+          name="{{ form.remember.name }}" 
+          id="{{ form.remember.id_for_label }}"
+          class="w-4 h-4 text-blue-600 border-zinc-300 rounded focus:ring-blue-500"
+        >
+        <label for="{{ form.remember.id_for_label }}" class="ml-2 text-sm text-zinc-600 dark:text-zinc-300">
+          Remember me
+        </label>
+      </div>
+      {% endif %}
+      
+      <button type="submit" class="w-full mt-4 bg-neutral-900 dark:bg-zinc-800 text-white px-4 py-2 rounded-lg hover:bg-neutral-800 dark:hover:bg-zinc-700 transition-colors">
+        Login
+      </button>
     </form>
-    <p class="mt-4 text-sm flex justify-center gap-2 ">
-      Don't have an account? <a class="text-blue-500" href="{% url 'account_signup' %}"> Sign up</a>
+    
+    <p class="mt-4 text-sm text-center text-zinc-600 dark:text-zinc-400">
+      Don't have an account? 
+      <a class="text-blue-500 hover:text-blue-600" href="{% url 'account_signup' %}">Sign up</a>
+    </p>
+    
+    <p class="mt-2 text-sm text-center">
+      <a class="text-blue-500 hover:text-blue-600" href="{% url 'account_reset_password' %}">Forgot password?</a>
     </p>
   </div>
+  
+  <script>
+    function togglePassword(fieldId) {
+      const input = document.getElementById(fieldId);
+      const eyeOpen = document.getElementById(fieldId + '-eye-open');
+      const eyeClosed = document.getElementById(fieldId + '-eye-closed');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeOpen.classList.add('hidden');
+        eyeClosed.classList.remove('hidden');
+      } else {
+        input.type = 'password';
+        eyeOpen.classList.remove('hidden');
+        eyeClosed.classList.add('hidden');
+      }
+    }
+  </script>
 {% endblock %}

@@ -66,7 +66,9 @@
           <td class="py-3 px-6 text-sm text-gray-600 dark:text-zinc-300">
             {% if paper.tags %}
               {% for tag in paper.tags %}
-                <span class="badge badge-soft badge-primary badge-sm p-2 text-sm items-center gap-1 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
+                <span class="badge badge-soft badge-primary badge-sm p-2 text-sm items-center gap-2 
+                            dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 
+                            whitespace-normal break-words">
                   {{ tag }}
                 </span>
               {% endfor %}
@@ -99,8 +101,9 @@
           <td class="py-3 px-6 text-right">
             <button 
               hx-post="{% url 'staff_paper_regenerate_tags' paper.id %}"
-              hx-target="closest tbody"
-              hx-swap="outerHTML"
+              hx-target="#papers-partial-container"
+              hx-swap="innerHTML"
+              hx-indicator="this"
               class="btn text-xs px-3 py-1 rounded bg-green-100 text-green-800 hover:bg-green-200 transition dark:text-green-300 dark:bg-green-900"
               title="Regenerate tags using AI">
               <span class="htmx-indicator loading loading-spinner loading-xs"></span>

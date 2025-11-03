@@ -119,6 +119,7 @@
     overflow-y: scroll; /* Shows scrollbar space */
   }
   
+  
 </style>
 
   <!-- Alpine.js -->
@@ -128,10 +129,9 @@
   {% block extra_head %}{% endblock %}
 </head>
 
-<body class="min-h-screen bg-gradient-to-br 
-  from-blue-50 via-white to-indigo-50 
-  dark:from-[#0a0a0a] dark:via-[#0d0d0d] dark:to-[#050505]
-  text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300">
+<body class="min-h-screen bg-gray-50 dark:bg-zinc-950
+  text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300 
+  flex flex-col">
 
   {% include 'components/navbar.html' %}
 

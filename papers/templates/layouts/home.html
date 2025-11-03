@@ -128,13 +128,14 @@
 </head>
 
 <body class="min-h-screen bg-gradient-to-br 
-  from-blue-50 via-white to-indigo-50 
-  dark:from-[#0a0a0a] dark:via-[#0d0d0d] dark:to-[#050505]
-  text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300">
+  from-blue-100 via-blue-150 to-blue-50
+  dark:from-gray-900 dark:via-gray-900 dark:to-zinc-950
+  text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300 
+  flex flex-col">
 
   {% include 'components/navbar-no-search.html' %}
 
-  <div id="main-content" class="container mx-auto p-6">
+  <div id="main-content" class="container mx-auto p-6 flex-grow">
     {% block content %}{% endblock %}
   </div>
 
@@ -176,8 +177,9 @@
   </script>
 
   {% block extra_scripts %}{% endblock %}
+
+  <footer class="mt-auto">
+    {% include 'components/footer.html' %}
+  </footer>
 </body>
-<footer>
-  {% include 'components/footer.html' %}
-</footer>
 </html>

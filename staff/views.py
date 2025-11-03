@@ -5,6 +5,10 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.db import transaction
 from papers.utils.nlp import extract_tags
+from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from .models import SearchSettings
+from .forms import SearchSettingsForm
 
 def staff_required(view_func):
     return user_passes_test(lambda u: u.is_authenticated and u.is_staff)(view_func)
@@ -62,10 +66,8 @@ def approve_paper(request, pk):
 def staff_dashboard(request):
     return render(request, 'staff/main.html')
 
-
-
-
 def extract_tags_view(request):
+
     """Extract tags for all papers"""
     
     if request.method == 'POST':
@@ -108,3 +110,4 @@ def extract_tags_view(request):
         'papers_count': papers_count,
     }
     return render(request, 'papers/extract_tags.html', context)
+

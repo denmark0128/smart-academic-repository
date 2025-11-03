@@ -1,26 +1,11 @@
-<nav class="bg-white p-4 shadow dark:bg-zinc-900 dark:border-b dark:border-zinc-700">
+<nav class="p-4">
   <div class="container mx-auto flex items-center justify-between">
 
     <!-- Logo -->
     <a href="/" class="font-bold text-xl">Academic Repo</a>
 
-    <button id="theme-toggle"
-      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
-      <!-- Sun icon (shown in dark mode) -->
-      <svg class="h-5 w-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-      </svg>
-      <!-- Moon icon (shown in light mode) -->
-      <svg class="h-5 w-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-      </svg>
-    </button>
-
-    <div>
-      
-    </div>
-    <!-- Search -->
-
+    <div class="flex flex-row justify-center items-center gap-4">
+    
     <!-- Mobile Menu / Login -->
     {% if user.is_authenticated %}
       <!-- Logged in: Hamburger menu -->
@@ -81,9 +66,21 @@
 
       <!-- Desktop Links with Icons -->
       <ul class="hidden sm:flex gap-4 justify-center items-center">
+
+        <button id="theme-toggle"
+      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+      <!-- Sun icon (shown in dark mode) -->
+      <svg class="h-5 w-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+      </svg>
+      <!-- Moon icon (shown in light mode) -->
+      <svg class="h-5 w-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+      </svg>
+    </button>
         <li>
           <a href="{% url 'saved_papers' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Library">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="h-5 w-5 dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
             </svg>
           </a>
@@ -132,6 +129,17 @@
         </li>
       </ul>
     {% else %}
+    <button id="theme-toggle"
+      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+      <!-- Sun icon (shown in dark mode) -->
+      <svg class="h-5 w-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+      </svg>
+      <!-- Moon icon (shown in light mode) -->
+      <svg class="h-5 w-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+      </svg>
+    </button>
       <!-- Not logged in: show login button with icon on mobile -->
       <a href="{% url 'account_login' %}" class="sm:hidden p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-flex items-center gap-2" title="Login">
         <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +193,7 @@
         </li>
       </ul>
     {% endif %}
-
+      </div>
   </div>
 
   <script>

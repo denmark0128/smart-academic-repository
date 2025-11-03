@@ -1,3 +1,42 @@
+
+
+{% if messages %}
+  <div 
+    class="fixed top-4 right-4 z-50 space-y-2"
+    style="max-width: 300px;"
+  >
+    {% for message in messages %}
+      <div 
+        x-data="{ show: true }" 
+        x-show="show" 
+        x-init="setTimeout(() => show = false, 4000)" 
+        x-transition.duration.400ms 
+        class="flex items-start justify-between p-3 rounded-lg shadow-lg border text-sm
+               {% if message.tags == 'success' %}
+                 bg-green-100 text-green-800 border-green-300
+               {% elif message.tags == 'info' %}
+                 bg-blue-100 text-blue-800 border-blue-300
+               {% elif message.tags == 'error' %}
+                 bg-red-100 text-red-800 border-red-300
+               {% else %}
+                 bg-gray-100 text-gray-800 border-gray-300
+               {% endif %}">
+        
+        <span class="flex-1">{{ message }}</span>
+
+        <button 
+          @click="show = false" 
+          class="ml-3 text-lg font-semibold hover:text-gray-500 leading-none"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+
 <div x-data="{ searchQuery: '', filterStatus: '' }" class="space-y-4">
 
   <!-- Search + Filter -->
@@ -28,12 +67,13 @@
     <table class="table table-xs w-full rounded-lg table-zebra dark:[&>tbody>tr:nth-child(even)]:bg-zinc-800 dark:[&>tbody>tr:nth-child(odd)]:bg-zinc-900 " x-ref="tagsTable">
       <thead>
         <tr class="bg-gray-50 border-b border-gray-200 dark:bg-zinc-900 dark:border-zinc-700">
-          <th class="py-4 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Tag Name</th>
-          <th class="py-4 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Embedding status</th>
-          <th class="py-4 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Status</th>
-          <th class="py-4 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Papers Count</th>
-          <th class="py-4 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Created</th>
-          <th class="py-4 px-6 text-right text-sm font-semibold text-gray-700 dark:text-zinc-300">Actions</th>
+          <th class="py-2 w-1/6 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Tag Name</th>
+          <th class="py-2 w-5/6 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Description</th>
+          <th class="py-2 w-1/6 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Embedding status</th>
+          <th class="py-2 w-1/6 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Status</th>
+          <th class="py-2 w-1/6 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Papers Count</th>
+          <th class="py-2 w-1/6 px-6 text-left text-sm font-semibold text-gray-700 dark:text-zinc-300">Created</th>
+          <th class="py-2 w-1/6 px-6 text-right text-sm font-semibold text-gray-700 dark:text-zinc-300">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -43,7 +83,7 @@
             (!searchQuery || '{{ tag.name|escapejs }}'.toLowerCase().includes(searchQuery.toLowerCase())) &&
             (!filterStatus || 
               (filterStatus === 'active' && '{{ tag.is_active }}' === 'True') ||
-              (filterStatus === 'inactive' && '{{ tag.is_active }}' === 'False')
+              (filterStatus === 'inactive' && '{{ tag.is_active }}' === 'False') 
             )
           )"
           class="border-b border-gray-100 hover:bg-gray-50 transition-colors dark:border-zinc-700"
@@ -51,23 +91,38 @@
           <td class="py-2 px-3 text-sm font-medium text-gray-800 dark:text-zinc-300">
             {{ tag.name }}
           </td>
-          <td class="py-4 px-6">
+          <td 
+            class="py-2 px-3 text-xs font-medium text-gray-800 dark:text-zinc-300 cursor-pointer"
+            x-data="{ expanded: false }"
+            @click="expanded = !expanded"
+          >
+            <span x-show="!expanded">
+              {{ tag.description|truncatechars:100}}
+              <span class="text-blue-500 ml-1" x-show="'{{ tag.description|length }}' > 80">… more</span>
+            </span>
+            <span x-show="expanded">
+              {{ tag.description }}
+              <span class="text-blue-500 ml-1">(less)</span>
+            </span>
+          </td>
+
+          <td class="py-2 w-1/6 px-6">
            {% if tag.embedding is not None %}
             <span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded dark:text-blue-300 dark:bg-blue-900">✓ Ready</span>
           {% else %}
             <span class="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded dark:text-orange-300 dark:bg-orange-900">Missing</span>
           {% endif %}
-          <td class="py-4 px-6">
+          <td class="py-2 w-1/6 px-6">
             {% if tag.is_active %}
               <span class="px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full dark:text-green-300 dark:bg-green-900">Active</span>
             {% else %}
               <span class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full dark:text-red-300 dark:bg-red-900">Inactive</span>
             {% endif %}
           </td>
-          <td class="py-4 px-6 text-sm text-gray-600 dark:text-zinc-300">{{ tag.paper_count }} paper{{ tag.paper_count|pluralize }}</td>
-          <td class="py-4 px-6 text-sm text-gray-500 dark:text-zinc-300">{{ tag.created_at|date:"M d, Y" }}</td>
-          <td class="py-4 px-6 text-right">
-            <div class="flex justify-end gap-2">
+          <td class="py-2 w-1/6 px-6 text-sm text-gray-600 dark:text-zinc-300">{{ tag.paper_count }} paper{{ tag.paper_count|pluralize }}</td>
+          <td class="py-2 w-1/6 px-6 text-sm text-gray-500 dark:text-zinc-300">{{ tag.created_at|date:"M d, Y" }}</td>
+          <td class="py-2 w-1/6 px-6 text-right">
+            <div class="flex justify-end gap-2 flex-col">
             {% if tag.embedding is None %}
             <button 
               hx-post="{% url 'staff_tags_generate_embedding' tag.id %}"
@@ -107,7 +162,7 @@
               hx-include="[name='q'],[name='status']"
               hx-confirm="Are you sure you want to delete '{{ tag.name }}'? This cannot be undone."
               class="btn btn-active btn-error btn-sm text-xs"
-              title="Generate embedding">
+              title="Delete">
               <span class="htmx-indicator loading loading-spinner loading-xs"></span>
               <span>Delete</span>
             </button>
@@ -123,5 +178,6 @@
         {% endfor %}
       </tbody>
     </table>
+    
   </div>
 </div>

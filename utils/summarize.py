@@ -1,12 +1,7 @@
-"""
-Paper Summarization Utility
-Generates summaries from paper content using local Llama model (Gemma 3)
-Updated to join ALL chunks and use full 32k context window
-Now uses streaming chat completion format
-"""
-
 import os
 from llama_cpp import Llama
+import fitz
+from staff.utils import get_llama_settings  # <-- Following your pattern
 
 _llm = None 
 # ----------- Load model once globally -----------
@@ -14,13 +9,16 @@ def get_llm():
     """Load Llama model on first use, then cache it."""
     global _llm
     if _llm is None:
-        print("🦙 Loading local Llama model (Gemma 3)... this may take a bit")
+        # ✅ Get settings dynamically
+        settings = get_llama_settings()
+        
+        print(f"🦙 Loading local Llama model ({settings.repo_id})... this may take a bit")
         try:
             _llm = Llama.from_pretrained(
-                repo_id="unsloth/gemma-3-1b-it-GGUF",
-                filename="gemma-3-1b-it-BF16.gguf",
-                seed=4,
-                n_ctx=32000,
+                repo_id=settings.repo_id,               # <-- Changed
+                filename=settings.model_filename,       # <-- Changed
+                seed=settings.model_seed,               # <-- Changed
+                n_ctx=settings.n_ctx,                   # <-- Changed
             )
             print("✅ Model loaded and ready.")
         except Exception as e:
@@ -47,89 +45,120 @@ def get_paper_text(paper):
 
 
 def generate_summary(paper):
-	"""
-	Generate a streamed summary for the paper using Gemma 3.
-	"""
-	llm = get_llm() 
-	if not llm:
-		print("[Summarizer] ERROR: Model not loaded")
-		return None
+    """
+    Generate a streamed summary for the paper using settings from the database.
+    """
+    llm = get_llm() 
+    if not llm:
+        print("[Summarizer] ERROR: Model not loaded")
+        return None
 
-	all_text = get_paper_text(paper)
-	if not all_text.strip():
-		print("[Summarizer] No text found to summarize.")
-		return None
+    all_text = get_paper_text(paper)
+    if not all_text.strip():
+        print("[Summarizer] No text found to summarize.")
+        return None
 
-	print(f"[Summarizer] Generating summary for: {paper.title}")
-	
-	# ---- Step 3: Summarize using chat interface ----
-	output = llm.create_chat_completion(
-		messages=[
-			{
-				"role": "system",
-				"content": "You are an academic summarizer that writes clear and concise summaries."
-			},
-			{
-				"role": "user",
-				"content": f"Summarize this paper concisely and detailed:\n\n{all_text}"
-			}
-		],
-		stream=True,
-		seed=2,
-	)
+    print(f"[Summarizer] Generating summary for: {paper.title}")
+    
+    # ✅ Get settings dynamically
+    settings = get_llama_settings()
 
-	# ---- Step 4: Stream output live ----
-	result = ""
-	for chunk in output:
-		delta = chunk["choices"][0]["delta"]
-		if "content" in delta:
-			print(delta["content"], end="", flush=True)
-			result += delta["content"]
+    # --- Build generation arguments from settings ---
+    generation_args = {
+        "stream": True,
+        "seed": settings.generation_seed,  # <-- Changed
+    }
+    
+    # Add optional params from settings ONLY if they are set (not None)
+    if settings.temperature is not None:
+        generation_args["temperature"] = settings.temperature
+    if settings.max_tokens is not None:
+        generation_args["max_tokens"] = settings.max_tokens
+    if settings.top_p is not None:
+        generation_args["top_p"] = settings.top_p
 
-	print("\n\n=== Final Output ===")
-	print(result)
+    # ---- Summarize using chat interface ----
+    output = llm.create_chat_completion(
+        messages=[
+            {
+                "role": "system",
+                "content": settings.system_prompt  # <-- Changed
+            },
+            {
+                "role": "user",
+                "content": settings.user_prompt_template.format(text=all_text) # <-- Changed
+            }
+        ],
+        **generation_args
+    )
 
-	return result
+    # ---- Stream output live ----
+    result = ""
+    for chunk in output:
+        delta = chunk["choices"][0]["delta"]
+        if "content" in delta:
+            print(delta["content"], end="", flush=True)
+            result += delta["content"]
+
+    print("\n\n=== Final Output ===")
+    print(result)
+
+    return result
 
 
 def summarize_pdf_to_json(pdf_path):
-	"""
-	Legacy function for direct PDF summarization.
-	"""
-	llm = get_llm() 
-	import fitz
-	doc = fitz.open(pdf_path)
-	all_text = " ".join(page.get_text() for page in doc)
-	title = os.path.splitext(os.path.basename(pdf_path))[0]
+    """
+    Legacy function for direct PDF summarization.
+    Now uses settings from the database.
+    """
+    llm = get_llm() 
+    doc = fitz.open(pdf_path)
+    all_text = " ".join(page.get_text() for page in doc)
+    title = os.path.splitext(os.path.basename(pdf_path))[0]
 
-	output = llm.create_chat_completion(
-		messages=[
-			{
-				"role": "system",
-				"content": "You are an academic summarizer that writes clear and concise summaries."
-			},
-			{
-				"role": "user",
-				"content": f"Summarize this paper concisely and detailed:\n\n{all_text}"
-			}
-		],
-		stream=True,
-		seed=2,
-	)
+    # ✅ Get settings dynamically
+    settings = get_llama_settings()
 
-	result = ""
-	for chunk in output:
-		delta = chunk["choices"][0]["delta"]
-		if "content" in delta:
-			print(delta["content"], end="", flush=True)
-			result += delta["content"]
+    # --- Build generation arguments from settings ---
+    generation_args = {
+        "stream": True,
+        "seed": settings.generation_seed, # <-- Changed
+    }
+    
+    if settings.temperature is not None:
+        generation_args["temperature"] = settings.temperature
+    if settings.max_tokens is not None:
+        generation_args["max_tokens"] = settings.max_tokens
+    if settings.top_p is not None:
+        generation_args["top_p"] = settings.top_p
 
-	print("\n\n=== Final Output ===")
-	print(result)
+    output = llm.create_chat_completion(
+        messages=[
+            {
+                "role": "system",
+                "content": settings.system_prompt  # <-- Changed
+            },
+            {
+                "role": "user",
+                "content": settings.user_prompt_template.format(text=all_text) # <-- Changed
+            }
+        ],
+        **generation_args
+    )
 
-	return {
-		"file": os.path.basename(pdf_path),
-		"title": title,
-		"summary": result,
-		"inference_mode": "local_llama_cpp_stream",
-	}
+    result = ""
+    for chunk in output:
+        delta = chunk["choices"][0]["delta"]
+        if "content" in delta:
+            print(delta["content"], end="", flush=True)
+            result += delta["content"]
+
+    print("\n\n=== Final Output ===")
+    print(result)
+
+    return {
+        "file": os.path.basename(pdf_path),
+        "title": title,
+        "summary": result,
+        "inference_mode": "local_llama_cpp_stream_db_settings", # <-- Updated
+    }

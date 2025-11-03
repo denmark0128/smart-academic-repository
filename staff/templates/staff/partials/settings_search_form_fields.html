@@ -1,0 +1,143 @@
+{% comment %}
+This partial is returned on a successful POST from the search_settings_view
+via an HTMX request. It includes the success message and updated fields.
+{% endcomment %}
+
+{% if messages %}
+  <div class="my-4 space-y-2">
+    {% for message in messages %}
+      <div 
+        x-data="{ show: true }" 
+        x-show="show" 
+        x-transition 
+        class="flex items-center justify-between p-3 rounded border
+               {% if message.tags == 'success' %}
+                 bg-green-100 text-green-800 border-green-300
+               {% elif message.tags == 'info' %}
+                 bg-blue-100 text-blue-800 border-blue-300
+               {% elif message.tags == 'error' %}
+                 bg-red-100 text-red-800 border-red-300
+               {% else %}
+                 bg-gray-100 text-gray-800 border-gray-300
+               {% endif %}">
+        
+        <span>{{ message }}</span>
+
+        <button 
+          @click="show = false" 
+          class="text-sm font-semibold ml-4 hover:opacity-70"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Model Settings -->
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4 text-zinc-700 dark:text-zinc-200">Model Settings</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="{{ form.embedding_model_name.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Model</label>
+            {{ form.embedding_model_name }}
+            {% if form.embedding_model_name.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.embedding_model_name.errors.0 }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Chunking Settings -->
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4 text-zinc-700 dark:text-zinc-200">Chunking Settings</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="{{ form.chunk_size.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Chunk Size</label>
+            {{ form.chunk_size }}
+            {% if form.chunk_size.errors %}<p class="text-red-500 text-xs mt-1">{{ form.chunk_size.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label for="{{ form.chunk_overlap.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Chunk Overlap</label>
+            {{ form.chunk_overlap }}
+            {% if form.chunk_overlap.errors %}<p class="text-red-500 text-xs mt-1">{{ form.chunk_overlap.errors.0 }}</p>{% endif %}
+        </div>
+    </div>
+    <div class="mt-4">
+        <label for="{{ form.appendix_cutoff.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Appendix Cutoff</label>
+        {{ form.appendix_cutoff }}
+        {% if form.appendix_cutoff.errors %}<p class="text-red-500 text-xs mt-1">{{ form.appendix_cutoff.errors.0 }}</p>{% endif %}
+    </div>
+</div>
+
+<!-- Search Settings -->
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4 text-zinc-700 dark:text-zinc-200">Search Settings</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="{{ form.top_k_results.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Top K Results</label>
+            {{ form.top_k_results }}
+            {% if form.top_k_results.errors %}<p class="text-red-500 text-xs mt-1">{{ form.top_k_results.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label for="{{ form.min_similarity_score.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Min Similarity Score</label>
+            {{ form.min_similarity_score }}
+            {% if form.min_similarity_score.errors %}<p class="text-red-500 text-xs mt-1">{{ form.min_similarity_score.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label for="{{ form.bm25_weight.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">BM25 Weight</label>
+            {{ form.bm25_weight }}
+            {% if form.bm25_weight.errors %}<p class="text-red-500 text-xs mt-1">{{ form.bm25_weight.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label for="{{ form.vector_weight.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Vector Weight</label>
+            {{ form.vector_weight }}
+            {% if form.vector_weight.errors %}<p class="text-red-500 text-xs mt-1">{{ form.vector_weight.errors.0 }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Performance Settings -->
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4 text-zinc-700 dark:text-zinc-200">Performance Settings</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label for="{{ form.max_chunks_scan.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Max Chunks Scan</label>
+            {{ form.max_chunks_scan }}
+            {% if form.max_chunks_scan.errors %}<p class="text-red-500 text-xs mt-1">{{ form.max_chunks_scan.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label for="{{ form.hybrid_search_multiplier.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Hybrid Search Multiplier</label>
+            {{ form.hybrid_search_multiplier }}
+            {% if form.hybrid_search_multiplier.errors %}<p class="text-red-500 text-xs mt-1">{{ form.hybrid_search_multiplier.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label for="{{ form.hybrid_search_min_results.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Min Results</label>
+            {{ form.hybrid_search_min_results }}
+            {% if form.hybrid_search_min_results.errors %}<p class="text-red-500 text-xs mt-1">{{ form.hybrid_search_min_results.errors.0 }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Tag Extraction Settings -->
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-4 text-zinc-700 dark:text-zinc-200">Tag Extraction Settings</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label for="{{ form.tag_extraction_top_n.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Top N Tags</label>
+            {{ form.tag_extraction_top_n }}
+            {% if form.tag_extraction_top_n.errors %}<p class="text-red-500 text-xs mt-1">{{ form.tag_extraction_top_n.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label for="{{ form.tag_extraction_min_score.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Min Score</label>
+            {{ form.tag_extraction_min_score }}
+            {% if form.tag_extraction_min_score.errors %}<p class="text-red-500 text-xs mt-1">{{ form.tag_extraction_min_score.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label for="{{ form.tag_cache_timeout.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Cache Timeout (seconds)</label>
+            {{ form.tag_cache_timeout }}
+            {% if form.tag_cache_timeout.errors %}<p class="text-red-500 text-xs mt-1">{{ form.tag_cache_timeout.errors.0 }}</p>{% endif %}
+        </div>
+    </div>
+</div>

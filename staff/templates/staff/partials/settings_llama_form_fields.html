@@ -1,0 +1,120 @@
+{% comment %} 
+This partial is returned on a successful POST from the llama_settings_view 
+via an HTMX request. It includes the success message.
+{% endcomment %}
+
+{% if messages %}
+  <div class="my-4 space-y-2">
+    {% for message in messages %}
+      <div 
+        x-data="{ show: true }" 
+        x-show="show" 
+        x-transition 
+        class="flex items-center justify-between p-3 rounded border
+               {% if message.tags == 'success' %}
+                 bg-green-100 text-green-800 border-green-300
+               {% elif message.tags == 'info' %}
+                 bg-blue-100 text-blue-800 border-blue-300
+               {% elif message.tags == 'error' %}
+                 bg-red-100 text-red-800 border-red-300
+               {% else %}
+                 bg-gray-100 text-gray-800 border-gray-300
+               {% endif %}">
+        
+        <span>{{ message }}</span>
+
+        <button 
+          @click="show = false" 
+          class="text-sm font-semibold ml-4 hover:opacity-70"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4 text-zinc-700 dark:text-zinc-200">Model Loading</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <div class="md:col-span-2">
+            <label for="{{ form.repo_id.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">HuggingFace Repo ID</label>
+            {{ form.repo_id }}
+            {% if form.repo_id.errors %}<p class="text-red-500 text-xs mt-1">{{ form.repo_id.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="md:col-span-1">
+            <label for="{{ form.model_seed.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Model Seed</label>
+            {{ form.model_seed }}
+            {% if form.model_seed.errors %}<p class="text-red-500 text-xs mt-1">{{ form.model_seed.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="md:col-span-2">
+            <label for="{{ form.model_filename.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Model Filename (.gguf)</label>
+            {{ form.model_filename }}
+            {% if form.model_filename.errors %}<p class="text-red-500 text-xs mt-1">{{ form.model_filename.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.n_ctx.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Context Window (n_ctx)</label>
+            {{ form.n_ctx }}
+            {% if form.n_ctx.errors %}<p class="text-red-500 text-xs mt-1">{{ form.n_ctx.errors.0 }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4 text-zinc-700 dark:text-zinc-200">Prompt Templates</h2>
+    <div class="grid grid-cols-1 gap-6"> <div>
+            <label for="{{ form.system_prompt.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">System Prompt</label>
+            {{ form.system_prompt }}
+            {% if form.system_prompt.errors %}<p class="text-red-500 text-xs mt-1">{{ form.system_prompt.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.user_prompt_template.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">User Prompt Template</label>
+            {{ form.user_prompt_template }}
+            <p class="text-xs text-zinc-500 mt-1">Use <code>{text}</code> as a placeholder for the paper content.</p>
+            {% if form.user_prompt_template.errors %}<p class="text-red-500 text-xs mt-1">{{ form.user_prompt_template.errors.0 }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+
+
+<div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-4 text-zinc-700 dark:text-zinc-200">Generation & Caching</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <div>
+            <label for="{{ form.generation_seed.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Generation Seed</Codelabel>
+            {{ form.generation_seed }}
+            {% if form.generation_seed.errors %}<p class="text-red-500 text-xs mt-1">{{ form.generation_seed.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.temperature.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Temperature</label>
+            {{ form.temperature }}
+            {% if form.temperature.errors %}<p class="text-red-500 text-xs mt-1">{{ form.temperature.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.max_tokens.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Max Tokens (null=unlimited)</label>
+            {{ form.max_tokens }}
+            {% if form.max_tokens.errors %}<p class="text-red-500 text-xs mt-1">{{ form.max_tokens.errors.0 }}</p>{% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.top_p.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Top P</label>
+            {{ form.top_p }}
+            {% if form.top_p.errors %}<p class="text-red-500 text-xs mt-1">{{ form.top_p.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.settings_cache_timeout.id_for_label }}" class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-1">Settings Cache (seconds)</label>
+            {{ form.settings_cache_timeout }}
+            {% if form.settings_cache_timeout.errors %}<p class="text-red-500 text-xs mt-1">{{ form.settings_cache_timeout.errors.0 }}</p>{% endif %}
+        </div>
+    </div>
+</div>
