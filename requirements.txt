@@ -5,7 +5,6 @@ django-crispy-forms
 crispy-tailwind
 psycopg2-binary
 spacy
-faiss-cpu
 sentence-transformers
 django-htmx
 pgvector
@@ -14,8 +13,3 @@ gunicorn
 django-cors-headers
 pymupdf
 
-# Force CPU-only torch
-torch==2.3.0+cpu
-torchvision==0.18.0+cpu
-torchaudio==2.3.0+cpu
---extra-index-url https://download.pytorch.org/whl/cpu

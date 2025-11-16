@@ -30,8 +30,6 @@ from utils.metadata_extractor import (
     normalize_college,
     normalize_program,
 )
-from utils.summarize import generate_summary
-from utils.related import find_related_papers
 from django.template.response import TemplateResponse
 
 from utils.single_paper_rag import query_rag # <-- Make sure this imports your modified function

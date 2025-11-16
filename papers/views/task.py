@@ -6,7 +6,7 @@ from papers.models import Paper, MatchedCitation
 from utils.tagging import extract_tags, get_embedding_model
 from utils.semantic_search import index_paper
 from utils.citation_matcher import extract_and_match_citations
-from utils.summarize import generate_summary
+from utils.summarize import generate_summary_with_api
 
 # -----------------------------------------------------------------------------
 # MAIN COORDINATOR TASK
@@ -94,7 +94,7 @@ def process_paper_task(paper_id):
         # --- STEP 4: Summary Generation ---
         try:
             print("[Task] Generating summary...")
-            summary = generate_summary(paper)
+            summary = generate_summary_with_api(paper)
             if summary:
                 paper.summary = summary
                 paper.save(update_fields=["summary"])

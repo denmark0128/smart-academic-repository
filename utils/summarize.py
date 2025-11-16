@@ -1,9 +1,59 @@
 #summarize.py
+from google import genai
+from dotenv import load_dotenv
+from django.conf import settings
+import json
 import os
-from llama_cpp import Llama
+#from llama_cpp import Llama
 import fitz
 from staff.utils import get_llama_settings  # <-- Following your pattern
 
+BASE_DIR = settings.BASE_DIR
+load_dotenv(BASE_DIR / ".env")
+api_key = os.getenv("GEMINI_API_KEY")
+
+def get_paper_text(paper):
+    """
+    Extract and join ONLY chunk text (ignore title and abstract).
+    """
+    chunks = paper.chunks.all().order_by("chunk_id")
+
+    if chunks.exists():
+        all_text = " ".join(chunk.text for chunk in chunks if chunk.text)
+        print(f"[Summarizer] Joined {len(chunks)} chunks")
+    else:
+        all_text = ""
+        print("[Summarizer] No chunks found")
+
+    print(f"[Summarizer] Total text length: {len(all_text):,} chars")
+    return all_text
+
+
+def generate_summary_with_api(paper):
+    """
+    Generate a summary for the paper using Gemini API with settings from the database.
+    """
+    settings = get_llama_settings()
+    
+    all_text = get_paper_text(paper)
+    if not all_text.strip():
+        print("[Summarizer] No text found to summarize.")
+        return None
+
+    print(f"[Summarizer] Generating API summary for: {paper.title}")
+
+    # Build the prompt following the same pattern as local
+    full_prompt = f"{settings.system_prompt}\n\n{settings.user_prompt_template.format(text=all_text)}"
+
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-lite",  # Updated model name
+        contents=full_prompt,
+    )
+
+    return response.text
+
+'''
 _llm = None 
 # ----------- Load model once globally -----------
 def get_llm():
@@ -28,21 +78,6 @@ def get_llm():
     return _llm
 
 
-def get_paper_text(paper):
-    """
-    Extract and join ONLY chunk text (ignore title and abstract).
-    """
-    chunks = paper.chunks.all().order_by("chunk_id")
-
-    if chunks.exists():
-        all_text = " ".join(chunk.text for chunk in chunks if chunk.text)
-        print(f"[Summarizer] Joined {len(chunks)} chunks")
-    else:
-        all_text = ""
-        print("[Summarizer] No chunks found")
-
-    print(f"[Summarizer] Total text length: {len(all_text):,} chars")
-    return all_text
 
 
 def generate_summary(paper):
@@ -163,3 +198,5 @@ def summarize_pdf_to_json(pdf_path):
         "summary": result,
         "inference_mode": "local_llama_cpp_stream_db_settings", # <-- Updated
     }
+
+'''
