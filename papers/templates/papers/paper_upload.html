@@ -53,6 +53,23 @@
     {% include 'papers/partials/uploads/upload_form.html' %}
   </div>
 
+  <!-- Uploaded Papers -->
+<div x-show="subTab === 'review'"
+     hx-get="{% url 'review_papers_partials' %}"
+     hx-trigger="load"
+     hx-swap="innerHTML"
+     class="mt-4">
+     
+  <!-- Skeleton placeholder -->
+  <div class="animate-pulse space-y-2">
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+    <div class="h-10 bg-gray-300 rounded w-full"></div>
+  </div>
+</div>
 
 </div>
 {% endblock %}

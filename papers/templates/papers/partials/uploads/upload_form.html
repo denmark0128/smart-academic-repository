@@ -14,7 +14,7 @@
   }
 
   /* 🔹 Centered spinner overlay */
-  #processing-overlay {
+  .spinner-overlay {
     position: fixed;
     inset: 0;
     display: none;
@@ -26,7 +26,7 @@
     flex-direction: column;
   }
 
-  html.dark #processing-overlay {
+  html.dark .spinner-overlay {
     background: rgba(0, 0, 0, 0.5);
   }
 
@@ -43,8 +43,7 @@
 
   /* 1. The wrapper holds the visuals and the hidden input */
   .file-dropzone-wrapper {
-    position: relative;
-    padding-top: 2rem; /* Give space for the label */
+    position: relative; /* Give space for the label */
   }
 
   /* 2. The visual dropzone box */
@@ -118,7 +117,6 @@
     <div class="flex flex-col lg:flex-row gap-8">
 
       <!-- 🔹 LEFT COLUMN (File Upload) -->
-      <!-- This is the new Drag and Drop UI -->
       <div class="w-full lg:w-1/3 space-y-2">
         <label for="{{ form.file.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
           {{ form.file.label }}
@@ -126,14 +124,11 @@
         
         <div class="file-dropzone-wrapper" id="file-dropzone-wrapper">
           <!-- The Visual Part -->
-          <div class="file-dropzone-content">
+          <div class="file-dropzone-content"> 
             <svg class="file-dropzone-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
             </svg>
             <p class="file-dropzone-text" id="file-dropzone-text">Drag & drop your paper here</p>
-            <!-- 
-              FIX: Added id="file-dropzone-text-sub" to match the JavaScript selector 
-            -->
             <p class="file-dropzone-text-sub" id="file-dropzone-text-sub">or click to browse</p>
           </div>
           
@@ -178,7 +173,7 @@
           <div class="form-errors">{{ form.abstract.errors }}</div>
         </div>
 
-        <!-- College & Program -->
+        <!-- College & Program (CHAINED SELECTS) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="form-field-group space-y-2">
             <label for="{{ form.college.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">
@@ -220,16 +215,25 @@
   </form>
 </div>
 
-<!-- 🔹 Fixed overlay spinner (no changes needed) -->
-<div id="processing-overlay">
+<!-- 🔹 SPINNER 1: For metadata extraction (processing file) -->
+<div id="processing-overlay" class="spinner-overlay">
   <svg class="animate-spin h-10 w-10 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
   </svg>
-  <p class="text-blue-700 font-semibold dark:text-blue-300">Processing your paper…</p>
+  <p class="text-blue-700 font-semibold dark:text-blue-300">Your paper is being processed...</p>
 </div>
 
-<!-- 🔹 JavaScript (MODIFIED to support drag/drop) -->
+<!-- 🔹 SPINNER 2: For final upload (redirecting) -->
+<div id="upload-overlay" class="spinner-overlay">
+  <svg class="animate-spin h-10 w-10 text-green-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+  </svg>
+  <p class="text-green-700 font-semibold dark:text-green-300">Uploading your paper, you will be redirected to another page...</p>
+</div>
+
+<!-- 🔹 JavaScript (WITH CHAINED SELECTS) -->
 <script>
 // --- Get elements ---
 const fileInput = document.querySelector("#file-upload");
@@ -241,23 +245,101 @@ const defaultDropzoneText = "Drag & drop your paper here";
 const defaultDropzoneSubText = "or click to browse";
 const defaultHelpText = helpText ? helpText.innerText : "";
 
-// --- Metadata extraction logic (moved to a function) ---
+// Get both spinners
+const processingOverlay = document.querySelector("#processing-overlay");
+const uploadOverlay = document.querySelector("#upload-overlay");
+
+// 🔹 NEW: Get college and program selects
+const collegeSelect = document.querySelector("#id_college");
+const programSelect = document.querySelector("#id_program");
+
+// 🔹 NEW: College-Program mapping (matches your models.py)
+const collegeProgramMap = {
+    'ccs': ['bsit', 'bscs'],  
+    'cba': ['bsba', 'bsa'],   
+    'cas': ['bsem','bsee'],           
+    'coe': ['bsece'],                
+    'cihm': ['bshm'],         
+}
+
+// 🔹 NEW: Store all program options on page load
+let allProgramOptions = [];
+if (programSelect) {
+  allProgramOptions = Array.from(programSelect.options).map(opt => ({
+    value: opt.value,
+    text: opt.text
+  }));
+}
+
+// 🔹 NEW: Function to filter programs based on selected college
+function filterPrograms(collegeCode) {
+  if (!programSelect) return;
+  
+  // Clear current options except the first (placeholder)
+  programSelect.innerHTML = '<option value="">---------</option>';
+  
+  if (!collegeCode) {
+    // No college selected, show all programs
+    allProgramOptions.forEach(opt => {
+      if (opt.value) { // Skip empty option
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.text;
+        programSelect.appendChild(option);
+      }
+    });
+    return;
+  }
+  
+  // Get allowed programs for this college
+  const allowedPrograms = collegeProgramMap[collegeCode] || [];
+  
+  // Add only matching programs
+  allProgramOptions.forEach(opt => {
+    if (opt.value && allowedPrograms.includes(opt.value)) {
+      const option = document.createElement('option');
+      option.value = opt.value;
+      option.textContent = opt.text;
+      programSelect.appendChild(option);
+    }
+  });
+  
+  // If no programs available, show a message
+  if (programSelect.options.length === 1) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'No programs available for this college';
+    option.disabled = true;
+    programSelect.appendChild(option);
+  }
+}
+
+// 🔹 NEW: Listen for college changes
+if (collegeSelect) {
+  collegeSelect.addEventListener('change', (e) => {
+    filterPrograms(e.target.value);
+  });
+  
+  // Initialize on page load if college is already selected
+  if (collegeSelect.value) {
+    filterPrograms(collegeSelect.value);
+  }
+}
+
+// --- Metadata extraction logic ---
 async function handleFileSelect(file) {
   if (!file) return;
 
   const form = document.querySelector("#upload-form");
-  const overlay = document.querySelector("#processing-overlay");
 
-  // 🔹 Show overlay + dim form
-  overlay.style.display = "flex";
+  // 🔹 Show PROCESSING overlay + dim form
+  processingOverlay.style.display = "flex";
   form.classList.add("dimmed");
 
   // 🔹 Update dropzone text
   dropzoneText.innerText = file.name;
-  // This line should no longer cause an error
   dropzoneSubText.innerText = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
   if (helpText) helpText.innerText = "Processing file for metadata...";
-
 
   const formData = new FormData();
   formData.append("file", file);
@@ -273,8 +355,8 @@ async function handleFileSelect(file) {
 
     const data = await response.json();
 
-    // 🔹 Hide overlay + undim
-    overlay.style.display = "none";
+    // 🔹 Hide PROCESSING overlay + undim
+    processingOverlay.style.display = "none";
     form.classList.remove("dimmed");
     if (helpText) helpText.innerText = defaultHelpText;
 
@@ -290,13 +372,18 @@ async function handleFileSelect(file) {
         } else {
           el.value = data.metadata[f] || "";
         }
+        
+        // 🔹 NEW: If college was auto-filled, trigger the filter
+        if (f === 'college' && el.value) {
+          filterPrograms(el.value);
+        }
       });
     } else {
       if (helpText) helpText.innerText = "Could not extract metadata. Please fill manually.";
     }
   } catch (err) {
     console.error(err);
-    overlay.style.display = "none";
+    processingOverlay.style.display = "none";
     form.classList.remove("dimmed");
     if (helpText) helpText.innerText = "An error occurred. Please try again.";
   }
@@ -304,16 +391,15 @@ async function handleFileSelect(file) {
 
 // --- Event Listeners ---
 
-// 1. Click/Browse (Stays on the hidden input)
+// 1. Click/Browse
 fileInput.addEventListener("change", (e) => {
   const file = e.target.files[0];
   handleFileSelect(file);
 });
 
-// 2. Drag Events (add/remove visual class)
-//    ATTACH TO THE WRAPPER (THE VISUAL ELEMENT)
+// 2. Drag Events
 ['dragenter', 'dragover'].forEach(eventName => {
-  dropzoneWrapper.addEventListener(eventName, (e) => { // <-- CHANGED
+  dropzoneWrapper.addEventListener(eventName, (e) => {
     e.preventDefault();
     e.stopPropagation();
     dropzoneWrapper.classList.add('dragover');
@@ -321,25 +407,26 @@ fileInput.addEventListener("change", (e) => {
 });
 
 ['dragleave', 'drop'].forEach(eventName => {
-  dropzoneWrapper.addEventListener(eventName, (e) => { // <-- CHANGED
+  dropzoneWrapper.addEventListener(eventName, (e) => {
     e.preventDefault();
     e.stopPropagation();
     dropzoneWrapper.classList.remove('dragover');
   });
 });
 
-// 3. Drop Event (get file and trigger logic)
-//    ATTACH TO THE WRAPPER (THE VISUAL ELEMENT)
-dropzoneWrapper.addEventListener("drop", (e) => { // <-- CHANGED
-  // e.dataTransfer.files holds the files
+// 3. Drop Event
+dropzoneWrapper.addEventListener("drop", (e) => {
   if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-    // Manually assign the dropped file(s) to the input
     fileInput.files = e.dataTransfer.files; 
-    
-    // Call the handler function directly
     const file = e.dataTransfer.files[0];
     handleFileSelect(file);
   }
 });
-</script>
 
+// 4. Form submission
+document.querySelector("#upload-form").addEventListener("submit", (e) => {
+  const form = e.target;
+  uploadOverlay.style.display = "flex";
+  form.classList.add("dimmed");
+});
+</script>

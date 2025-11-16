@@ -1,6 +1,16 @@
 
 
 services:
+  # --- 1. DEFINE REDIS FIRST ---
+  # This is the service definition that was missing
+  redis:
+    image: "redis:alpine"
+    container_name: paperrepo_redis
+    expose:
+      - "6379"
+    restart: unless-stopped
+
+  # --- 2. YOUR WEB APP (UPDATED) ---
   web:
     build: .
     container_name: paperrepo_app
@@ -11,7 +21,24 @@ services:
       - .:/app
     expose:
       - "8000"
+    restart: unless-stopped
+    depends_on:
+      - redis  # This line needs the 'redis' service above to exist
 
+  # --- 3. THE NEW CELERY WORKER ---
+  worker:
+    build: .
+    container_name: paperrepo_worker
+    command: celery -A paperrepo worker -l info -c 4
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    depends_on:
+      - redis  # This line also needs the 'redis' service above to exist
+
+  # --- 4. YOUR NGINX SERVICE ---
   nginx:
     image: nginx:latest
     container_name: paperrepo_nginx

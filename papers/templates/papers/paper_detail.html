@@ -4,17 +4,27 @@
 {% block title %}{{ paper.title }}{% endblock %}
 
 {% block content %}
-
-<div class="container mx-auto px-4 py-8 max-w-4xl">
+<div class="container mx-auto px-4 pb-8 max-w-6xl">
+  <!-- Back Button -->
+  <div class="mb-2">
+    <button onclick="history.back()" 
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800/70 rounded-lg dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
+      <!-- Left Arrow Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      Back
+    </button>
+  </div>
   <!-- Grid: Left = Metadata + Abstract, Right = Chat/Buttons/Tags -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
 
     <!-- LEFT COLUMN -->
     <div class="md:col-span-2 space-y-6">
 
       <!-- Title + Metadata + Authors + Tags + Buttons (Immediate Load) -->
-      <div class="bg-white/80 backdrop-blur-sm border border-gray-200 p-6 rounded-lg bg-white space-y-4 dark:bg-zinc-900 dark:border-zinc-700">
-        <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-4 dark:text-gray-300">{{ paper.title }}</h1>
+      <div class="bg-white-100/80 backdrop-blur-sm border border-gray-200 p-6 rounded-lg bg-white space-y-4 dark:bg-gray-700/30 dark:border-gray-800">
+        <h1 class="text-2xl font-bold text-gray-800 leading-tight mb-4 dark:text-gray-300">{{ paper.title }}</h1>
         <p class="text-sm text-gray-500">Views: {{ paper.views }}</p>
 
         <!-- DOI -->
@@ -53,10 +63,10 @@
             <span class="font-bold">{{ paper.year }}</span>
           {% endif %}
           {% if paper.college %}
-            <span class="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-lg dark:bg-zinc-800 dark:text-zinc-200">{{ paper.college }}</span>
+            <span class="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-lg dark:bg-gray-800 dark:text-gray-200">{{ paper.college }}</span>
           {% endif %}
           {% if paper.program %}
-            <span class="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded-lg dark:bg-zinc-800 dark:text-zinc-200">{{ paper.program }}</span>
+            <span class="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded-lg dark:bg-gray-800 dark:text-gray-200">{{ paper.program }}</span>
           {% endif %}
         </div>
 
@@ -68,9 +78,9 @@
              hx-swap="innerHTML">
           <div class="flex flex-wrap gap-2">
             <div class="animate-pulse flex gap-2">
-              <div class="h-6 w-20 bg-gray-200 rounded-full"></div>
-              <div class="h-6 w-24 bg-gray-200 rounded-full"></div>
-              <div class="h-6 w-16 bg-gray-200 rounded-full"></div>
+              <div class="h-6 w-20 bg-gray-200 dark:bg-gray-800/70 rounded-full"></div>
+              <div class="h-6 w-24 bg-gray-200 dark:bg-gray-800/70 rounded-full"></div>
+              <div class="h-6 w-16 bg-gray-200 dark:bg-gray-800/70 rounded-full"></div>
             </div>
           </div>
         </div>
@@ -78,7 +88,7 @@
         <!-- Buttons -->
         <div class="flex flex-col sm:flex-row gap-2 w-full items-stretch sm:items-center">
           {% if paper.file %}
-          <a href="{{ paper.file.url }}" download class="btn btn-soft bg-blue-600 text-white dark:bg-blue-900 text-center">Download PDF</a>
+          <a href="{{ paper.file.url }}" download class="btn btn-soft bg-blue-600 text-white dark:bg-blue-950 text-center">Download PDF</a>
           {% endif %}
           
           <!-- Save Button (Lazy Load) -->
@@ -92,14 +102,15 @@
               
             {% if user.is_authenticated %}
               <div class="animate-pulse">
-                <div class="h-10 w-full sm:w-32 bg-gray-200 rounded"></div>
+                <div class="h-10 w-full sm:w-32 bg-gray-200 dark:bg-gray-800/70 rounded"></div>
               </div>
             {% else %}
-              <div class="text-center">
+                <div class="text-center">
                 <a href="{% url 'account_login' %}?next={% url 'paper_detail' paper.pk %}" class="text-sm text-blue-600 hover:underline">
                   Log in to save this paper
                 </a>
               </div>
+
             {% endif %}
           </div>
           
@@ -111,7 +122,7 @@
               hx-swap="innerHTML">
             
               <div class="animate-pulse">
-                <div class="h-10 bg-gray-200 rounded w-full sm:w-48"></div>
+                <div class="h-10 bg-gray-200 dark:bg-gray-800/70 rounded w-full sm:w-48"></div>
               </div>
           </div>
         </div>
@@ -125,12 +136,12 @@
            hx-trigger="load"
            hx-select="#abstract-section"
            hx-swap="innerHTML">
-        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 p-6 rounded-lg dark:bg-zinc-900 dark:border-zinc-700">
+        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 p-6 rounded-lg dark:bg-gray-700/30 dark:border-gray-800">
           <div class="animate-pulse">
-            <div class="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div class="h-4 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-800/70 rounded w-1/4 mb-4"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-800/70 rounded mb-2"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-800/70 rounded mb-2"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-800/70 rounded w-5/6"></div>
           </div>
         </div>
       </div>
@@ -141,7 +152,7 @@
            hx-trigger="load"
            hx-select="#summary-section"
            hx-swap="innerHTML">
-        <div class="border border-gray-200 p-6 rounded-lg bg-yellow-50 border-yellow-400 dark:bg-zinc-900 dark:border-zinc-700">
+        <div class="border border-gray-200 p-6 rounded-lg bg-yellow-50 border-yellow-400 dark:bg-gray-700/30 dark:border-gray-800">
           <div class="animate-pulse">
             <div class="h-4 bg-yellow-200 rounded w-1/3 mb-4"></div>
             <div class="h-4 bg-yellow-200 rounded mb-2"></div>
@@ -151,31 +162,18 @@
 
       </div>
 
-      <!-- AI Insights (Lazy Load) -->
-      <div id="ai-insights-container"
-           hx-get="{% url 'paper_detail_partials' paper.pk %}"
-           hx-trigger="load"
-           hx-select="#ai-insights-section"
-           hx-swap="innerHTML">
-        <div class="border border-gray-200 p-6 rounded-lg bg-white dark:bg-zinc-900 dark:border-zinc-700">
-          <div class="animate-pulse">
-            <div class="h-4 bg-gray-200 rounded w-1/4"></div>
-          </div>
-        </div>
-      </div>
-
       <!-- Citations (Lazy Load) -->
       <div id="citations-container"
            hx-get="{% url 'paper_detail_partials' paper.pk %}"
            hx-trigger="load"
            hx-select="#citations-section"
            hx-swap="innerHTML">
-        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-sm p-6 dark:bg-zinc-900 dark:border-zinc-700">
+        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-sm p-6 dark:bg-gray-700/30 dark:border-gray-800">
           <div class="animate-pulse">
-            <div class="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-800/70 rounded w-1/3 mb-4"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="h-32 bg-gray-200 rounded"></div>
-              <div class="h-32 bg-gray-200 rounded"></div>
+              <div class="h-32 bg-gray-200 dark:bg-gray-800/70 rounded"></div>
+              <div class="h-32 bg-gray-200 dark:bg-gray-800/70 rounded"></div>
             </div>
           </div>
         </div>
@@ -184,17 +182,38 @@
     </div>
 
     <!-- RIGHT COLUMN -->
-    <div class="flex flex-col space-y-3">
+    <div class="flex flex-col space-y-6">
       
       <!-- Chat (Lazy Load) -->
-      <div id="chat-container"
+      <div class="flex flex-col space-y-3">
+  
+  <div id="chat-loader"
+       hx-get="{% url 'paper_detail_partials' paper.pk %}"
+       hx-trigger="load"
+       hx-select="#chat-section"
+       hx-swap="outerHTML">
+    
+    <div class="bg-white rounded-lg border border-gray-200 flex flex-col h-96 dark:bg-gray-700/30 dark:border-gray-800">
+      <div class="flex-1 flex items-center justify-center">
+        <div class="animate-pulse text-gray-400">Loading chat...</div>
+      </div>
+    </div>
+  </div>
+  
+  </div>
+
+      
+
+      <!-- Citation Box (Lazy Load) -->
+      <div id="citation-box-container"
            hx-get="{% url 'paper_detail_partials' paper.pk %}"
            hx-trigger="load"
-           hx-select="#chat-section"
+           hx-select="#citation-box-section"
            hx-swap="innerHTML">
-        <div class="bg-white rounded-lg border border-gray-200 flex flex-col h-96 dark:bg-zinc-900 dark:border-zinc-700">
-          <div class="flex-1 flex items-center justify-center">
-            <div class="animate-pulse text-gray-400">Loading chat...</div>
+        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg dark:bg-gray-700/30 dark:border-gray-800 p-4">
+          <div class="animate-pulse">
+            <div class="h-4 bg-gray-200 dark:bg-gray-800/70 rounded w-1/3 mb-4"></div>
+            <div class="h-16 bg-gray-200 dark:bg-gray-800/70 rounded"></div>
           </div>
         </div>
       </div>
@@ -207,25 +226,11 @@
            hx-swap="innerHTML">
         <div class="mt-10">
           <div class="animate-pulse">
-            <div class="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-800/70 rounded w-1/4 mb-4"></div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="h-32 bg-gray-200 rounded"></div>
-              <div class="h-32 bg-gray-200 rounded"></div>
+              <div class="h-32 bg-gray-200 dark:bg-gray-800/70 rounded"></div>
+              <div class="h-32 bg-gray-200 dark:bg-gray-800/70 rounded"></div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Citation Box (Lazy Load) -->
-      <div id="citation-box-container"
-           hx-get="{% url 'paper_detail_partials' paper.pk %}"
-           hx-trigger="load"
-           hx-select="#citation-box-section"
-           hx-swap="innerHTML">
-        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg dark:bg-zinc-900 dark:border-zinc-700 p-4">
-          <div class="animate-pulse">
-            <div class="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div class="h-16 bg-gray-200 rounded"></div>
           </div>
         </div>
       </div>
@@ -234,4 +239,35 @@
   </div>
 </div>
 
+
 {% endblock %}
+
+
+<script>
+function cleanAISummary() {
+    const summaryPreElement = document.querySelector('#summary-section pre');
+    if (!summaryPreElement) return;
+
+    let rawText = summaryPreElement.textContent.trim();
+
+    // Remove AI intro (e.g., "**Summary:**" or "**Key Findings & Methodology:**")
+    rawText = rawText.replace(/^(?:.*?)(?:\*\*Summary:\*\*|\*\*Key Findings & Methodology:\*\*)\s*/i, '');
+
+    // Remove AI outro (e.g., "--- **Note:**")
+    rawText = rawText.replace(/\s+---(?:\s*\*\*Note:\*\*[\s\S]*)?$/i, '');
+
+    summaryPreElement.textContent = rawText;
+}
+
+// Run after HTMX swaps content
+document.body.addEventListener('htmx:afterSwap', (event) => {
+    if (event.detail.target.id === 'summary-section') {
+        cleanAISummary();
+    }
+});
+
+// Also run once in case it's already loaded
+document.addEventListener('DOMContentLoaded', () => {
+    cleanAISummary();
+});
+</script>

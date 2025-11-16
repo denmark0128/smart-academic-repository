@@ -80,20 +80,19 @@
   {% block extra_head %}{% endblock %}
 </head>
 
-<body class="min-h-screen bg-gradient-to-br 
-  from-gray-100 via-white to-indigo-50 
-  dark:from-[#0a0a0a] dark:via-[#0d0d0d] dark:to-[#050505]
-  text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300">
+<body class="min-h-screen bg-gray-50 dark:bg-black
+  text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300 
+  flex flex-col">
 
   {% if not hide_navbar %}
     {% include 'components/navbar_staff.html' %}
   {% endif %}
 
-  <div id="main-content" class="container mx-auto p-6">
+  <div id="main-content" class="container  mx-auto px-6 py-2">
     {% block content %}{% endblock %}
   </div>
 
-  <!-- Toast container -->
+  <!-- Toast container -->b
   <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
 
   <!-- NProgress JS -->
@@ -105,6 +104,28 @@
 document.body.addEventListener('htmx:configRequest', (event) => {
     event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
 });
+
+
+  // Clears input after the request is SENT
+  document.body.addEventListener("htmx:afterRequest", (evt) => {
+    // Make sure this event is from our form
+    if (evt.detail.elt.id === "chat-form") {
+      document.getElementById("chat-input").value = "";
+    }
+  });
+
+  document.body.addEventListener("htmx:afterSwap", (evt) => {
+    // Also make sure this event is from our chat form
+    if (evt.detail.elt.id === "chat-form") {
+      
+      // Find the container that scrolls
+      const chatContainer = document.getElementById("chat-container");
+      
+      // Set its scroll position to the very bottom
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    });
 </script>
+
 </body>
 </html>

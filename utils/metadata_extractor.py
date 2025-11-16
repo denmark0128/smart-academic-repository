@@ -1,8 +1,21 @@
+#metadata_extractor.py
 import fitz  # PyMuPDF
+import os
+from google import genai
+from dotenv import load_dotenv
 import spacy
 from spacy.pipeline import EntityRuler
 import json
+from django.conf import settings
 import re
+
+# --- Environment Setup ---
+BASE_DIR = settings.BASE_DIR
+load_dotenv(BASE_DIR / ".env")
+api_key = os.getenv("GEMINI_API_KEY")
+
+
+
 
 # === PDF text extractor ===
 def extract_text_from_pdf(pdf_path):
@@ -22,6 +35,39 @@ def preclean_text(text):
     # Join lines with single newline (no empty lines)
     return "\n".join(lines)
 
+def extract_metadata_with_llm(text):
+    prompt = f"""
+    Extract metadata from the text of an academic paper.
+    Respond ONLY with a valid JSON object.
+    Include any of these keys if found: "title", "authors", "year" (default to 2025 if no date is found), "college", "program", "abstract".
+    Text:
+    {text}
+    """
+
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(
+        model="gemma-3-27b-it",
+        contents=prompt,
+    )
+
+    response_text = response.text.strip()
+    print("[LLM RAW RESPONSE]", response_text)
+
+    # Try to capture JSON inside ```json ... ```
+    match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+    json_to_parse = match.group(1) if match else response_text
+
+    try:
+        metadata = json.loads(json_to_parse)
+        print("[LLM INFO] Successfully parsed JSON.")
+    except json.JSONDecodeError:
+        print("[LLM WARNING] Invalid JSON, returning empty dict.")
+        metadata = {}
+
+    return metadata
+
+
+
 def extract_date(text):
     return re.findall(r'\b(20\d{2})\b', text)
 
@@ -36,10 +82,13 @@ def extract_college(text):
     return None
 
 def extract_program(text):
+    prefixes = ["bachelor", "degree"]
     for line in text.splitlines():
-        if line.strip().lower().startswith("bachelor"):
+        stripped_line = line.strip().lower()
+        if any(stripped_line.startswith(prefix) for prefix in prefixes):
             return line.strip()
     return None
+
 
 # === Title extractor ===
 def extract_title(text):
@@ -133,30 +182,47 @@ def extract_project_description(pdf_path):
 
 # === Run extractor on PDF ===
 def extract_metadata(pdf_path):
+    # 1. Extract text
     raw_text = extract_text_from_pdf(pdf_path)
     cleaned_text = preclean_text(raw_text)
-    doc = nlp(cleaned_text)
 
-    lines = raw_text.strip().splitlines()
-    person_lines = set()
-    date_lines = set()
+    # 2. Try LLM extraction
+    metadata = {}
+    try:
+        metadata = extract_metadata_with_llm(cleaned_text)
+    except Exception as e:
+        print(f"[LLM ERROR] {e}")
+        # fallback to old extraction if LLM fails
+        metadata = {}
 
-    for ent in doc.ents:
-        for line in lines:
-            if ent.text in line:
-                if ent.label_ == "PERSON":
-                    person_lines.add(line.strip())
-                elif ent.label_ == "DATE":
-                    date_lines.add(line.strip())
+    # 3. Fallback to old methods if any key is missing or empty
+    title = metadata.get("title") or extract_title(cleaned_text)
+    college = metadata.get("college") or extract_college(cleaned_text)
+    program = metadata.get("program") or extract_program(cleaned_text)
+    authors = metadata.get("authors") or []
+    
+    # If LLM didn't give authors, fallback to spaCy
+    if not authors:
+        doc = nlp(cleaned_text)
+        lines = raw_text.strip().splitlines()
+        person_lines = set()
+        for ent in doc.ents:
+            if ent.label_ == "PERSON":
+                for line in lines:
+                    if ent.text in line:
+                        person_lines.add(line.strip())
+        authors = list(person_lines)
+    
+    year = metadata.get("year") or extract_date(cleaned_text)
+    abstract = metadata.get("abstract") or extract_project_description(pdf_path)  # keep existing abstract extraction
 
     return {
-        "title": extract_title(cleaned_text),
-        "college": extract_college(cleaned_text),
-        "program": extract_program(cleaned_text),
-        "authors": list(person_lines),
-        "year": extract_date(cleaned_text),
-        "abstract": extract_project_description(pdf_path),
-
+        "title": title,
+        "college": college,
+        "program": program,
+        "authors": authors,
+        "year": year,
+        "abstract": abstract,
     }
 
 # === Run test ===
@@ -176,6 +242,7 @@ COLLEGE_MAPPING = {
     "college of engineering": "coe",
     "college of education": "ced",
     "college of nursing": "con",
+    "college of international hospitality management": "cihm",
     # Add more as needed
 }
 
@@ -184,10 +251,10 @@ PROGRAM_MAPPING = {
     "bachelor of science in information technology": "bsit",
     "bachelor of science in business administration": "bsba",
     "bachelor of secondary education": "bse",
-    "bachelor of elementary education": "bee",
     "bachelor of science in accountancy": "bsa",
     "bachelor of science in civil engineering": "bsce",
     "bachelor of science in nursing": "bsn",
+    "bachelor of science in hospitality management": 'bshm'
     # Add more as needed
 }
 

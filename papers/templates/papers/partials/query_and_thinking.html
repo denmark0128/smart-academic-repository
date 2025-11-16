@@ -1,0 +1,22 @@
+<div class="flex justify-end">
+  <div class="max-w-md lg:max-w-lg px-4 py-3
+              bg-blue-600 text-white 
+              rounded-lg shadow-sm">
+    <p>{{ query }}</p>
+  </div>
+</div>
+
+<div class="flex justify-start"
+     hx-get="{% url 'get_answer' paper.pk %}?query={{ query|urlencode }}"
+     hx-trigger="load"
+     hx-swap="outerHTML">
+  
+  <div class="max-w-md lg:max-w-lg px-4 py-3
+              bg-gray-100 dark:bg-zinc-700 
+              text-gray-900 dark:text-gray-200 
+              rounded-lg shadow-sm">
+    <div class="animate-pulse">
+      <div class="h-2 bg-gray-300 dark:bg-zinc-600 rounded-full w-24"></div>
+    </div>
+  </div>
+</div>

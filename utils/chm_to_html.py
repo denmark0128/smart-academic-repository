@@ -1,9 +1,12 @@
+#chm_to_html.py
+
 import os
 import subprocess
 import shutil
 import uuid
 from bs4 import BeautifulSoup
 from urllib.parse import unquote
+
 
 # -------- CONFIG --------
 SEVEN_ZIP_CMD = r"C:\Program Files\7-Zip\7z.exe"  # adjust path

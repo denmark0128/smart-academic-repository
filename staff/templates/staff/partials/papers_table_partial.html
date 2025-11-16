@@ -64,7 +64,16 @@
 
           <!-- Tags -->
           <td class="py-3 px-6 text-sm text-gray-600 dark:text-zinc-300">
-            {% if paper.tags %}
+            {% if paper.tags_with_scores %}
+              {% for tag in paper.tags_with_scores %}
+                <span class="badge badge-soft badge-primary badge-sm p-2 text-sm items-center gap-2 
+                            dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 
+                            whitespace-normal break-words">
+                  {{ tag.name }}
+                  <span class="text-xs text-gray-400 ml-1">({{ tag.score|floatformat:4 }})</span>
+                </span>
+              {% endfor %}
+            {% elif paper.tags %}
               {% for tag in paper.tags %}
                 <span class="badge badge-soft badge-primary badge-sm p-2 text-sm items-center gap-2 
                             dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 
@@ -75,8 +84,8 @@
             {% else %}
               <span class="text-gray-400 text-xs">No tags</span>
             {% endif %}
-
           </td>
+
 
 
           <!-- Status -->

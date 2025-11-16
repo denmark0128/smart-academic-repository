@@ -14,7 +14,7 @@
     <button 
       @click="tab = 'dashboard'"
       :class="tab === 'dashboard' 
-        ? 'border-b-2 border-indigo-600 text-indigo-600' 
+        ? 'border-b-2 border-indigo-600 dark:text-gray-200' 
         : 'border-transparent text-zinc-800 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-200'">
       Dashboard
     </button>
@@ -22,28 +22,28 @@
     <button 
       @click="tab = 'tags'"
       :class="tab === 'tags' 
-        ? 'border-b-2 border-indigo-600 text-indigo-600' 
+        ? 'border-b-2 border-indigo-600 dark:text-gray-200' 
         : 'border-transparent text-zinc-800 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-200'">
       Manage Tags
     </button>
     <button 
       @click="tab = 'papers'"
       :class="tab === 'papers' 
-        ? 'border-b-2 border-indigo-600 text-indigo-600' 
+        ? 'border-b-2 border-indigo-600 dark:text-gray-200' 
         : 'border-transparent text-zinc-800 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-200'">
       Manage Papers
     </button>
     <button 
       @click="tab = 'settings_search'"
       :class="tab === 'settings_search' 
-        ? 'border-b-2 border-indigo-600 text-indigo-600' 
+        ? 'border-b-2 border-indigo-600 dark:text-gray-200' 
         : 'border-transparent text-zinc-800 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-200'">
       Search Settings
     </button>
     <button 
       @click="tab = 'settings_llama'"
       :class="tab === 'settings_llama' 
-        ? 'border-b-2 border-indigo-600 text-indigo-600' 
+        ? 'border-b-2 border-indigo-600 dark:text-gray-200' 
         : 'border-transparent text-zinc-800 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-200'">
       Llama Settings
     </button>

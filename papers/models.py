@@ -19,8 +19,18 @@ PROGRAM_CHOICES = [
     ('bsba', 'BS in Business Administration'),
     ('bse', 'BS in Secondary Education'),
     ('bsa', 'BS in Accountancy'),
+    ('bshm', 'BS in Hospitality Management'),
+    ('bsece', 'BS in Electronics Engineering'),
     # add more as needed
 ]
+
+COLLEGE_PROGRAM_MAP = {
+    'ccs': ['bsit', 'bscs'],  
+    'cba': ['bsba', 'bsa'],   
+    'cas': ['bsem','bsee'],           
+    'coe': ['bsece'],                
+    'cihm': ['bshm'],         
+}
 
 class Paper(models.Model):
     local_doi = models.CharField(max_length=100, unique=True, null=True, blank=True)

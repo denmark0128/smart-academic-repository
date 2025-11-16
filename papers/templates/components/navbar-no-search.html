@@ -1,8 +1,8 @@
-<nav class="p-4">
+<nav class="pt-2 px-2 flex items-center">
   <div class="container mx-auto flex items-center justify-between">
 
     <!-- Logo -->
-    <a href="/" class="font-bold text-xl">Academic Repo</a>
+    <a href="/" class="font-bold text-xl text-zinc-800 dark:text-zinc-400">Prot</a>
 
     <div class="flex flex-row justify-center items-center gap-4">
     
@@ -18,7 +18,7 @@
           </svg>
         </button>
 
-        <div x-show="open" x-transition class="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded shadow-lg z-50 flex flex-col">
+        <div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded shadow-lg z-50 flex flex-col">
           <a href="{% url 'saved_papers' %}" class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-zinc-700 flex items-center gap-3 dark:text-gray-200">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
@@ -68,7 +68,7 @@
       <ul class="hidden sm:flex gap-4 justify-center items-center">
 
         <button id="theme-toggle"
-      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+      class="ml-6 p-2 rounded-md border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600">
       <!-- Sun icon (shown in dark mode) -->
       <svg class="h-5 w-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -79,58 +79,59 @@
       </svg>
     </button>
         <li>
-          <a href="{% url 'saved_papers' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Library">
+          <a href="{% url 'saved_papers' %}" class="flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Library">
             <svg class="h-5 w-5 dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
             </svg>
           </a>
         </li>
         <li>
-          <a href="{% url 'paper_insights' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Overview">
+          <a href="{% url 'paper_insights' %}" class="flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Overview">
             <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
           </a>
         </li>
         <li>
-          <a href="{% url 'home' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Home">
+          <a href="{% url 'home' %}" class="flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Home">
             <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
             </svg>
           </a>
         </li>
         <li>
-          <a href="{% url 'paper_list' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Papers">
+          <a href="{% url 'paper_list' %}" class="flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Papers">
             <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
           </a>
         </li>
         <li>
-          <a href="{% url 'paper_upload' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Upload">
+          <a href="{% url 'paper_upload' %}" class="flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Upload">
             <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
             </svg>
           </a>
         </li>
-        <li>
-          <a href="{% url 'profile_page' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Profile - {{ user.username }}">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Profile dropdown -->
+        <li class="relative" x-data="{ open: false }">
+          <button @click="open = !open" class="border border-zinc-300 flex items-center justify-center p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:border-zinc-700 rounded-full" title="Profile - {{ user.username }}">
+            <svg class="h-5 w-5 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'account_logout' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Logout">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-            </svg>
-          </a>
+          </button>
+
+          <!-- Dropdown menu -->
+          <div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md shadow-lg z-50">
+            <a href="{% url 'profile_page' %}" class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">Profile</a>
+            <a href="{% url 'staff_dashboard' %}" class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">Staff Dashboard</a>
+            <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">Logout</a>
+          </div>
         </li>
       </ul>
     {% else %}
     <button id="theme-toggle"
-      class="ml-6 p-2 rounded-md border border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+      class="ml-6 p-2 rounded-md border-gray-300 text-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
       <!-- Sun icon (shown in dark mode) -->
       <svg class="h-5 w-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -141,55 +142,17 @@
       </svg>
     </button>
       <!-- Not logged in: show login button with icon on mobile -->
-      <a href="{% url 'account_login' %}" class="sm:hidden p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-flex items-center gap-2" title="Login">
-        <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-        </svg>
+      <a href="{% url 'account_login' %}" class="sm:hidden p-2 text-zinc-800 dark:text-zinc-400 text-xs inline-flex items-center gap-2" title="Login">
+        <span class="bg-white/50 dark:bg-zinc-700/50 rounded-full px-4 py-2">Sign in</span>
       </a>
       
       <!-- Desktop Links with Icons -->
       <ul class="hidden sm:flex gap-4 items-center">
-        <li>
-          <a href="{% url 'saved_papers' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Library">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-            </svg>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'home' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Home">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-            </svg>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'paper_list' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Papers">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'paper_upload' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Upload">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-            </svg>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'account_login' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Login">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-            </svg>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'account_signup' %}" class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md inline-block" title="Register">
-            <svg class="h-5 w-5 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-            </svg>
-          </a>
+          <li>
+    <a href="{% url 'account_login' %}" class="p-2 text-zinc-800 dark:text-zinc-300 text-xs inline-flex items-center gap-2" title="Login">
+        <span class="bg-white/50 dark:bg-zinc-700/50 rounded-full px-4 py-2">Sign in</span>
+      </a>
+  </li>
         </li>
       </ul>
     {% endif %}

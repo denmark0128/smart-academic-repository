@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
     'crispy_forms',
     'crispy_tailwind',
     'staff',
@@ -51,7 +53,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     "debug_toolbar",
-
+    "channels",
+    "django_rq",
     # end INSTALLED_APPS
     # do not add extra closing bracket here
 ]
@@ -64,6 +67,9 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_ON_GET = True
+SOCIALACCOUNT_LOGIN_ON_GET= True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -78,6 +84,30 @@ MIDDLEWARE = [
     'django_htmx.middleware.HtmxMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': os.getenv("OAUTH_GOOGLE_CLIENT_ID"),
+            'secret': os.getenv("OAUTH_GOOGLE_SECRET"),
+            'key': ''
+        }
+    },
+    'github': {
+        'APP': {
+            'client_id': os.getenv("OAUTH_GITHUB_CLIENT_ID"),
+            'secret': os.getenv("OAUTH_GITHUB_SECRET"),
+            'key': ''
+        },
+        'AUTH_PARAMS' : {
+            'prompt': 'consent',
+        }
+    }
+}
+
 
 CORS_ALLOW_ALL_ORIGINS = True  # testing only
 
@@ -119,7 +149,7 @@ DATABASES = {
         'USER': os.getenv("SUPABASE_USER"),
         'PASSWORD': os.getenv("SUPABASE_PASSWORD"),
         'HOST': os.getenv("SUPABASE_HOST"),
-        'PORT': os.getenv("SUPABASE_PORT", 5432),
+        'PORT': int(os.getenv("SUPABASE_PORT", 6543)),
         'OPTIONS': {'sslmode': 'require'},
     }
 }
@@ -177,9 +207,13 @@ CRISPY_TEMPLATE_PACK = "tailwind"
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
 
 ALLOWED_HOSTS = ["django-thesis.onrender.com", "localhost", "127.0.0.1", '.ngrok-free.dev' ]
 CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.dev']
@@ -199,3 +233,26 @@ CACHES = {
 }
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 3600,  # 1 hour
+    },
+    'high': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 7200,  # 2 hours
+    },
+    'low': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 1800,  # 30 minutes
+    },
+}
+

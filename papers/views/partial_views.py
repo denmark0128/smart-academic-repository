@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from papers.models import Paper, MatchedCitation, SavedPaper
-from django.db.models import Prefetch, Q, F
+from django.db.models import Prefetch, Q, F, Count
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from utils.semantic_search import semantic_search, keyword_search, index_paper, get_model
@@ -16,7 +16,7 @@ def footer_partial(request):
 @login_required
 def uploaded_papers_partial(request):
     # Only get papers uploaded by the currently logged-in user
-    papers = Paper.objects.filter(uploaded_by=request.user).order_by('-uploaded_at')
+    papers = Paper.objects.filter(uploaded_by=request.user, status='complete').order_by('-uploaded_at')
     return render(request, 'papers/partials/uploads/uploaded_papers.html', {'papers': papers})
 
 def paper_list_partial(request):
@@ -28,6 +28,7 @@ def paper_list_partial(request):
     program = request.GET.get('program')
     year = request.GET.get('year')
     view_mode = request.GET.get('view_mode', 'card')
+    is_infinite = request.GET.get('infinite') == 'true'  # New flag for infinite scroll
 
     results = []
 
@@ -48,8 +49,9 @@ def paper_list_partial(request):
         return render(request, "papers/partials/paper_list/_paper_list_content.html", context)
 
     # --- Base queryset (defer heavy fields) ---
-    papers = Paper.objects.defer(
-        'title_embedding', 'abstract_embedding', 'summary', 'file'
+    papers = Paper.objects.only(
+        'id', 'title', 'authors', 'abstract', 'college', 
+        'program', 'year', 'tags', 'file'
     ).all()
 
     # --- Apply filters ---
@@ -120,11 +122,9 @@ def paper_list_partial(request):
                 search_results = []
             else:
                 print('Performing search for query:', query)
-                # ✅ Remove top_k=50, let it use database settings (default 5)
                 search_results = keyword_search(query)
                 if not search_results:
                     print('No keyword search results, falling back to semantic search')
-                    # ✅ Remove top_k=50, let it use database settings (default 5)
                     search_results = semantic_search(query)
 
             # Build result objects
@@ -172,7 +172,7 @@ def paper_list_partial(request):
             })
     
     # --- Pagination ---
-    paginator = Paginator(results, 10)
+    paginator = Paginator(results, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -183,7 +183,7 @@ def paper_list_partial(request):
     years = sorted([y for y in years if y is not None], reverse=True)
 
     context = {
-        "results": page_obj,  # only paginated
+        "results": page_obj,
         "query": query,
         "page_obj": page_obj,
         "colleges": colleges,
@@ -196,8 +196,13 @@ def paper_list_partial(request):
         "active_filters": active_filters,
         "tag_counts": tag_counts,
         "view_mode": view_mode,
+        "is_infinite": is_infinite,  # Pass flag to template
     }
 
+    # For infinite scroll, use a minimal template that only returns the results
+    if is_infinite:
+        return render(request, "papers/partials/paper_list/_infinite_results.html", context)
+    
     return render(request, "papers/partials/paper_list/_paper_list_content.html", context)
 
 @login_required
@@ -223,8 +228,12 @@ def paper_detail_partials(request, pk):
     # Check what section is being requested (if hx-select is in headers)
     hx_target = request.headers.get('HX-Target', '')
     
+    is_dynamic_request = (
+        'save-button' in hx_target or 
+        'chat-container' in hx_target
+    )
     # For non-user-specific sections, check cache first
-    if 'save-button' not in hx_target:
+    if not is_dynamic_request:
         cache_key = f'paper_partials_{pk}'
         cached_response = cache.get(cache_key)
         if cached_response:
@@ -309,7 +318,163 @@ def paper_detail_partials(request, pk):
     response = render(request, 'papers/partials/paper_detail_partials.html', context)
     
     # Cache the response for non-user-specific requests
-    if 'save-button' not in hx_target:
-        cache.set(cache_key, response, 60 * 10)  # Cache for 10 minutes
+    if not is_dynamic_request:
+        cache.set(cache_key, response, 5 * 1) # Cache for 10 minutes
     
     return response
+
+@login_required
+def paper_review_list(request):
+    """
+    A partial view that just returns the list of 
+    table rows for the uploaded papers.
+    """
+    papers = Paper.objects.filter(uploaded_by=request.user,).exclude(status='complete').order_by('-uploaded_at')
+    
+    # 1. It reads whatever status is in the DB
+    return render(request, "papers/partials/uploads/uploaded_papers_rows.html", {
+        "papers": papers  # Sends the fresh paper list to the user
+    })
+
+
+@login_required
+def review_papers_partial(request): 
+    # Only get papers uploaded by the currently logged-in user
+    papers = Paper.objects.filter(uploaded_by=request.user,).exclude(status='complete').order_by('-uploaded_at')
+    return render(request, 'papers/partials/uploads/review.html', {'papers': papers})
+
+
+def insights_partial(request, chart_type):
+    """Single view to handle all chart partials based on chart_type parameter"""
+    papers = Paper.objects.all()
+    context = {'chart_type': chart_type}
+    
+    if chart_type == 'summary_cards':
+        # Basic stats for top cards
+        total_papers = papers.count()
+        total_citations = MatchedCitation.objects.count()
+        
+        # Top author by number of papers
+        author_to_papers = {}
+        for p in papers:
+            for a in (p.authors or []):
+                if isinstance(a, str):
+                    author_to_papers.setdefault(a, 0)
+                    author_to_papers[a] += 1
+        top_author = max(author_to_papers.items(), key=lambda x: x[1])[0] if author_to_papers else "N/A"
+        
+        # Most cited paper
+        paper_cite_counts = MatchedCitation.objects.values('matched_paper').annotate(c=Count('id')).order_by('-c').first()
+        top_cited_paper = None
+        if paper_cite_counts:
+            top_cited_paper = Paper.objects.filter(paper_id=paper_cite_counts['matched_paper']).first()
+        
+        context.update({
+            'total_papers': total_papers,
+            'total_citations': total_citations,
+            'top_author': top_author,
+            'top_cited_paper': top_cited_paper,
+        })
+    
+    elif chart_type == 'tag_sidebar':
+        # Tag counts for sidebar
+        tags = [tag for paper in papers for tag in paper.tags]
+        tag_counts = dict(Counter(tags))
+        context['tag_counts'] = dict(sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:20])
+    
+    elif chart_type == 'trending_tags':
+        tags = [tag for paper in papers for tag in paper.tags]
+        tag_counts = dict(Counter(tags))
+        sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+        
+        context.update({
+            'chart_id': 'tagsPieChart',
+            'insights': {
+                'tag_labels': [t[0] for t in sorted_tags],
+                'tag_values': [t[1] for t in sorted_tags],
+            }
+        })
+    
+    elif chart_type == 'papers_per_year':
+        years = sorted({p.year for p in papers if p.year})
+        year_counts = {y: 0 for y in years}
+        for p in papers:
+            if p.year:
+                year_counts[p.year] = year_counts.get(p.year, 0) + 1
+        
+        context.update({
+            'chart_id': 'trendLineChart',
+            'insights': {
+                'year_labels': years,
+                'year_values': [year_counts.get(y, 0) for y in years],
+            }
+        })
+    
+    elif chart_type == 'top_cited_papers':
+        cite_counts = MatchedCitation.objects.values('matched_paper').annotate(
+            count=Count('id')
+        ).order_by('-count')[:10]
+        
+        top_cited_papers = []
+        for item in cite_counts:
+            paper = Paper.objects.filter(paper_id=item['matched_paper']).first()
+            if paper:
+                top_cited_papers.append({
+                    'paper': paper,
+                    'count': item['count']
+                })
+        
+        context['top_cited_papers'] = top_cited_papers
+    
+    elif chart_type == 'tag_trends':
+        tags = [tag for paper in papers for tag in paper.tags]
+        tag_counts = Counter(tags)
+        years = sorted({p.year for p in papers if p.year})
+        
+        top_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        top_tag_names = [t for t, _ in top_tags]
+        
+        tag_trends = {}
+        for tag in top_tag_names:
+            counts = []
+            for y in years:
+                c = Paper.objects.filter(year=y, tags__contains=[tag]).count()
+                counts.append(c)
+            tag_trends[tag] = counts
+        
+        context.update({
+            'chart_id': 'tagTrendChart',
+            'insights': {
+                'year_labels': years,
+                'tag_trends': tag_trends,
+                'top_tag_names': top_tag_names,
+            }
+        })
+    
+    elif chart_type == 'college_program':
+        programs = [p.program for p in papers if p.program]
+        prog_counts = Counter(programs)
+        top_programs = [p for p, c in prog_counts.most_common(5)]
+        
+        colleges = sorted(set([p.college for p in papers if p.college]))
+        
+        college_program_matrix = []
+        for college in colleges:
+            row = []
+            for prog in top_programs:
+                row.append(Paper.objects.filter(college=college, program=prog).count())
+            college_program_matrix.append({
+                'college': college,
+                'counts': row,
+            })
+        
+        context.update({
+            'chart_id': 'collegeProgramChart',
+            'insights': {
+                'programs': top_programs,
+                'colleges': colleges,
+                'college_program_matrix': college_program_matrix,
+            }
+        })
+    
+    return render(request, 'papers/partials/insights_charts.html', context)

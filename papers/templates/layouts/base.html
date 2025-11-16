@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>{% block title %}Academic Repo{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  
   <!-- 🌙 Dark Mode Preload Script -->
   <script>
     if (
@@ -45,6 +45,7 @@
   <!-- NProgress -->
   <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
   <style>
+
     #nprogress .bar {
       background: #000000;
       height: 3px;
@@ -129,13 +130,13 @@
   {% block extra_head %}{% endblock %}
 </head>
 
-<body class="min-h-screen bg-gray-50 dark:bg-zinc-950
+<body class="min-h-screen bg-gray-50 dark:bg-black sm:px-4
   text-zinc-900 dark:text-zinc-100 font-inter transition-colors duration-300 
   flex flex-col">
 
   {% include 'components/navbar.html' %}
 
-  <div id="main-content" class="container mx-auto p-6">
+  <div id="main-content" class="flex-1b container mx-auto p-2">
     {% block content %}{% endblock %}
   </div>
 
@@ -166,6 +167,10 @@
   </script>
 
   {% block extra_scripts %}{% endblock %}
+
+    <footer class="mt-12 mx-4">
+    {% include 'components/footer.html' %}
+  </footer>
 </body>
 
 </html>

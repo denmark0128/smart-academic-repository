@@ -1,7 +1,7 @@
 <div id="save-btn-{{ paper.id }}" >
     {% if is_saved %}
     <form 
-        hx-post="{% url 'unsave_paper_list' paper.id %}" 
+        hx-post="{% url 'unsave_paper_list' paper.pk %}" 
         hx-target="#save-btn-{{ paper.id }}" 
         hx-swap="outerHTML"
         hx-on="htmx:afterRequest: 
@@ -16,7 +16,7 @@
     </form>
     {% else %}
     <form 
-        hx-post="{% url 'save_paper_list' paper.id %}" 
+        hx-post="{% url 'save_paper_list' paper.pk %}" 
         hx-target="#save-btn-{{ paper.id }}" 
         hx-swap="outerHTML"
         hx-on="htmx:afterRequest: 

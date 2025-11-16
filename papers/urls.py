@@ -12,14 +12,13 @@ router.register(r'api/savedpapers', SavedPaperViewSet)
 urlpatterns = [
     path('', views.paper_list, name='paper_list'),
     path('papers/<int:pk>/', views.paper_detail, name='paper_detail'),
-    path('papers/<int:pk>/query/', views.paper_query, name='paper_query'),  # new
     path('autocomplete/', views.autocomplete, name='autocomplete'),
     path('upload/', views.paper_upload, name='paper_upload'),
     path('profile/', views.profile_page, name='profile_page'),
     path('saved/', views.saved_papers, name='saved_papers'),
     path('extract-metadata/', views.extract_metadata, name='extract_metadata'),
     path('insights/', views.paper_insights, name='paper_insights'),
-    path('save/<int:paper_id>/', views.save_paper, name='save_paper'),
+    path('save/<int:pk>/', views.save_paper, name='save_paper'),
     path('unsave/<int:pk>/', views.unsave_paper, name='unsave_paper'),
     path('saveList/<int:paper_id>/', views.save_paper_list, name='save_paper_list'),
     path('unsaveList/<int:pk>/', views.unsave_paper_list, name='unsave_paper_list'),
@@ -33,4 +32,11 @@ urlpatterns = [
     path('partials/saved-papers/', saved_papers_partial, name='saved_papers_partial'),
     path('paper/<int:pk>/partials/', paper_detail_partials, name='paper_detail_partials'),
     path("footer/", footer_partial, name="footer_partial"),
+    path("rag-chat/", views.rag_chat_view, name="rag_chat"),
+    path('paper-review-list/', paper_review_list, name='paper_review_list'),
+    path('partials/review/', review_papers_partial, name='review_papers_partials'),
+    path('paper/<int:pk>/query/', views.paper_query, name='paper_query'),
+    path('paper/<int:pk>/get-answer/', views.get_answer, name='get_answer'),
+    path('insights/chart/<str:chart_type>/', insights_partial, name='insights_partial'), 
 ]
+

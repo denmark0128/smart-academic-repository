@@ -27,15 +27,12 @@ from papers.forms import StyledLoginForm
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', lambda request: redirect('/accounts/login/')),
-    path('logout/', auth_views.LogoutView.as_view(template_name='registration/log_out.html'), name='logout'),
-    path('', home, name='home'),  # Root path (homepage)
+    path('', home, name='home'),
     path('papers/', include('papers.urls')),
+    path('staff/', include('staff.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('staff/', include('staff.urls')),  # Include staff URLs
-     path('accounts/', include('allauth.urls')),
-    path('password_change/', auth_views.PasswordChangeView.as_view(template_name='registration/password_change_form.html'), name='password_change'),
-    path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'), name='password_change_done'),
+    # ✅ All authentication routes handled by Allauth
+    path('accounts/', include('allauth.urls')),
 ]   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

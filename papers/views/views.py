@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
+from django.template.loader import render_to_string
 from django.core.cache import cache
 from django.utils.html import escape
 from django.conf import settings
@@ -12,7 +13,6 @@ from urllib.parse import urlencode
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.views.decorators.cache import cache_page
-
 import re
 import os
 import fitz
@@ -20,10 +20,9 @@ import json
 import random
 from collections import Counter
 from random import randint
-
+from .task import process_paper_task
 from papers.models import Paper, SavedPaper, MatchedCitation, Tag
 from papers.forms import PaperForm
-from papers.utils.nlp import extract_tags, get_embedding_model
 from utils.extract_metadata_from_abstract import extract_metadata_from_abstract
 from utils.chm_to_html import merge_chm_to_html
 from utils.metadata_extractor import (
@@ -33,8 +32,56 @@ from utils.metadata_extractor import (
 )
 from utils.summarize import generate_summary
 from utils.related import find_related_papers
+from django.template.response import TemplateResponse
 
-from utils.single_paper_rag import query_rag
+from utils.single_paper_rag import query_rag # <-- Make sure this imports your modified function
+
+def rag_chat_view(request):
+    return TemplateResponse(request, "papers/partials/chat_messages.html")
+
+from django.views.decorators.http import require_GET
+
+
+def paper_query(request, pk):
+    """
+    HTMX endpoint for paper Q&A chatbot.
+    THIS VIEW IS NOW VERY FAST.
+    It just returns the user's query bubble and a "thinking" bubble.
+    """
+    if request.method == "POST":
+        paper = get_object_or_404(Paper, pk=pk)
+        user_query = request.POST.get("query", "").strip()
+        if not user_query:
+            return JsonResponse({"error": "Empty query"}, status=400)
+        
+        #  Return a new partial that shows the query
+        #  and triggers the *real* answer load.
+        return render(request, "papers/partials/query_and_thinking.html", {
+            "paper": paper,
+            "query": user_query,
+        })
+
+    return JsonResponse({"error": "POST required"}, status=400)
+
+
+@require_GET  # This view is triggered by hx-get
+def get_answer(request, pk):
+    """
+    HTMX endpoint that does the SLOW work.
+    It is loaded *by* the "thinking" bubble.
+    """
+    paper = get_object_or_404(Paper, pk=pk)
+    user_query = request.GET.get("query", "").strip() # Get query from URL param
+    if not user_query:
+        return JsonResponse({"error": "Empty query"}, status=400)
+
+    answer = query_rag(paper.id, user_query)
+
+    # Return the *answer* partial
+    return render(request, "papers/partials/answer_bubble.html", {
+        "answer": answer,
+    })
+
 
 def home(request):
     return render(request, "home.html")
@@ -216,7 +263,7 @@ def paper_list(request):
     return render(request, "papers/paper_list.html", context)
 
 
-@cache_page(30 * 1, key_prefix='paper_detail_public')  # Cache for all users
+#@cache_page(30 * 1, key_prefix='paper_detail_public')  # Cache for all users
 def paper_detail(request, pk):
     """
     Main paper detail view - loads instantly with minimal data.
@@ -224,17 +271,20 @@ def paper_detail(request, pk):
     Everything else deferred to partials view.
     """
 
-    paper = Paper.objects.only(
-        'id',
-        'title', 
-        'authors', 
-        'year', 
-        'college', 
-        'program',
-        'file',
-        'views',      # ← Add this
-        'local_doi',  
-    ).get(pk=pk)
+    paper = get_object_or_404(
+        Paper.objects.only(
+            'id',
+            'title', 
+            'authors', 
+            'year', 
+            'college', 
+            'program',
+            'file',
+            'views',
+            'local_doi',  
+        ),
+        pk=pk
+    )
     
     context = {
         'paper': paper,
@@ -242,21 +292,7 @@ def paper_detail(request, pk):
     
     return render(request, 'papers/paper_detail.html', context)
 
-def paper_query(request, pk):
-    """HTMX endpoint for paper Q&A chatbot"""
-    if request.method == "POST":
-        paper = get_object_or_404(Paper, pk=pk)
-        user_query = request.POST.get("query", "").strip()
-        if not user_query:
-            return JsonResponse({"error": "Empty query"}, status=400)
 
-        # Use prototype query_rag
-        answer = query_rag(user_query, top_k=3)
-
-        # Return HTMX snippet
-        return render(request, "papers/partials/answer.html", {"answer": answer})
-
-    return JsonResponse({"error": "POST required"}, status=400)
 
 @login_required
 def paper_upload(request):
@@ -270,223 +306,57 @@ def paper_upload(request):
 
         if form.is_valid():
             print("[3] Form is valid")
+            
+            # Save the paper with user's input (trusting the form data)
             paper = form.save(commit=False)
             paper.uploaded_by = request.user
             paper.is_indexed = False
             paper.status = "processing"
             paper.save()
+            
             print(f"[4] Saved new Paper object with ID {paper.id}")
 
+            # Handle CHM file merging (structural requirement, not metadata)
             ext = os.path.splitext(paper.file.name)[1].lower()
             print(f"[5] Uploaded file extension: {ext}")
 
-            # --- PDF / DOCX ---
-            if ext in [".pdf", ".docx"]:
-                print("[6] Processing PDF/DOCX")
-                try:
-                    metadata = extract_metadata(paper.file.path)
-                    print(f"[7] Extracted metadata: {metadata}")
-
-                    paper.title = metadata.get("title") or paper.title
-                    paper.abstract = metadata.get("abstract") or paper.abstract
-                    paper.authors = metadata.get("authors") or paper.authors
-                    paper.college = metadata.get("college") or paper.college
-                    paper.program = metadata.get("program") or paper.program
-
-                    year_list = metadata.get("year")
-                    print(f"[8] Year list: {year_list}")
-                    if year_list and len(year_list) > 0:
-                        try:
-                            paper.year = int(year_list[0])
-                        except ValueError:
-                            print(f"[PDF Metadata] Invalid year: {year_list[0]}")
-
-                    paper.save(update_fields=["title", "abstract", "authors", "college", "program", "year"])
-                    print("[9] Saved Paper metadata for PDF/DOCX")
-                except Exception as e:
-                    print(f"[PDF Metadata Error] {e}")
-
-            # --- CHM ---
-            elif ext == ".chm":
-                print("[10] Processing CHM")
+            if ext == ".chm":
+                print("[9] Processing CHM synchronously")
                 try:
                     merged_html_path, _ = merge_chm_to_html(
                         paper.file.path, settings.MEDIA_ROOT
                     )
-                    print(f"[11] CHM merged HTML path: {merged_html_path}")
+                    print(f"[10] CHM merged HTML path: {merged_html_path}")
 
-                    # Save relative path to model (for later access by index_paper)
-                    paper.merged_html.name = str(merged_html_path).replace(str(settings.MEDIA_ROOT), "").replace("\\", "/").lstrip("/")
+                    # Save relative path to model
+                    paper.merged_html.name = str(merged_html_path).replace(
+                        str(settings.MEDIA_ROOT), ""
+                    ).replace("\\", "/").lstrip("/")
                     paper.save(update_fields=["merged_html"])
-                    print("[12] Saved merged_html FileField")
+                    print("[11] Saved merged_html FileField")
                 except Exception as e:
                     print(f"[CHM Merge Error] {e}")
 
-                # Extract metadata from merged.html
-                try:
-                    if os.path.exists(merged_html_path):
-                        metadata = extract_metadata_from_abstract(merged_html_path)
-                        print(f"[13] Extracted CHM metadata: {metadata}")
-
-                        paper.title = metadata.get("title") or paper.title
-                        paper.abstract = metadata.get("description") or paper.abstract
-                        paper.authors = metadata.get("authors") or paper.authors
-
-                        year = metadata.get("year")
-                        if year:
-                            try:
-                                paper.year = int(year)
-                            except ValueError:
-                                print(f"[CHM Metadata] Invalid year: {year}")
-
-                        paper.save(update_fields=["title", "abstract", "authors", "year"])
-                        print("[15] Saved Paper metadata for CHM")
-                except Exception as e:
-                    print(f"[CHM Metadata Error] {e}")
-
-            # --- POST-PROCESSING PIPELINE ---
-            # 0. Embedding the title and abstract
-            try:
-                print("[15a] Generating title and abstract embeddings...")
-                
-                # (Ensure this import is at the top of your view file)
-                model = get_embedding_model()
-                
-                fields_to_update = []
-                
-                # Embed the title
-                if paper.title:
-                    try:
-                        paper.title_embedding = model.encode(paper.title, convert_to_numpy=True)
-                        fields_to_update.append("title_embedding")
-                        print("[15b] Generated title embedding")
-                    except Exception as e:
-                        print(f"[Title Embedding Error] {e}")
-                
-                # Embed the abstract
-                if paper.abstract:
-                    try:
-                        paper.abstract_embedding = model.encode(paper.abstract, convert_to_numpy=True)
-                        fields_to_update.append("abstract_embedding")
-                        print("[15c] Generated abstract embedding")
-                    except Exception as e:
-                        print(f"[Abstract Embedding Error] {e}")
-                
-                # Save the new embeddings to the database
-                if fields_to_update:
-                    paper.save(update_fields=fields_to_update)
-                    print(f"[15d] Saved new embeddings: {fields_to_update}")
-                    
-            except Exception as e:
-                print(f"[Metadata Embedding Error] {e}")
-
-            # 1. Semantic Search Indexing (creates embeddings + chunks)
-            try:
-                print("[16] Indexing paper for semantic search")
-                from utils.semantic_search import index_paper
-                index_paper(paper)
-                paper.is_indexed = True
-                paper.save(update_fields=["is_indexed"])
-                print("[17] Paper indexed successfully")
-            except Exception as e:
-                print(f"[Indexing Error] {e}")
-
-            # 2. Tag/Keyword Extraction
-            try:
-                print("[18] Using pre-computed embeddings for tagging...")
-                
-                # 1) ✅ Get the embedding we already created
-                embedding_for_tagging = None
-                if paper.abstract_embedding is not None:
-                    embedding_for_tagging = paper.abstract_embedding
-                    print("[18] Using abstract_embedding for tags.")
-                elif paper.title_embedding is not None:
-                    embedding_for_tagging = paper.title_embedding
-                    print("[18] No abstract_embedding, using title_embedding for tags.")
-
-                
-                if embedding_for_tagging is None:
-                    print("[19] No text or embeddings available for tagging")
-                else:
-                    # 2) ✅ Call extract_tags WITH the embedding (not text)
-                    from papers.utils.nlp import extract_tags
-                    tags_with_scores = extract_tags(doc_emb=embedding_for_tagging)
-
-                    if not tags_with_scores:
-                        print("[19] extract_tags returned no tags")
-                    else:
-                        # 3) "Unwrap" the list of dicts into a simple list of names
-                        tag_names = [t['name'] for t in tags_with_scores]
-                        print(f"[19] Tags extracted: {tag_names}")
-                        
-                        # 4) Save the simple list of strings
-                        paper.tags = tag_names
-                        paper.save(update_fields=["tags"])
-                        print(f"[19] Tags saved to paper.tags: {tag_names}")
-
-            except Exception as e:
-                import traceback
-                print(f"[Tag Extraction Error] {e}")
-                traceback.print_exc()
-            # 3. Summary Generation
-            try:
-                print("[3] Generating summary using local Llama model...")
-                summary = generate_summary(paper)  # 👈 call it here
-
-                if summary:
-                    paper.summary = summary  # save to model if you have a field
-                    paper.save(update_fields=["summary"])
-                    print("[3] ✅ Summary generated and saved.")
-                else:
-                    print("[3] ⚠️ No summary generated.")
-            except Exception as e:
-                print(f"[3] ❌ Summary generation failed: {e}")
-            
-            # 4. Citation Extraction and Matching
-            try:
-                print("[22] Extracting and matching citations")
-                from utils.citation_matcher import extract_and_match_citations
-                
-                # This function will:
-                # - Extract citations from the paper text
-                # - Match them against existing papers in database
-                # - Create MatchedCitation records
-                matched_citations = extract_and_match_citations(paper)
-                
-                # Update cached citation counts
-                paper.matched_count_cached = len(matched_citations)
-                paper.save(update_fields=["matched_count_cached"])
-                
-                print(f"[23] Found and saved {len(matched_citations)} citations")
-            except Exception as e:
-                print(f"[Citation Matching Error] {e}")
-
-            # Mark processing complete
-            try:
-                paper.status = "complete"
-                paper.save(update_fields=["status"])
-                print("[24] All processing complete - status set to 'complete'")
-            except Exception as e:
-                print(f"[Status Update Error] {e}")
+            # Queue the HEAVY processing tasks in background
+            process_paper_task.delay(paper.id)
+            print(f"[14] Queued background task for paper ID {paper.id}")
 
             return redirect("/papers/upload?status=success")
         else:
             print("[3a] Form is invalid")
             print(form.errors)
-
     else:
         print("[2a] GET request detected")
         form = PaperForm()
 
     status = request.GET.get("status")
-    print(f"[25] Rendering template with status: {status}")
+    print(f"[15] Rendering template with status: {status}")
     return render(request, "papers/paper_upload.html", {
         "form": form,
         "status": status,
         "papers": papers,
         "years": years,
     })
-
 
 def _get_paper_text_for_tagging(paper):
     """Helper to safely extract text from paper for tagging"""

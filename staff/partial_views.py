@@ -179,10 +179,13 @@ def staff_tags_generate_embedding(request, tag_id):
 def staff_papers_partial(request):
     return render(request, 'staff/partials/papers_partial.html')
 
-def staff_papers_table_partial(request):
+def staff_papers_table_partial(request, extra_context=None):
     """Main tags management page"""
     papers = Paper.objects.all()
-    return render(request, 'staff/partials/papers_table_partial.html', {"papers": papers})
+    context = {'papers': papers}
+    if extra_context:
+        context.update(extra_context)
+    return render(request, 'staff/partials/papers_table_partial.html', context)
 
 
 def staff_paper_regenerate_tags(request, paper_id):
@@ -192,11 +195,6 @@ def staff_paper_regenerate_tags(request, paper_id):
         
         try:
             print(f"[Regenerate Tags] Processing paper: {paper.title}")
-            
-            # (Ensure these are imported at the top of your file)
-            # from papers.utils.nlp import extract_tags
-            # from papers.utils.helpers import _get_paper_text_for_tagging
-            # from django.contrib import messages
             
             tags_with_scores = None
 
@@ -219,15 +217,19 @@ def staff_paper_regenerate_tags(request, paper_id):
                     tags_with_scores = extract_tags(text=text_for_tagging)
                 else:
                     messages.error(request, f'No text available for tag extraction')
-                    return staff_papers_table_partial(request) # Stop here
+                    return staff_papers_table_partial(request)
             
             # 4. Process the results
             if tags_with_scores:
                 tag_names = [t['name'] for t in tags_with_scores]
                 print(f"[Regenerate Tags] Extracted tag names: {tag_names}")
                 
+                # Save only tag names to database
                 paper.tags = tag_names
                 paper.save(update_fields=['tags'])
+                
+                # ✅ Set tags_with_scores temporarily for display (not saved to DB)
+                paper.tags_with_scores = tags_with_scores
                 
                 messages.success(
                     request, 
@@ -236,7 +238,7 @@ def staff_paper_regenerate_tags(request, paper_id):
             else:
                 print("[Regenerate Tags] No suitable tags found.")
                 messages.warning(request, f'No suitable tags found')
-                paper.tags = [] # Clear existing tags
+                paper.tags = []
                 paper.save(update_fields=['tags'])
                 
         except Exception as e:
@@ -245,7 +247,17 @@ def staff_paper_regenerate_tags(request, paper_id):
             import traceback
             traceback.print_exc()
     
-    return staff_papers_table_partial(request)
+    # ✅ FIX: Fetch all papers and inject the updated paper with scores
+    papers = Paper.objects.all()
+    
+    # Replace the paper in the queryset with our in-memory version that has tags_with_scores
+    papers_list = list(papers)
+    for i, p in enumerate(papers_list):
+        if p.id == paper.id:
+            papers_list[i] = paper  # Replace with our modified paper object
+            break
+    
+    return render(request, 'staff/partials/papers_table_partial.html', {'papers': papers_list})
 
 def _get_paper_text_for_tagging(paper):
     """Helper to safely extract text from paper for tagging"""

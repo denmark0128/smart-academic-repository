@@ -64,7 +64,7 @@ class PaperForm(forms.ModelForm):
         widget=forms.Textarea(attrs={
             'class': TEXTAREA_CLASSES,
             'rows': 5,
-            'placeholder': "Brief summary of your research paper"
+            'placeholder': "Brief summary of your research paper, include purpose and methods used"
         }),
         required=False
     )
@@ -111,23 +111,9 @@ class PaperForm(forms.ModelForm):
     #     ... (all crispy_forms logic removed) ...
 
     def clean_authors(self):
-        """
-        Clean the authors field.
-        Takes a comma-separated string and turns it into a list of names.
-        """
-        raw = self.cleaned_data.get('authors', '')
-        
-        # Split by comma, strip whitespace from each name, and remove empty strings
-        names = [name.strip() for name in raw.split(',') if name.strip()]
-        
+        raw = self.cleaned_data['authors']
+        lines = raw.strip().splitlines()
+        names = [line.strip() for line in lines if line.strip()]
         if not names:
             raise forms.ValidationError("Please enter at least one author.")
-            
-        # The model field probably expects a list or a JSON string.
-        # For now, we return the list of names.
-        # If your model's 'authors' field is a simple CharField,
-        # you might want to re-join them:
-        # return ", ".join(names) 
-        
-        # But assuming your model can handle the list:
         return names

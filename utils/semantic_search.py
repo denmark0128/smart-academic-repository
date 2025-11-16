@@ -1,3 +1,4 @@
+#semantic_search.py
 import re
 import os
 import fitz  # PyMuPDF
@@ -49,7 +50,6 @@ def get_model():
 # -------------------------------
 # PDF extraction & chunking
 # -------------------------------
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -87,34 +87,6 @@ def extract_and_chunk(pdf_path, chunk_size=None, chunk_overlap=None):
         
         full_text += text
         page_map.extend([page_num] * len(text))
-    
-    doc.close()
-    
-    # Recursive chunking with LangChain
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        separators=["\n\n", "\n", ". ", " ", ""]
-    )
-    
-    chunks = text_splitter.split_text(full_text)
-    
-    # Add metadata
-    result = []
-    char_position = 0
-    for i, chunk in enumerate(chunks):
-        # Find approximate page for this chunk
-        chunk_start = full_text.find(chunk, char_position)
-        page_num = page_map[chunk_start] if chunk_start < len(page_map) else page_map[-1]
-        
-        result.append({
-            "text": chunk,
-            "chunk_id": i,
-            "page": page_num
-        })
-        char_position = chunk_start + len(chunk)
-    
-    return result
     
     doc.close()
     
