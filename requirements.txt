@@ -12,4 +12,4 @@ djangorestframework
 gunicorn
 django-cors-headers
 pymupdf
-
+celery-django
