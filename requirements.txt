@@ -1,9 +1,10 @@
 # Core Django packages
 Django==5.2.4
-django-allauth
+django-allauth==65.13.0
 django-crispy-forms
 crispy-tailwind
 psycopg2-binary
+torch torchvision --index-url https://download.pytorch.org/whl/cpu
 sentence-transformers
 django-htmx
 pgvector
@@ -11,5 +12,5 @@ djangorestframework
 gunicorn
 django-cors-headers
 pymupdf
-dotenv
-bs4
+python-dotenv
+beautifulsoup4

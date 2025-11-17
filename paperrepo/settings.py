@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'pgvector',  # Ensure pgvector is included
     'rest_framework',
     'corsheaders',
+    "debug_toolbar",
     "django_rq",
     # end INSTALLED_APPS
     # do not add extra closing bracket here
@@ -80,6 +81,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
