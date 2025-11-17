@@ -20,7 +20,7 @@ import json
 import random
 from collections import Counter
 from random import randint
-from .task import process_paper_task
+#from .task import process_paper_task
 from papers.models import Paper, SavedPaper, MatchedCitation, Tag
 from papers.forms import PaperForm
 from utils.extract_metadata_from_abstract import extract_metadata_from_abstract
