@@ -8,9 +8,43 @@ from bs4 import BeautifulSoup
 from urllib.parse import unquote
 
 
+import os
+import subprocess
+import shutil
+import uuid
+from bs4 import BeautifulSoup
+from urllib.parse import unquote
+import platform # New import
+import sys # New import for checking command existence
+
 # -------- CONFIG --------
-SEVEN_ZIP_CMD = r"C:\Program Files\7-Zip\7z.exe"  # adjust path
+# Attempt to find the appropriate command based on the OS
+if platform.system() == "Windows":
+    # 1. Try to find 7z in PATH
+    CMD = shutil.which("7z") or shutil.which("7z.exe")
+    # 2. Fallback to common hardcoded path if not in PATH
+    if CMD is None and os.path.exists(r"C:\Program Files\7-Zip\7z.exe"):
+        CMD = r"C:\Program Files\7-Zip\7z.exe"
+    # 3. Use '7z' as a fallback, hoping it's in a known location or PATH
+    if CMD is None:
+        CMD = "7z" # If all else fails, use the name and hope PATH works
+elif platform.system() == "Linux":
+    CMD = shutil.which("extract_chmcmd")
+    if CMD is None:
+        CMD = "extract_chmcmd" # Use the name and hope PATH works
+else:
+    # Handle other operating systems if needed, but this is a good default
+    CMD = None
+
+if CMD is None or (platform.system() not in ["Windows", "Linux"]):
+    print("[!] ERROR: Unsupported OS or CHM extraction utility not found.")
+    sys.exit(1)
+
+# Renamed the variable to CMD for generic command
+CHM_EXTRACT_CMD = CMD 
 SKIP_IMAGES = {"ccslogo.png", "plplogo.png"}
+
+# ... (keep decode_chm_path, cleanup_keep_merged_and_images functions) ...
 
 
 def decode_chm_path(path: str) -> str:
@@ -37,13 +71,33 @@ def cleanup_keep_merged_and_images(output_dir: str, merged_file="merged.html", i
 
 
 def extract_chm(chm_path: str, output_dir: str):
-    """Extract CHM using 7-Zip."""
-    try:
-        subprocess.run([SEVEN_ZIP_CMD, "x", chm_path, f"-o{output_dir}"], check=True)
-        print(f"[+] Extracted CHM to {output_dir}")
-    except subprocess.CalledProcessError:
-        print("[!] Failed to extract CHM.")
+    """Extract CHM using the OS-appropriate utility (7z or extract_chmcmd)."""
+    os.makedirs(output_dir, exist_ok=True) 
+
+    if platform.system() == "Windows":
+        # 7-Zip syntax: x (extract with full path) -o{output_dir}
+        command_args = [CHM_EXTRACT_CMD, "x", chm_path, f"-o{output_dir}"]
+        tool_name = "7-Zip"
+    elif platform.system() == "Linux":
+        # extract_chmcmd syntax: <chm_file> <output_directory>
+        command_args = [CHM_EXTRACT_CMD, chm_path, output_dir]
+        tool_name = "extract_chmcmd"
+    else:
+        print("[!] ERROR: Extraction failed. Unsupported OS detected.")
         exit(1)
+
+    try:
+        subprocess.run(command_args, check=True)
+        print(f"[+] Extracted CHM to {output_dir} using {tool_name}")
+    except subprocess.CalledProcessError:
+        print(f"[!] Failed to extract CHM using {tool_name}.")
+        print(f"    Command: {' '.join(command_args)}")
+        exit(1)
+    except FileNotFoundError:
+         print(f"[!] Extraction tool not found. On Windows, ensure 7-Zip is installed, or on Linux, install 'libchm-bin'.")
+         exit(1)
+
+# ... (keep the rest of your original functions) ...
 
 
 def fix_html_paths(output_dir: str):
