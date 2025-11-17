@@ -1,4 +1,5 @@
 # views/task.py
+'''
 import traceback
 from celery import chord, group, shared_task
 from django.conf import settings
@@ -152,3 +153,5 @@ def process_paper_task(paper_id):
                 print(f"[Task] CRITICAL: Could not even save failed status. {e_save}")
         
         return False
+
+        '''
