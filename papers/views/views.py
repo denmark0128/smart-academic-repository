@@ -30,8 +30,12 @@ from utils.metadata_extractor import (
     normalize_college,
     normalize_program,
 )
+from utils.tagging import extract_tags, get_embedding_model
+from utils.semantic_search import index_paper
+from utils.citation_matcher import extract_and_match_citations
+from utils.summarize import generate_summary_with_api
 from django.template.response import TemplateResponse
-
+import traceback
 from utils.single_paper_rag import query_rag # <-- Make sure this imports your modified function
 
 def rag_chat_view(request):
@@ -290,7 +294,131 @@ def paper_detail(request, pk):
     
     return render(request, 'papers/paper_detail.html', context)
 
+def process_paper_synchronously(paper):
+    """
+    Process uploaded paper synchronously (no Celery).
+    Runs HEAVY processing steps: embeddings, indexing, tags, summary, citations.
+    """
+    try:
+        print(f"[Sync] Processing paper ID: {paper.id}")
+        
+        # --- STEP 1: Generate Embeddings ---
+        try:
+            print("[Sync] Generating embeddings...")
+            model = get_embedding_model()
+            fields_to_update = []
 
+            if paper.title:
+                try:
+                    paper.title_embedding = model.encode(paper.title, convert_to_numpy=True)
+                    fields_to_update.append("title_embedding")
+                    print("[Sync] Generated title embedding")
+                except Exception as e:
+                    print(f"[Sync] Title Embedding Error: {e}")
+
+            if paper.abstract:
+                try:
+                    paper.abstract_embedding = model.encode(paper.abstract, convert_to_numpy=True)
+                    fields_to_update.append("abstract_embedding")
+                    print("[Sync] Generated abstract embedding")
+                except Exception as e:
+                    print(f"[Sync] Abstract Embedding Error: {e}")
+
+            if fields_to_update:
+                paper.save(update_fields=fields_to_update)
+                print(f"[Sync] Saved embeddings: {fields_to_update}")
+        except Exception as e:
+            print(f"[Sync] Embedding Error: {e}")
+
+        # --- STEP 2: Semantic Search Indexing ---
+        try:
+            print("[Sync] Indexing paper for semantic search")
+            index_paper(paper)
+            paper.is_indexed = True
+            paper.save(update_fields=["is_indexed"])
+            print("[Sync] Paper indexed successfully")
+        except Exception as e:
+            print(f"[Sync] Indexing Error: {e}")
+
+        # --- STEP 3: Tag Extraction ---
+        try:
+            print("[Sync] Extracting tags...")
+            embedding_for_tagging = None
+            
+            if paper.abstract_embedding is not None:
+                embedding_for_tagging = paper.abstract_embedding
+                print("[Sync] Using abstract_embedding for tags")
+            elif paper.title_embedding is not None:
+                embedding_for_tagging = paper.title_embedding
+                print("[Sync] Using title_embedding for tags")
+
+            if embedding_for_tagging is not None:
+                tags_with_scores = extract_tags(doc_emb=embedding_for_tagging)
+                if tags_with_scores:
+                    tag_names = [t['name'] for t in tags_with_scores]
+                    paper.tags = tag_names
+                    paper.save(update_fields=["tags"])
+                    print(f"[Sync] Tags saved: {tag_names}")
+            else:
+                print("[Sync] No embeddings available for tagging")
+        except Exception as e:
+            print(f"[Sync] Tag Extraction Error: {e}")
+
+        # --- STEP 4: Summary Generation ---
+        try:
+            print("[Sync] Generating summary...")
+            summary = generate_summary_with_api(paper)
+            if summary:
+                paper.summary = summary
+                paper.save(update_fields=["summary"])
+                print("[Sync] Summary generated and saved")
+            else:
+                print("[Sync] No summary generated")
+        except Exception as e:
+            print(f"[Sync] Summary Generation Error: {e}")
+
+        # --- STEP 5: Citation Extraction ---
+        try:
+            print("[Sync] Extracting and matching citations")
+            matched_citations = extract_and_match_citations(
+                paper=paper,
+                threshold=0.75,
+                top_k=5
+            )
+            
+            paper.matched_count_cached = len(matched_citations)
+            
+            paper.citation_count_cached = MatchedCitation.objects.filter(
+                matched_paper=paper
+            ).count()
+            
+            paper.save(update_fields=["matched_count_cached", "citation_count_cached"])
+            print(f"[Sync] Found {len(matched_citations)} citations from this paper")
+            print(f"[Sync] This paper is cited {paper.citation_count_cached} times")
+            
+        except Exception as e:
+            print(f"[Sync] Citation Matching Error: {e}")
+            traceback.print_exc()
+
+        # --- STEP 6: Mark Complete ---
+        paper.status = "complete"
+        paper.save(update_fields=["status"])
+        print(f"[Sync] Processing complete for paper ID: {paper.id}")
+        
+        return True
+
+    except Exception as e:
+        print(f"[Sync] Fatal error processing paper {paper.id}: {e}")
+        traceback.print_exc()
+        
+        # Mark paper as failed
+        try:
+            paper.status = "failed"
+            paper.save(update_fields=["status"])
+        except Exception as e_save:
+            print(f"[Sync] CRITICAL: Could not save failed status. {e_save}")
+        
+        return False
 
 @login_required
 def paper_upload(request):
@@ -305,7 +433,7 @@ def paper_upload(request):
         if form.is_valid():
             print("[3] Form is valid")
             
-            # Save the paper with user's input (trusting the form data)
+            # Save the paper with user's input
             paper = form.save(commit=False)
             paper.uploaded_by = request.user
             paper.is_indexed = False
@@ -335,9 +463,14 @@ def paper_upload(request):
                 except Exception as e:
                     print(f"[CHM Merge Error] {e}")
 
-            # Queue the HEAVY processing tasks in background
-            process_paper_task.delay(paper.id)
-            print(f"[14] Queued background task for paper ID {paper.id}")
+            # --- REPLACED: Run processing synchronously instead of Celery task ---
+            print(f"[14] Starting synchronous processing for paper ID {paper.id}")
+            try:
+                process_paper_synchronously(paper)
+                print(f"[15] Synchronous processing completed for paper ID {paper.id}")
+            except Exception as e:
+                print(f"[15] Synchronous processing failed for paper ID {paper.id}: {e}")
+                # Status already set to "failed" inside process_paper_synchronously
 
             return redirect("/papers/upload?status=success")
         else:
@@ -348,7 +481,7 @@ def paper_upload(request):
         form = PaperForm()
 
     status = request.GET.get("status")
-    print(f"[15] Rendering template with status: {status}")
+    print(f"[16] Rendering template with status: {status}")
     return render(request, "papers/paper_upload.html", {
         "form": form,
         "status": status,
