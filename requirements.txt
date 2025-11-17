@@ -18,3 +18,4 @@ python-dotenv
 beautifulsoup4
 django-debug-toolbar
 jwt
+google-genai
