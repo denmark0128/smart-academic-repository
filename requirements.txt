@@ -12,4 +12,5 @@ djangorestframework
 gunicorn
 django-cors-headers
 pymupdf
-
+dotenv
+bs4
