@@ -1,10 +1,7 @@
-#metadata_extractor.py
 import fitz  # PyMuPDF
 import os
 from google import genai
 from dotenv import load_dotenv
-import spacy
-from spacy.pipeline import EntityRuler
 import json
 from django.conf import settings
 import re
@@ -13,8 +10,6 @@ import re
 BASE_DIR = settings.BASE_DIR
 load_dotenv(BASE_DIR / ".env")
 api_key = os.getenv("GEMINI_API_KEY")
-
-
 
 
 # === PDF text extractor ===
@@ -39,7 +34,7 @@ def extract_metadata_with_llm(text):
     prompt = f"""
     Extract metadata from the text of an academic paper.
     Respond ONLY with a valid JSON object.
-    Include any of these keys if found: "title", "authors", "year" (default to 2025 if no date is found), "college", "program", "abstract".
+    Include any of these keys if found: "title", "authors" (as an array of strings), "year" (default to 2025 if no date is found), "college", "program", "abstract".
     Text:
     {text}
     """
@@ -65,7 +60,6 @@ def extract_metadata_with_llm(text):
         metadata = {}
 
     return metadata
-
 
 
 def extract_date(text):
@@ -104,7 +98,6 @@ def extract_title(text):
         "a graduate thesis",
         "a dissertation",
         "a final project",
-
     ]
     for i, line in enumerate(lines):
         if any(cue in line.lower() for cue in cue_phrases):
@@ -116,21 +109,6 @@ def extract_title(text):
             return " ".join(title_lines)
     return None
 
-# === spaCy setup ===
-nlp = spacy.blank("en")
-ruler = nlp.add_pipe("entity_ruler")
-patterns = [
-    {
-        "label": "PERSON",
-        "pattern": [
-            {"IS_TITLE": True}, {"TEXT": ","},
-            {"IS_TITLE": True},
-            {"IS_TITLE": True, "OP": "*"},
-            {"IS_ALPHA": True, "OP": "?"}, {"TEXT": ".", "OP": "?"}
-        ]
-    },
-]
-ruler.add_patterns(patterns)
 
 def extract_project_description(pdf_path):
     import fitz
@@ -192,29 +170,15 @@ def extract_metadata(pdf_path):
         metadata = extract_metadata_with_llm(cleaned_text)
     except Exception as e:
         print(f"[LLM ERROR] {e}")
-        # fallback to old extraction if LLM fails
         metadata = {}
 
-    # 3. Fallback to old methods if any key is missing or empty
+    # 3. Fallback to rule-based methods if any key is missing or empty
     title = metadata.get("title") or extract_title(cleaned_text)
     college = metadata.get("college") or extract_college(cleaned_text)
     program = metadata.get("program") or extract_program(cleaned_text)
     authors = metadata.get("authors") or []
-    
-    # If LLM didn't give authors, fallback to spaCy
-    if not authors:
-        doc = nlp(cleaned_text)
-        lines = raw_text.strip().splitlines()
-        person_lines = set()
-        for ent in doc.ents:
-            if ent.label_ == "PERSON":
-                for line in lines:
-                    if ent.text in line:
-                        person_lines.add(line.strip())
-        authors = list(person_lines)
-    
     year = metadata.get("year") or extract_date(cleaned_text)
-    abstract = metadata.get("abstract") or extract_project_description(pdf_path)  # keep existing abstract extraction
+    abstract = metadata.get("abstract") or extract_project_description(pdf_path)
 
     return {
         "title": title,

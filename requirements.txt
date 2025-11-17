@@ -4,7 +4,6 @@ django-allauth
 django-crispy-forms
 crispy-tailwind
 psycopg2-binary
-spacy
 sentence-transformers
 django-htmx
 pgvector
