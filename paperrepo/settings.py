@@ -24,7 +24,7 @@ load_dotenv(BASE_DIR / ".env")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -52,8 +52,6 @@ INSTALLED_APPS = [
     'pgvector',  # Ensure pgvector is included
     'rest_framework',
     'corsheaders',
-    "debug_toolbar",
-    "channels",
     "django_rq",
     # end INSTALLED_APPS
     # do not add extra closing bracket here
