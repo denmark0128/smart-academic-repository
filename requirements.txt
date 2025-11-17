@@ -16,3 +16,4 @@ django-cors-headers
 pymupdf
 python-dotenv
 beautifulsoup4
+django-debug-toolbar
