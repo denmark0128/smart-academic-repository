@@ -1,6 +1,5 @@
 # utils/nlp.py
 import re
-from spacy.lang.en.stop_words import STOP_WORDS
 from sentence_transformers import util
 import torch
 import json

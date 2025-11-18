@@ -19,3 +19,5 @@ beautifulsoup4
 django-debug-toolbar
 jwt
 google-genai
+langchain
+langchain-text-splitters
