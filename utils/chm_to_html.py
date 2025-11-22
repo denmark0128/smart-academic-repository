@@ -29,9 +29,9 @@ if platform.system() == "Windows":
     if CMD is None:
         CMD = "7z" # If all else fails, use the name and hope PATH works
 elif platform.system() == "Linux":
-    CMD = shutil.which("extract_chmLib")
+    CMD = shutil.which("7z")
     if CMD is None:
-        CMD = "extract_chmLib" # Use the name and hope PATH works
+        CMD = "7z" # Use the name and hope PATH works
 else:
     # Handle other operating systems if needed, but this is a good default
     CMD = None
@@ -71,31 +71,22 @@ def cleanup_keep_merged_and_images(output_dir: str, merged_file="merged.html", i
 
 
 def extract_chm(chm_path: str, output_dir: str):
-    """Extract CHM using the OS-appropriate utility (7z or extract_chmcmd)."""
+    """Extract CHM using 7z (works on both Windows and Linux)."""
     os.makedirs(output_dir, exist_ok=True) 
 
-    if platform.system() == "Windows":
-        # 7-Zip syntax: x (extract with full path) -o{output_dir}
-        command_args = [CHM_EXTRACT_CMD, "x", chm_path, f"-o{output_dir}"]
-        tool_name = "7-Zip"
-    elif platform.system() == "Linux":
-        # extract_chmcmd syntax: <chm_file> <output_directory>
-        command_args = [CHM_EXTRACT_CMD, chm_path, output_dir]
-        tool_name = "extract_chmLib"
-    else:
-        print("[!] ERROR: Extraction failed. Unsupported OS detected.")
-        exit(1)
-
+    # 7-Zip syntax is the same on both platforms
+    command_args = [CHM_EXTRACT_CMD, "x", chm_path, f"-o{output_dir}"]
+    
     try:
         subprocess.run(command_args, check=True)
-        print(f"[+] Extracted CHM to {output_dir} using {tool_name}")
+        print(f"[+] Extracted CHM to {output_dir} using 7-Zip")
     except subprocess.CalledProcessError:
-        print(f"[!] Failed to extract CHM using {tool_name}.")
+        print(f"[!] Failed to extract CHM using 7-Zip.")
         print(f"    Command: {' '.join(command_args)}")
         exit(1)
     except FileNotFoundError:
-         print(f"[!] Extraction tool not found. On Windows, ensure 7-Zip is installed, or on Linux, install 'libchm-bin'.")
-         exit(1)
+        print(f"[!] 7-Zip not found. Install with: sudo apt-get install p7zip-full")
+        exit(1)
 
 # ... (keep the rest of your original functions) ...
 
