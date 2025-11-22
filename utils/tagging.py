@@ -1,35 +1,58 @@
 import re
-from sentence_transformers import util
-import torch
 import json
-# ✅ IMPORT GenAI
+# ❌ REMOVE: from sentence_transformers import util
+# ❌ REMOVE: import torch
 from google import genai
 from google.genai import types
-from .semantic_search import get_model # get_model now returns genai.Client
+from .semantic_search import get_model
 from django.core.cache import cache
 from papers.models import Tag
 import numpy as np
 from staff.utils import get_search_settings 
 
 # --- GenAI Settings ---
-GENAI_EMBEDDING_MODEL = 'gemini-embedding-001' # Using the 768-dim model
+GENAI_EMBEDDING_MODEL = 'gemini-embedding-001'
 # --- End GenAI Settings ---
 
-_client = None # <-- Renamed to client
-_embedding_model_name = None # To hold the model name for the embedding call
+_client = None
+_embedding_model_name = None
 
-def get_embedding_model():  # <-- Modified
+def get_embedding_model():
   """
   Get the configured GenAI client and model name.
   Caches the client locally.
   """
   global _client, _embedding_model_name
   if _client is None:
-    _client = get_model() # returns the genai.Client instance from semantic_search.py
+    _client = get_model()
     _embedding_model_name = GENAI_EMBEDDING_MODEL
   return _client, _embedding_model_name
 
-# ... keep all your existing constants and functions ...
+
+def cosine_similarity(a, b):
+  """
+  Compute cosine similarity between two vectors or between a vector and a matrix.
+  a: shape (n,) or (1, n)
+  b: shape (m, n)
+  returns: shape (m,) - similarity scores
+  """
+  a = np.array(a)
+  b = np.array(b)
+  
+  # Ensure a is 1D
+  if a.ndim == 2:
+    a = a.flatten()
+  
+  # Compute dot product
+  dot_product = np.dot(b, a)
+  
+  # Compute norms
+  norm_a = np.linalg.norm(a)
+  norm_b = np.linalg.norm(b, axis=1)
+  
+  # Avoid division by zero
+  return dot_product / (norm_a * norm_b + 1e-8)
+
 
 def extract_tags(text=None, doc_emb=None, top_n=None, min_score=None): 
   """
@@ -45,7 +68,7 @@ def extract_tags(text=None, doc_emb=None, top_n=None, min_score=None):
   print(f"top n: {top_n}")
   print(f"min_score: {min_score}")
   
-  # ... (Your cache loading code remains the same) ...
+  # Cache loading
   cache_key = 'active_tags_with_embeddings'
   cached_data = cache.get(cache_key)
   
@@ -83,14 +106,13 @@ def extract_tags(text=None, doc_emb=None, top_n=None, min_score=None):
   if not candidates:
     return []
   
-  # 2. Encode Text (MODIFIED)
+  # 2. Encode Text
   if doc_emb is None:
     if not text or not text.strip():
       print("[extract_tags] No text or embedding provided.")
       return []
     
     print("[extract_tags] Encoding provided text using GenAI...")
-    # ✅ Get GenAI Client and model name
     client, model_name = get_embedding_model()
 
     if not client:
@@ -98,46 +120,53 @@ def extract_tags(text=None, doc_emb=None, top_n=None, min_score=None):
       return []
 
     try:
-      # Use RETRIEVAL_QUERY task type for the document/query being tagged
       response = client.models.embed_content(
         model=model_name,
         contents=[text],
-        task_type="CLASSIFICATION"
+        config=types.EmbedContentConfig(task_type="CLASSIFICATION")
       )
-      # Convert list output to PyTorch Tensor for compatibility with util.cos_sim
-      doc_emb = torch.tensor(response['embedding'], dtype=torch.float32)
+      
+      # ✅ Access the embedding correctly based on response structure
+      if hasattr(response, 'embeddings'):
+        doc_emb = np.array(response.embeddings[0].values, dtype=np.float32)
+      elif hasattr(response, 'values'):
+        doc_emb = np.array(response.values, dtype=np.float32)
+      else:
+        print(f"❌ Unexpected response structure: {dir(response)}")
+        return []
+        
     except Exception as e:
       print(f"❌ Failed to embed text with GenAI: {e}")
+      import traceback
+      traceback.print_exc()
       return []
 
   else:
     print("[extract_tags] Using pre-computed document embedding.")
-    if not isinstance(doc_emb, torch.Tensor):
-      doc_emb = torch.tensor(doc_emb, dtype=torch.float32)
-    if doc_emb.dim() == 1:
-      doc_emb = doc_emb.unsqueeze(0) 
+    doc_emb = np.array(doc_emb, dtype=np.float32)
   
-  # 3. Compute Similarity (Rest of the logic remains the same)
-  # Convert stored embeddings (which are RETRIEVAL_DOCUMENT type) to tensor
-  cand_embs = torch.tensor(np.array(embeddings), dtype=torch.float32)
+  # 3. Compute Similarity using NumPy
+  cand_embs = np.array(embeddings, dtype=np.float32)
   
-  # Compute cosine similarity
-  scores = util.cos_sim(doc_emb, cand_embs)[0]
+  # ✅ Use our custom cosine_similarity function instead of util.cos_sim
+  scores = cosine_similarity(doc_emb, cand_embs)
   
-  # ... (Rest of your function is correct, calculating top_idx, filtering, etc.) ...
-  top_idx = torch.topk(scores, k=min(top_n, len(scores))).indices.tolist()
+  # 4. Get top N
+  top_idx = np.argsort(scores)[::-1][:top_n]
   
   top_tags_with_desc = [
-    {"name": candidates[i], "description": descriptions[i], "score": scores[i].item()}
+    {"name": candidates[i], "description": descriptions[i], "score": float(scores[i])}
     for i in top_idx
   ]
   
+  # 5. Filter nested tags
   filtered_tags = []
   for tag_data in top_tags_with_desc:
     tag_name = tag_data['name']
     if not any((tag_name != other['name'] and tag_name in other['name']) for other in top_tags_with_desc):
       filtered_tags.append(tag_data)
   
+  # 6. Filter by min_score
   result = [
     tag for tag in filtered_tags
     if tag['score'] >= min_score

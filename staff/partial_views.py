@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.core.cache import cache
 from django.contrib import messages
 from django.core.paginator import Paginator
-from papers.utils.nlp import get_embedding_model, extract_tags
+from utils.tagging import get_embedding_model, extract_tags
 import re
 
 def staff_table_partial(request):

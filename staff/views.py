@@ -4,7 +4,7 @@ from papers.models import Paper
 from django.http import HttpResponse
 from django.contrib import messages
 from django.db import transaction
-from papers.utils.nlp import extract_tags
+from utils.tagging import extract_tags
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from .models import SearchSettings

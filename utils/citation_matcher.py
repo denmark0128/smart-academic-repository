@@ -3,7 +3,9 @@ import fitz  # PyMuPDF
 import re
 import numpy as np
 from papers.models import Paper, MatchedCitation
-from papers.utils.nlp import get_embedding_model
+# ✅ CHANGED: Import GenAI client instead of sentence_transformers model
+from utils.semantic_search import get_model, GENAI_EMBEDDING_MODEL
+from google.genai import types
 from django.db.models import F
 from pgvector.django import CosineDistance
 import os
@@ -124,6 +126,39 @@ def parse_apa_citation(cite):
         return {"title": "", "authors": [], "year": ""}
 
 
+# ✅ NEW: Helper function to generate embeddings using GenAI
+def generate_embedding(client, text):
+    """Generate embedding for a single text using GenAI"""
+    try:
+        response = client.models.embed_content(
+            model=GENAI_EMBEDDING_MODEL,
+            contents=[text],
+            config=types.EmbedContentConfig(task_type="RETRIEVAL_QUERY", output_dimensionality=768)
+        )
+        
+        # Access embedding based on response structure
+        if hasattr(response, 'embeddings'):
+            embedding = np.array(response.embeddings[0].values, dtype=np.float32)
+        elif hasattr(response, 'values'):
+            embedding = np.array(response.values, dtype=np.float32)
+        else:
+            print(f"[Citation] ❌ Unexpected response structure: {dir(response)}")
+            return None
+        
+        # Normalize the embedding
+        norm = np.linalg.norm(embedding)
+        if norm > 0:
+            embedding = embedding / norm
+        
+        return embedding
+        
+    except Exception as e:
+        print(f"[Citation] Error generating embedding: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
 # Step 3: Main function to extract and match citations using pgvector
 def extract_and_match_citations(paper, threshold=0.75, top_k=5):
     """
@@ -157,11 +192,14 @@ def extract_and_match_citations(paper, threshold=0.75, top_k=5):
     
     print(f"[Citation] Found {len(raw_citations)} raw citations")
     
-    # Get embedding model
+    # ✅ CHANGED: Get GenAI client instead of embedding model
     try:
-        model = get_embedding_model()
+        client = get_model()
+        if not client:
+            print("[Citation] Error: GenAI client not available")
+            return []
     except Exception as e:
-        print(f"[Citation] Error loading embedding model: {e}")
+        print(f"[Citation] Error loading GenAI client: {e}")
         return []
     
     # Check if we have papers with embeddings to match against
@@ -189,14 +227,11 @@ def extract_and_match_citations(paper, threshold=0.75, top_k=5):
                 parsed['title'] = citation
                 print(f"[Citation] Using full text as fallback: {citation[:80]}")
             
-            # Generate embedding for parsed citation title
-            try:
-                citation_embedding = model.encode(parsed['title'], convert_to_numpy=True)
-                norm = np.linalg.norm(citation_embedding)
-                if norm > 0:
-                    citation_embedding = citation_embedding / norm
-            except Exception as e:
-                print(f"[Citation] Error generating embedding: {e}")
+            # ✅ CHANGED: Generate embedding using GenAI
+            citation_embedding = generate_embedding(client, parsed['title'])
+            
+            if citation_embedding is None:
+                print("[Citation] Failed to generate embedding, skipping")
                 continue
             
             # Use pgvector to find top_k most similar papers by title
@@ -216,14 +251,11 @@ def extract_and_match_citations(paper, threshold=0.75, top_k=5):
             best_score = 0.0
             
             for candidate in similar_papers:
-
                 title_similarity = 1 - candidate.distance
                 
                 # Calculate author overlap
                 parsed_authors = set(a.lower() for a in parsed['authors'])
                 paper_authors = set(a.lower() for a in (candidate.authors or []))
-                author_overlap = len(parsed_authors.intersection(paper_authors)) / max(len(paper_authors), 1)
-
                 
                 if paper_authors:
                     author_overlap = len(parsed_authors.intersection(paper_authors)) / len(paper_authors)

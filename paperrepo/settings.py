@@ -45,8 +45,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
-    'crispy_forms',
-    'crispy_tailwind',
     'staff',
     'django_htmx',
     'pgvector',  # Ensure pgvector is included
@@ -199,8 +197,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = ("tailwind", )
-CRISPY_TEMPLATE_PACK = "tailwind"
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
