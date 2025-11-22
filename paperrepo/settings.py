@@ -210,8 +210,10 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
-CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.dev']
-
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.dev',
+			'https://smartrepo.site',
+			'http://smartrepo.site',]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 INTERNAL_IPS = ["127.0.0.1"]
 
 if DEBUG:
