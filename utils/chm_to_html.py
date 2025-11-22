@@ -6,7 +6,7 @@ import shutil
 import uuid
 from bs4 import BeautifulSoup
 from urllib.parse import unquote
-
+import glob
 
 import os
 import subprocess
@@ -107,7 +107,8 @@ def fix_html_paths(output_dir: str):
 
 def parse_toc(output_dir: str):
     """Parse Table of Contents (.hhc) to get ordered HTML files."""
-    hhc_file = os.path.join(output_dir, "Table of Contents.hhc")
+    hhc_files = glob.glob(os.path.join(output_dir, "*.hhc"))
+    hhc_file = hhc_files[0] if hhc_files else os.path.join(output_dir, "Table of Contents.hhc")
     toc_files = []
 
     if os.path.exists(hhc_file):
