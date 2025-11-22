@@ -48,7 +48,7 @@ def generate_summary_with_api(paper):
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",  # Updated model name
-        contents=full_prompt,
+        contents=full_prompt
     )
 
     return response.text
