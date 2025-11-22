@@ -1,19 +1,65 @@
-# utils/single_paper_rag.py (Enhanced RAG with context expansion)
+# utils/single_paper_rag.py (Enhanced RAG with Gemini embeddings)
 
 from google import genai
+from google.genai import types
 import os
 from dotenv import load_dotenv
 from django.conf import settings
 import numpy as np
 from papers.models import PaperChunk
 from pgvector.django import CosineDistance
-from .semantic_search import get_model
 from typing import List, Tuple
 
 # --- Environment Setup ---
 BASE_DIR = settings.BASE_DIR
 load_dotenv(BASE_DIR / ".env")
 api_key = os.getenv("GEMINI_API_KEY")
+GENAI_EMBEDDING_MODEL = "models/text-embedding-004"
+
+# Initialize Gemini client
+client = None
+if api_key:
+    client = genai.Client(api_key=api_key)
+
+# ----------------------------
+# Embedding Functions
+# ----------------------------
+
+def get_gemini_embedding(text: str, task_type: str = "RETRIEVAL_QUERY") -> np.ndarray:
+    """
+    Get embedding from Gemini API.
+    
+    Args:
+        text: Text to embed
+        task_type: One of "RETRIEVAL_DOCUMENT" or "RETRIEVAL_QUERY"
+    """
+    if not client:
+        raise ValueError("Gemini API client not initialized. Check GEMINI_API_KEY.")
+    
+    try:
+        response = client.models.embed_content(
+            model=GENAI_EMBEDDING_MODEL,
+            contents=[text],
+            config=types.EmbedContentConfig(
+                task_type=task_type,
+                output_dimensionality=768
+            )
+        )
+        
+        # Handle response structure
+        if hasattr(response, 'embeddings'):
+            query_emb = np.array(response.embeddings[0].values)
+        elif hasattr(response, 'values'):
+            query_emb = np.array(response.values)
+        else:
+            print(f"❌ Unexpected response structure: {dir(response)}")
+            raise ValueError("Unexpected embedding response structure")
+        
+        return query_emb
+    except Exception as e:
+        print(f"Error getting Gemini embedding: {e}")
+        raise
+
 
 # ----------------------------
 # Helper Functions
@@ -77,26 +123,27 @@ def rerank_chunks(query: str, chunks: List[Tuple[PaperChunk, float]]) -> List[Tu
 def query_rag(
     paper_id: int, 
     user_query: str, 
-    top_k: int = 5,  # Increased from 3
+    top_k: int = 5,
     use_context_expansion: bool = True,
-    use_hybrid_mode: bool = True,  # Allow model to use external knowledge
+    use_hybrid_mode: bool = True,
     temperature: float = 0.3
 ):
     """
-    Enhanced RAG pipeline with:
+    Enhanced RAG pipeline with Gemini embeddings:
+    - Gemini text-embedding-004 for query encoding
     - More chunks retrieved
     - Context expansion (surrounding chunks)
     - Optional hybrid mode (paper + model knowledge)
     - Better prompting
     """
     
-    # 1. Embed query
-    embed_model = get_model()
-    if embed_model is None:
-        return "Sorry, the embedding model is currently unavailable."
-    
-    query_emb = embed_model.encode([user_query], convert_to_numpy=True)[0]
-    query_emb_list = query_emb.tolist()
+    # 1. Embed query using Gemini
+    try:
+        query_emb = get_gemini_embedding(user_query, task_type="RETRIEVAL_QUERY")
+        query_emb_list = query_emb.tolist()
+    except Exception as e:
+        print(f"Error embedding query: {e}")
+        return "Sorry, I had trouble processing your question."
 
     # 2. Retrieve initial chunks with scores
     try:
@@ -175,13 +222,12 @@ Always reference page numbers when providing specific information.
 **ANSWER:**"""
 
     # 6. Generate with Gemini
-    if not api_key:
+    if not client:
         return "Sorry, AI generation service not configured."
 
     try:
-        client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model="gemini-2.5-flash",  # Using latest model
+            model="gemini-2.0-flash-exp",
             contents=prompt,
             config={
                 "temperature": temperature,
@@ -207,13 +253,12 @@ Always reference page numbers when providing specific information.
 def multi_query_rag(paper_id: int, user_query: str):
     """
     Generate multiple query variations to retrieve more diverse results.
+    Uses Gemini embeddings for all queries.
     """
-    if not api_key:
+    if not client:
         return query_rag(paper_id, user_query)
     
     try:
-        client = genai.Client(api_key=api_key)
-        
         # Generate query variations
         variation_prompt = f"""Generate 3 different ways to rephrase this question to search a research paper:
 "{user_query}"
@@ -231,21 +276,61 @@ Return only the 3 questions, numbered 1-3, nothing else."""
                 queries.append(line.split('.', 1)[1].strip())
         
         # Retrieve with all queries and combine results
-        embed_model = get_model()
         all_chunks = set()
         
         for q in queries[:3]:  # Limit to avoid too many queries
-            query_emb = embed_model.encode([q], convert_to_numpy=True)[0]
-            chunks = (
-                PaperChunk.objects
-                .filter(paper_id=paper_id)
-                .annotate(distance=CosineDistance("embedding", query_emb.tolist()))
-                .order_by("distance")[:3]
-            )
-            all_chunks.update(chunks)
+            try:
+                query_emb = get_gemini_embedding(q, task_type="RETRIEVAL_QUERY")
+                query_emb_list = query_emb.tolist()
+                chunks = (
+                    PaperChunk.objects
+                    .filter(paper_id=paper_id)
+                    .annotate(distance=CosineDistance("embedding", query_emb_list))
+                    .order_by("distance")[:3]
+                )
+                all_chunks.update(chunks)
+            except Exception as e:
+                print(f"Error with query '{q}': {e}")
+                continue
         
-        # Now use combined chunks for generation
-        # (Implement similar to query_rag with the combined chunk set)
+        if not all_chunks:
+            return query_rag(paper_id, user_query)
+        
+        # Sort chunks by page/position
+        sorted_chunks = sorted(all_chunks, key=lambda x: (x.page if x.page else 0, x.chunk_id))
+        
+        # Build context
+        context_str = ""
+        current_page = None
+        for chunk in sorted_chunks:
+            if chunk.page != current_page:
+                context_str += f"\n{'='*60}\n📄 PAGE {chunk.page}\n{'='*60}\n\n"
+                current_page = chunk.page
+            context_str += f"{chunk.text}\n\n"
+        
+        # Generate answer
+        prompt = f"""You are an expert research assistant analyzing a scientific paper.
+
+**CONTEXT FROM THE PAPER:**
+{context_str}
+
+**USER QUESTION:** 
+{user_query}
+
+**INSTRUCTIONS:**
+1. Base your answer on the provided context
+2. Always cite page numbers
+3. Be precise and academic
+
+**ANSWER:**"""
+        
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=prompt,
+            config={"temperature": 0.3, "max_output_tokens": 2048}
+        )
+        
+        return response.text + f"\n\n---\n*Multi-query retrieval: {len(all_chunks)} unique chunks*"
         
     except Exception as e:
         print(f"Multi-query failed, falling back: {e}")
