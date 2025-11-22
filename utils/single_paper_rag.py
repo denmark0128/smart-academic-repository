@@ -14,12 +14,25 @@ from typing import List, Tuple
 BASE_DIR = settings.BASE_DIR
 load_dotenv(BASE_DIR / ".env")
 api_key = os.getenv("GEMINI_API_KEY")
-GENAI_EMBEDDING_MODEL = "models/text-embedding-004"
+GENAI_EMBEDDING_MODEL = 'gemini-embedding-001'  # Match your working module
 
-# Initialize Gemini client
-client = None
-if api_key:
-    client = genai.Client(api_key=api_key)
+# ----------------------------
+# GenAI Client
+# ----------------------------
+
+def get_genai_client():
+    """
+    Returns the GenAI Client instance.
+    """
+    try:
+        # The client will automatically pick up the API key from environment variables
+        client = genai.Client()
+        print("✅ GenAI Client loaded.")
+        return client
+    except Exception as e:
+        print(f"❌ Failed to initialize GenAI Client: {e}")
+        return None
+
 
 # ----------------------------
 # Embedding Functions
@@ -27,12 +40,13 @@ if api_key:
 
 def get_gemini_embedding(text: str, task_type: str = "RETRIEVAL_QUERY") -> np.ndarray:
     """
-    Get embedding from Gemini API.
+    Get embedding from Gemini API for a single text.
     
     Args:
         text: Text to embed
         task_type: One of "RETRIEVAL_DOCUMENT" or "RETRIEVAL_QUERY"
     """
+    client = get_genai_client()
     if not client:
         raise ValueError("Gemini API client not initialized. Check GEMINI_API_KEY.")
     
@@ -46,7 +60,7 @@ def get_gemini_embedding(text: str, task_type: str = "RETRIEVAL_QUERY") -> np.nd
             )
         )
         
-        # Handle response structure
+        # Handle response structure (same as your working module)
         if hasattr(response, 'embeddings'):
             query_emb = np.array(response.embeddings[0].values)
         elif hasattr(response, 'values'):
@@ -57,7 +71,9 @@ def get_gemini_embedding(text: str, task_type: str = "RETRIEVAL_QUERY") -> np.nd
         
         return query_emb
     except Exception as e:
-        print(f"Error getting Gemini embedding: {e}")
+        print(f"❌ Error getting Gemini embedding: {e}")
+        import traceback
+        traceback.print_exc()
         raise
 
 
@@ -130,19 +146,19 @@ def query_rag(
 ):
     """
     Enhanced RAG pipeline with Gemini embeddings:
-    - Gemini text-embedding-004 for query encoding
+    - Gemini gemini-embedding-001 for query encoding
     - More chunks retrieved
     - Context expansion (surrounding chunks)
     - Optional hybrid mode (paper + model knowledge)
     - Better prompting
     """
     
-    # 1. Embed query using Gemini
+    # 1. Embed query using Gemini (matching your working module's approach)
     try:
         query_emb = get_gemini_embedding(user_query, task_type="RETRIEVAL_QUERY")
         query_emb_list = query_emb.tolist()
     except Exception as e:
-        print(f"Error embedding query: {e}")
+        print(f"❌ Error embedding query: {e}")
         return "Sorry, I had trouble processing your question."
 
     # 2. Retrieve initial chunks with scores
@@ -160,7 +176,9 @@ def query_rag(
         chunks_with_scores = rerank_chunks(user_query, chunks_with_scores)
         
     except Exception as e:
-        print(f"Error during retrieval: {e}")
+        print(f"❌ Error during retrieval: {e}")
+        import traceback
+        traceback.print_exc()
         return "Sorry, I had trouble searching the paper's contents."
 
     if not chunks_with_scores:
@@ -222,6 +240,7 @@ Always reference page numbers when providing specific information.
 **ANSWER:**"""
 
     # 6. Generate with Gemini
+    client = get_genai_client()
     if not client:
         return "Sorry, AI generation service not configured."
 
@@ -242,7 +261,9 @@ Always reference page numbers when providing specific information.
         return answer + metadata
         
     except Exception as e:
-        print(f"Error during generation: {e}")
+        print(f"❌ Error during generation: {e}")
+        import traceback
+        traceback.print_exc()
         return "Sorry, I encountered an error generating an answer."
 
 
@@ -255,6 +276,7 @@ def multi_query_rag(paper_id: int, user_query: str):
     Generate multiple query variations to retrieve more diverse results.
     Uses Gemini embeddings for all queries.
     """
+    client = get_genai_client()
     if not client:
         return query_rag(paper_id, user_query)
     
@@ -290,7 +312,7 @@ Return only the 3 questions, numbered 1-3, nothing else."""
                 )
                 all_chunks.update(chunks)
             except Exception as e:
-                print(f"Error with query '{q}': {e}")
+                print(f"❌ Error with query '{q}': {e}")
                 continue
         
         if not all_chunks:
@@ -333,5 +355,7 @@ Return only the 3 questions, numbered 1-3, nothing else."""
         return response.text + f"\n\n---\n*Multi-query retrieval: {len(all_chunks)} unique chunks*"
         
     except Exception as e:
-        print(f"Multi-query failed, falling back: {e}")
+        print(f"❌ Multi-query failed, falling back: {e}")
+        import traceback
+        traceback.print_exc()
         return query_rag(paper_id, user_query)
