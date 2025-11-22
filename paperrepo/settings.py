@@ -209,7 +209,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
-ALLOWED_HOSTS = ["django-thesis-1.onrender.com", "localhost", "127.0.0.1", '.ngrok-free.dev' ]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.dev']
 
 INTERNAL_IPS = ["127.0.0.1"]
