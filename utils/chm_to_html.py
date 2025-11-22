@@ -27,18 +27,23 @@ if platform.system() == "Windows":
         CMD = r"C:\Program Files\7-Zip\7z.exe"
     # 3. Use '7z' as a fallback, hoping it's in a known location or PATH
     if CMD is None:
-        CMD = "7z" # If all else fails, use the name and hope PATH works
+        CMD = "7z"
 elif platform.system() == "Linux":
+    # 1. Try to find 7z in PATH
     CMD = shutil.which("7z")
+    # 2. Fallback to common hardcoded path if not in PATH
+    if CMD is None and os.path.exists("/usr/bin/7z"):
+        CMD = "/usr/bin/7z"
+    # 3. Use '7z' as a fallback, hoping it's in a known location or PATH
     if CMD is None:
-        CMD = "7z" # Use the name and hope PATH works
+        CMD = "7z"
 else:
     # Handle other operating systems if needed, but this is a good default
     CMD = None
-
 if CMD is None or (platform.system() not in ["Windows", "Linux"]):
-    print("[!] ERROR: Unsupported OS or CHM extraction utility not found.")
-    sys.exit(1)
+    error_msg = "Unsupported OS or CHM extraction utility not found."
+    print(f"[!] ERROR: {error_msg}")
+    raise Exception(error_msg)
 
 # Renamed the variable to CMD for generic command
 CHM_EXTRACT_CMD = CMD 
@@ -80,13 +85,14 @@ def extract_chm(chm_path: str, output_dir: str):
     try:
         subprocess.run(command_args, check=True)
         print(f"[+] Extracted CHM to {output_dir} using 7-Zip")
-    except subprocess.CalledProcessError:
-        print(f"[!] Failed to extract CHM using 7-Zip.")
-        print(f"    Command: {' '.join(command_args)}")
-        exit(1)
-    except FileNotFoundError:
-        print(f"[!] 7-Zip not found. Install with: sudo apt-get install p7zip-full")
-        exit(1)
+    except subprocess.CalledProcessError as e:
+        error_msg = f"Failed to extract CHM using 7-Zip. Command: {' '.join(command_args)}"
+        print(f"[!] {error_msg}")
+        raise Exception(error_msg) from e
+    except FileNotFoundError as e:
+        error_msg = "7-Zip not found. Install with: sudo apt-get install p7zip-full"
+        print(f"[!] {error_msg}")
+        raise Exception(error_msg) from e
 
 # ... (keep the rest of your original functions) ...
 

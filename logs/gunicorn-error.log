@@ -3689,3 +3689,1575 @@ ModuleNotFoundError: No module named 'config'
 [2025-11-22 05:14:47 +0000] [2285] [INFO] Booting worker with pid: 2285
 [2025-11-22 05:14:47 +0000] [2286] [INFO] Booting worker with pid: 2286
 [2025-11-22 05:14:47 +0000] [2287] [INFO] Booting worker with pid: 2287
+[2025-11-22 05:29:14 +0000] [2286] [INFO] Worker exiting (pid: 2286)
+[2025-11-22 05:29:14 +0000] [2287] [INFO] Worker exiting (pid: 2287)
+[2025-11-22 05:29:14 +0000] [2282] [INFO] Handling signal: term
+[2025-11-22 05:29:14 +0000] [2285] [INFO] Worker exiting (pid: 2285)
+[2025-11-22 05:29:15 +0000] [2282] [INFO] Shutting down: Master
+[2025-11-22 05:29:16 +0000] [2415] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 05:29:16 +0000] [2415] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (2415)
+[2025-11-22 05:29:16 +0000] [2415] [INFO] Using worker: sync
+[2025-11-22 05:29:16 +0000] [2431] [INFO] Booting worker with pid: 2431
+[2025-11-22 05:29:16 +0000] [2432] [INFO] Booting worker with pid: 2432
+[2025-11-22 05:29:16 +0000] [2433] [INFO] Booting worker with pid: 2433
+[2025-11-22 06:13:55 +0000] [2415] [INFO] Handling signal: term
+[2025-11-22 06:13:55 +0000] [2432] [INFO] Worker exiting (pid: 2432)
+[2025-11-22 06:13:55 +0000] [2433] [INFO] Worker exiting (pid: 2433)
+[2025-11-22 06:13:55 +0000] [2431] [INFO] Worker exiting (pid: 2431)
+[2025-11-22 06:13:56 +0000] [2415] [INFO] Shutting down: Master
+[2025-11-22 06:13:56 +0000] [2578] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 06:13:56 +0000] [2578] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (2578)
+[2025-11-22 06:13:56 +0000] [2578] [INFO] Using worker: sync
+[2025-11-22 06:13:56 +0000] [2580] [INFO] Booting worker with pid: 2580
+[2025-11-22 06:13:56 +0000] [2581] [INFO] Booting worker with pid: 2581
+[2025-11-22 06:13:56 +0000] [2582] [INFO] Booting worker with pid: 2582
+[2025-11-22 08:42:59 +0000] [2582] [INFO] Worker exiting (pid: 2582)
+[2025-11-22 08:42:59 +0000] [2581] [INFO] Worker exiting (pid: 2581)
+[2025-11-22 08:42:59 +0000] [2578] [INFO] Handling signal: term
+[2025-11-22 08:42:59 +0000] [2580] [INFO] Worker exiting (pid: 2580)
+[2025-11-22 08:43:00 +0000] [2578] [INFO] Shutting down: Master
+[2025-11-22 08:43:01 +0000] [3003] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 08:43:01 +0000] [3003] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (3003)
+[2025-11-22 08:43:01 +0000] [3003] [INFO] Using worker: sync
+[2025-11-22 08:43:01 +0000] [3004] [INFO] Booting worker with pid: 3004
+[2025-11-22 08:43:01 +0000] [3005] [INFO] Booting worker with pid: 3005
+[2025-11-22 08:43:01 +0000] [3006] [INFO] Booting worker with pid: 3006
+[2025-11-22 08:54:06 +0000] [3006] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 90, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'extract_chmcmd'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 311, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 98, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 08:55:52 +0000] [3006] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 90, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'extract_chmcmd'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 311, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 98, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 08:55:59 +0000] [3005] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 90, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'extract_chmcmd'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 311, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 98, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 09:05:39 +0000] [3004] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 90, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'extract_chmcmd'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 311, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 98, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 09:06:34 +0000] [3003] [INFO] Handling signal: term
+[2025-11-22 09:06:34 +0000] [3004] [INFO] Worker exiting (pid: 3004)
+[2025-11-22 09:06:34 +0000] [3005] [INFO] Worker exiting (pid: 3005)
+[2025-11-22 09:06:34 +0000] [3006] [INFO] Worker exiting (pid: 3006)
+[2025-11-22 09:06:35 +0000] [3003] [INFO] Shutting down: Master
+[2025-11-22 09:06:35 +0000] [3620] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 09:06:35 +0000] [3620] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (3620)
+[2025-11-22 09:06:35 +0000] [3620] [INFO] Using worker: sync
+[2025-11-22 09:06:35 +0000] [3622] [INFO] Booting worker with pid: 3622
+[2025-11-22 09:06:35 +0000] [3623] [INFO] Booting worker with pid: 3623
+[2025-11-22 09:06:35 +0000] [3624] [INFO] Booting worker with pid: 3624
+[2025-11-22 09:07:02 +0000] [3624] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 90, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'extract_chmcmd'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 311, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 98, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 09:16:08 +0000] [3620] [INFO] Handling signal: term
+[2025-11-22 09:16:08 +0000] [3623] [INFO] Worker exiting (pid: 3623)
+[2025-11-22 09:16:08 +0000] [3622] [INFO] Worker exiting (pid: 3622)
+[2025-11-22 09:16:08 +0000] [3624] [INFO] Worker exiting (pid: 3624)
+[2025-11-22 09:16:10 +0000] [3620] [INFO] Shutting down: Master
+[2025-11-22 09:16:10 +0000] [4280] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 09:16:10 +0000] [4280] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (4280)
+[2025-11-22 09:16:10 +0000] [4280] [INFO] Using worker: sync
+[2025-11-22 09:16:10 +0000] [4281] [INFO] Booting worker with pid: 4281
+[2025-11-22 09:16:10 +0000] [4282] [INFO] Booting worker with pid: 4282
+[2025-11-22 09:16:10 +0000] [4283] [INFO] Booting worker with pid: 4283
+[2025-11-22 09:16:50 +0000] [4281] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 90, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'extract_chmLib'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 311, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 98, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 09:22:28 +0000] [4280] [INFO] Handling signal: term
+[2025-11-22 09:22:28 +0000] [4281] [INFO] Worker exiting (pid: 4281)
+[2025-11-22 09:22:28 +0000] [4283] [INFO] Worker exiting (pid: 4283)
+[2025-11-22 09:22:28 +0000] [4282] [INFO] Worker exiting (pid: 4282)
+[2025-11-22 09:22:30 +0000] [4280] [INFO] Shutting down: Master
+[2025-11-22 09:22:30 +0000] [4462] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 09:22:30 +0000] [4462] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (4462)
+[2025-11-22 09:22:30 +0000] [4462] [INFO] Using worker: sync
+[2025-11-22 09:22:30 +0000] [4463] [INFO] Booting worker with pid: 4463
+[2025-11-22 09:22:30 +0000] [4464] [INFO] Booting worker with pid: 4464
+[2025-11-22 09:22:30 +0000] [4465] [INFO] Booting worker with pid: 4465
+[2025-11-22 09:22:54 +0000] [4463] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 81, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '7z'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 302, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 89, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 09:35:49 +0000] [4462] [INFO] Handling signal: term
+[2025-11-22 09:35:49 +0000] [4464] [INFO] Worker exiting (pid: 4464)
+[2025-11-22 09:35:49 +0000] [4465] [INFO] Worker exiting (pid: 4465)
+[2025-11-22 09:35:49 +0000] [4463] [INFO] Worker exiting (pid: 4463)
+[2025-11-22 09:35:50 +0000] [4462] [INFO] Shutting down: Master
+[2025-11-22 09:35:50 +0000] [4984] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 09:35:50 +0000] [4984] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (4984)
+[2025-11-22 09:35:50 +0000] [4984] [INFO] Using worker: sync
+[2025-11-22 09:35:50 +0000] [4985] [INFO] Booting worker with pid: 4985
+[2025-11-22 09:35:50 +0000] [4986] [INFO] Booting worker with pid: 4986
+[2025-11-22 09:35:51 +0000] [4987] [INFO] Booting worker with pid: 4987
+[2025-11-22 09:38:03 +0000] [4984] [INFO] Handling signal: term
+[2025-11-22 09:38:03 +0000] [4987] [INFO] Worker exiting (pid: 4987)
+[2025-11-22 09:38:03 +0000] [4985] [INFO] Worker exiting (pid: 4985)
+[2025-11-22 09:38:03 +0000] [4986] [INFO] Worker exiting (pid: 4986)
+[2025-11-22 09:38:04 +0000] [4984] [INFO] Shutting down: Master
+[2025-11-22 09:38:05 +0000] [5015] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 09:38:05 +0000] [5015] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (5015)
+[2025-11-22 09:38:05 +0000] [5015] [INFO] Using worker: sync
+[2025-11-22 09:38:05 +0000] [5016] [INFO] Booting worker with pid: 5016
+[2025-11-22 09:38:05 +0000] [5017] [INFO] Booting worker with pid: 5017
+[2025-11-22 09:38:05 +0000] [5018] [INFO] Booting worker with pid: 5018
+[2025-11-22 09:46:11 +0000] [5017] [INFO] Worker exiting (pid: 5017)
+[2025-11-22 09:46:11 +0000] [5016] [INFO] Worker exiting (pid: 5016)
+[2025-11-22 09:46:11 +0000] [5018] [INFO] Worker exiting (pid: 5018)
+[2025-11-22 09:46:11 +0000] [5015] [INFO] Handling signal: term
+[2025-11-22 09:46:11 +0000] [5015] [ERROR] Worker (pid:5017) was sent SIGTERM!
+[2025-11-22 09:46:11 +0000] [5015] [ERROR] Worker (pid:5016) was sent SIGTERM!
+[2025-11-22 09:46:11 +0000] [5015] [ERROR] Worker (pid:5018) was sent SIGTERM!
+[2025-11-22 09:46:11 +0000] [5015] [INFO] Shutting down: Master
+[2025-11-22 09:46:11 +0000] [5101] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 09:46:11 +0000] [5101] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (5101)
+[2025-11-22 09:46:11 +0000] [5101] [INFO] Using worker: sync
+[2025-11-22 09:46:11 +0000] [5102] [INFO] Booting worker with pid: 5102
+[2025-11-22 09:46:11 +0000] [5103] [INFO] Booting worker with pid: 5103
+[2025-11-22 09:46:11 +0000] [5104] [INFO] Booting worker with pid: 5104
+[2025-11-22 09:47:39 +0000] [5104] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 81, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '7z'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 302, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 89, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 09:58:14 +0000] [5101] [INFO] Handling signal: term
+[2025-11-22 09:58:14 +0000] [5104] [INFO] Worker exiting (pid: 5104)
+[2025-11-22 09:58:14 +0000] [5102] [INFO] Worker exiting (pid: 5102)
+[2025-11-22 09:58:14 +0000] [5103] [INFO] Worker exiting (pid: 5103)
+[2025-11-22 09:58:16 +0000] [5101] [INFO] Shutting down: Master
+[2025-11-22 09:58:16 +0000] [5167] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 09:58:16 +0000] [5167] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (5167)
+[2025-11-22 09:58:16 +0000] [5167] [INFO] Using worker: sync
+[2025-11-22 09:58:16 +0000] [5169] [INFO] Booting worker with pid: 5169
+[2025-11-22 09:58:16 +0000] [5170] [INFO] Booting worker with pid: 5170
+[2025-11-22 09:58:16 +0000] [5171] [INFO] Booting worker with pid: 5171
+[2025-11-22 09:58:33 +0000] [5170] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 81, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '7z'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 303, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 89, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 10:38:58 +0000] [5170] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 81, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '7z'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 303, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 89, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 10:50:30 +0000] [5167] [INFO] Handling signal: term
+[2025-11-22 10:50:30 +0000] [5171] [INFO] Worker exiting (pid: 5171)
+[2025-11-22 10:50:30 +0000] [5169] [INFO] Worker exiting (pid: 5169)
+[2025-11-22 10:50:30 +0000] [5170] [INFO] Worker exiting (pid: 5170)
+[2025-11-22 10:50:32 +0000] [5167] [INFO] Shutting down: Master
+[2025-11-22 10:50:32 +0000] [6371] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 10:50:32 +0000] [6371] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (6371)
+[2025-11-22 10:50:32 +0000] [6371] [INFO] Using worker: sync
+[2025-11-22 10:50:32 +0000] [6372] [INFO] Booting worker with pid: 6372
+[2025-11-22 10:50:32 +0000] [6373] [INFO] Booting worker with pid: 6373
+[2025-11-22 10:50:32 +0000] [6374] [INFO] Booting worker with pid: 6374
+[2025-11-22 10:50:57 +0000] [6373] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 81, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '7z'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 303, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 89, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 10:53:43 +0000] [6374] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 81, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '7z'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 613, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 303, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 89, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 11:03:42 +0000] [6371] [INFO] Handling signal: term
+[2025-11-22 11:03:42 +0000] [6372] [INFO] Worker exiting (pid: 6372)
+[2025-11-22 11:03:42 +0000] [6374] [INFO] Worker exiting (pid: 6374)
+[2025-11-22 11:03:42 +0000] [6373] [INFO] Worker exiting (pid: 6373)
+[2025-11-22 11:03:43 +0000] [6371] [INFO] Shutting down: Master
+[2025-11-22 11:03:43 +0000] [6465] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 11:03:43 +0000] [6465] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (6465)
+[2025-11-22 11:03:43 +0000] [6465] [INFO] Using worker: sync
+[2025-11-22 11:03:43 +0000] [6466] [INFO] Booting worker with pid: 6466
+[2025-11-22 11:03:43 +0000] [6467] [INFO] Booting worker with pid: 6467
+[2025-11-22 11:03:43 +0000] [6468] [INFO] Booting worker with pid: 6468
+[2025-11-22 11:04:02 +0000] [6467] [ERROR] Error handling request /papers/extract-metadata/
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 81, in extract_chm
+    subprocess.run(command_args, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '7z'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 134, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/gunicorn/workers/sync.py", line 177, in handle_request
+    respiter = self.wsgi(environ, resp.start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/wsgi.py", line 124, in __call__
+    response = self.get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 140, in get_response
+    response = self._middleware_chain(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/corsheaders/middleware.py", line 53, in __call__
+    result = self.get_response(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/allauth/account/middleware.py", line 34, in middleware
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 120, in __call__
+    response = response or self.get_response(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django_htmx/middleware.py", line 39, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/debug_toolbar/middleware.py", line 130, in __call__
+    return self.get_response(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/papers/views/views.py", line 614, in extract_metadata
+    merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 303, in merge_chm_to_html
+    extract_chm(chm_path, output_dir)
+  File "/home/ubuntu/django-thesis/utils/chm_to_html.py", line 89, in extract_chm
+    exit(1)
+  File "<frozen _sitebuiltins>", line 26, in __call__
+SystemExit: 1
+[2025-11-22 11:04:38 +0000] [6465] [INFO] Handling signal: term
+[2025-11-22 11:04:38 +0000] [6466] [INFO] Worker exiting (pid: 6466)
+[2025-11-22 11:04:38 +0000] [6467] [INFO] Worker exiting (pid: 6467)
+[2025-11-22 11:04:38 +0000] [6468] [INFO] Worker exiting (pid: 6468)
+[2025-11-22 11:04:40 +0000] [6465] [INFO] Shutting down: Master
+[2025-11-22 11:04:40 +0000] [6492] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 11:04:40 +0000] [6492] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (6492)
+[2025-11-22 11:04:40 +0000] [6492] [INFO] Using worker: sync
+[2025-11-22 11:04:40 +0000] [6493] [INFO] Booting worker with pid: 6493
+[2025-11-22 11:04:40 +0000] [6494] [INFO] Booting worker with pid: 6494
+[2025-11-22 11:04:40 +0000] [6495] [INFO] Booting worker with pid: 6495
+[2025-11-22 11:09:20 +0000] [6492] [INFO] Handling signal: term
+[2025-11-22 11:09:20 +0000] [6494] [INFO] Worker exiting (pid: 6494)
+[2025-11-22 11:09:20 +0000] [6493] [INFO] Worker exiting (pid: 6493)
+[2025-11-22 11:09:20 +0000] [6495] [INFO] Worker exiting (pid: 6495)
+[2025-11-22 11:09:22 +0000] [6492] [INFO] Shutting down: Master
+[2025-11-22 11:09:22 +0000] [6897] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 11:09:22 +0000] [6897] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (6897)
+[2025-11-22 11:09:22 +0000] [6897] [INFO] Using worker: sync
+[2025-11-22 11:09:22 +0000] [6898] [INFO] Booting worker with pid: 6898
+[2025-11-22 11:09:22 +0000] [6899] [INFO] Booting worker with pid: 6899
+[2025-11-22 11:09:22 +0000] [6900] [INFO] Booting worker with pid: 6900
+[2025-11-22 11:13:12 +0000] [6899] [INFO] Worker exiting (pid: 6899)
+[2025-11-22 11:13:12 +0000] [6900] [INFO] Worker exiting (pid: 6900)
+[2025-11-22 11:13:12 +0000] [6897] [INFO] Handling signal: term
+[2025-11-22 11:13:12 +0000] [6898] [INFO] Worker exiting (pid: 6898)
+[2025-11-22 11:13:13 +0000] [6897] [INFO] Shutting down: Master
+[2025-11-22 11:13:13 +0000] [6930] [INFO] Starting gunicorn 23.0.0
+[2025-11-22 11:13:13 +0000] [6930] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (6930)
+[2025-11-22 11:13:13 +0000] [6930] [INFO] Using worker: sync
+[2025-11-22 11:13:13 +0000] [6931] [INFO] Booting worker with pid: 6931
+[2025-11-22 11:13:14 +0000] [6932] [INFO] Booting worker with pid: 6932
+[2025-11-22 11:13:14 +0000] [6933] [INFO] Booting worker with pid: 6933
