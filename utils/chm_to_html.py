@@ -29,9 +29,9 @@ if platform.system() == "Windows":
     if CMD is None:
         CMD = "7z" # If all else fails, use the name and hope PATH works
 elif platform.system() == "Linux":
-    CMD = shutil.which("extract_chmcmd")
+    CMD = shutil.which("extract_chmLib")
     if CMD is None:
-        CMD = "extract_chmcmd" # Use the name and hope PATH works
+        CMD = "extract_chmLib" # Use the name and hope PATH works
 else:
     # Handle other operating systems if needed, but this is a good default
     CMD = None
@@ -81,7 +81,7 @@ def extract_chm(chm_path: str, output_dir: str):
     elif platform.system() == "Linux":
         # extract_chmcmd syntax: <chm_file> <output_directory>
         command_args = [CHM_EXTRACT_CMD, chm_path, output_dir]
-        tool_name = "extract_chmcmd"
+        tool_name = "extract_chmLib"
     else:
         print("[!] ERROR: Extraction failed. Unsupported OS detected.")
         exit(1)
