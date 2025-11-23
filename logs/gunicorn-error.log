@@ -10659,3 +10659,14 @@ SyntaxError: invalid syntax
 [2025-11-23 02:49:58 +0000] [10304] [INFO] Booting worker with pid: 10304
 [2025-11-23 02:49:58 +0000] [10305] [INFO] Booting worker with pid: 10305
 [2025-11-23 02:49:58 +0000] [10306] [INFO] Booting worker with pid: 10306
+[2025-11-23 03:49:08 +0000] [10303] [INFO] Handling signal: term
+[2025-11-23 03:49:08 +0000] [10306] [INFO] Worker exiting (pid: 10306)
+[2025-11-23 03:49:08 +0000] [10304] [INFO] Worker exiting (pid: 10304)
+[2025-11-23 03:49:08 +0000] [10305] [INFO] Worker exiting (pid: 10305)
+[2025-11-23 03:49:09 +0000] [10303] [INFO] Shutting down: Master
+[2025-11-23 03:49:09 +0000] [10545] [INFO] Starting gunicorn 23.0.0
+[2025-11-23 03:49:09 +0000] [10545] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (10545)
+[2025-11-23 03:49:09 +0000] [10545] [INFO] Using worker: sync
+[2025-11-23 03:49:09 +0000] [10547] [INFO] Booting worker with pid: 10547
+[2025-11-23 03:49:09 +0000] [10548] [INFO] Booting worker with pid: 10548
+[2025-11-23 03:49:09 +0000] [10549] [INFO] Booting worker with pid: 10549
