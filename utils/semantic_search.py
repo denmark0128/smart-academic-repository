@@ -35,6 +35,79 @@ def get_model():
     print(f"❌ Failed to initialize GenAI Client: {e}")
     return None
 
+def embed_paper_title(paper):
+    """
+    Generate and save embedding for paper title.
+    """
+    if not paper.title:
+        print(f"[Embed] Paper {paper.id} has no title, skipping")
+        return False
+    
+    # ✅ FIX 1: Get the GenAI Client
+    client = get_model()
+    if not client:
+        print(f"[Embed] GenAI client is not available for paper {paper.id}, skipping title embedding")
+        return False
+        
+    try:
+        print(f"[Embed] Generating title embedding for paper {paper.id}...")
+        
+        # ✅ FIX 2: Call embed_texts with a list, and take the first (and only) embedding
+        embeddings = embed_texts(client, [paper.title])
+        
+        if embeddings.any():
+            # embeddings will be a 2D array: [[...embedding vector...]]
+            paper.title_embedding = embeddings[0].tolist()  # Convert to list for pgvector
+            paper.save(update_fields=['title_embedding'])
+            print(f"[Embed] ✅ Title embedding saved for paper {paper.id}")
+            return True
+        else:
+            print(f"[Embed] ❌ Embedding failed for title of paper {paper.id}")
+            return False
+            
+    except Exception as e:
+        print(f"[Embed] ❌ Error embedding title for paper {paper.id}: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+def embed_paper_abstract(paper):
+    """
+    Generate and save embedding for paper abstract.
+    """
+    if not paper.abstract:
+        print(f"[Embed] Paper {paper.id} has no abstract, skipping")
+        return False
+    
+    # ✅ FIX 1: Get the GenAI Client
+    client = get_model()
+    if not client:
+        print(f"[Embed] GenAI client is not available for paper {paper.id}, skipping abstract embedding")
+        return False
+        
+    try:
+        print(f"[Embed] Generating abstract embedding for paper {paper.id}...")
+        
+        # ✅ FIX 2: Call embed_texts with a list, and take the first (and only) embedding
+        embeddings = embed_texts(client, [paper.abstract])
+        
+        if embeddings.any():
+            # embeddings will be a 2D array: [[...embedding vector...]]
+            paper.abstract_embedding = embeddings[0].tolist()  # Convert to list for pgvector
+            paper.save(update_fields=['abstract_embedding'])
+            print(f"[Embed] ✅ Abstract embedding saved for paper {paper.id}")
+            return True
+        else:
+            print(f"[Embed] ❌ Embedding failed for abstract of paper {paper.id}")
+            return False
+            
+    except Exception as e:
+        print(f"[Embed] ❌ Error embedding abstract for paper {paper.id}: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+    
 
 def embed_texts(client, texts, model_name=GENAI_EMBEDDING_MODEL):
   """
@@ -424,3 +497,5 @@ def keyword_search(query, top_k=None):
 def highlight_query(text, query):
   pattern = re.compile(re.escape(query), re.IGNORECASE)
   return pattern.sub(r"<mark>\g<0></mark>", text)
+
+
