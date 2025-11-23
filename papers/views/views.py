@@ -609,19 +609,16 @@ def extract_metadata(request):
         elif ext == ".chm":
             print("[Extract Metadata] CHM detected, merging CHM...")  # DEBUG
             
-        try:
-            # --- This will now assign to the variable defined outside the try block ---
-            merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
-            
-            print(f"[Extract Metadata] CHM merged to {merged_html_path}")  # DEBUG
-            metadata = extract_metadata_from_abstract(merged_html_path)
-            print(f"[Extract Metadata] CHM metadata extracted: {metadata}")  # DEBUG
-        except Exception as chm_error:
-            # Log the specific CHM extraction error
-            print(f"[Extract Metadata CHM ERROR] {type(chm_error).__name__}: {chm_error}")
-            import traceback
-            traceback.print_exc()
-            raise Exception(f"CHM extraction failed: {str(chm_error)}") from chm_error
+            try:  # <-- Properly indented inside the elif block
+                merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+                print(f"[Extract Metadata] CHM merged to {merged_html_path}")  # DEBUG
+                metadata = extract_metadata_from_abstract(merged_html_path)
+                print(f"[Extract Metadata] CHM metadata extracted: {metadata}")  # DEBUG
+            except Exception as chm_error:
+                print(f"[Extract Metadata CHM ERROR] {type(chm_error).__name__}: {chm_error}")
+                import traceback
+                traceback.print_exc()
+                raise Exception(f"CHM extraction failed: {str(chm_error)}") from chm_error
 
         # Normalize college/program
         raw_college = metadata.get("college", "")
