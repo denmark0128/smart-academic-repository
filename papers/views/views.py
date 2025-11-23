@@ -31,7 +31,7 @@ from utils.metadata_extractor import (
     normalize_program,
 )
 from utils.tagging import extract_tags, get_embedding_model
-from utils.semantic_search import index_paper
+from utils.semantic_search import index_paper, embed_paper_abstract, embed_paper_title
 from utils.citation_matcher import extract_and_match_citations
 from utils.summarize import generate_summary_with_api
 from django.template.response import TemplateResponse
@@ -305,28 +305,14 @@ def process_paper_synchronously(paper):
         # --- STEP 1: Generate Embeddings ---
         try:
             print("[Sync] Generating embeddings...")
-            model = get_embedding_model()
-            fields_to_update = []
+            title_success = embed_paper_title(paper)
+            if title_success:
+                print("[Sync] Generated and saved title embedding")
 
-            if paper.title:
-                try:
-                    paper.title_embedding = model.encode(paper.title, convert_to_numpy=True)
-                    fields_to_update.append("title_embedding")
-                    print("[Sync] Generated title embedding")
-                except Exception as e:
-                    print(f"[Sync] Title Embedding Error: {e}")
+            abstract_success = embed_paper_abstract(paper)
+            if abstract_success:
+                print("[Sync] Generated and saved abstract embedding")
 
-            if paper.abstract:
-                try:
-                    paper.abstract_embedding = model.encode(paper.abstract, convert_to_numpy=True)
-                    fields_to_update.append("abstract_embedding")
-                    print("[Sync] Generated abstract embedding")
-                except Exception as e:
-                    print(f"[Sync] Abstract Embedding Error: {e}")
-
-            if fields_to_update:
-                paper.save(update_fields=fields_to_update)
-                print(f"[Sync] Saved embeddings: {fields_to_update}")
         except Exception as e:
             print(f"[Sync] Embedding Error: {e}")
 
@@ -382,10 +368,9 @@ def process_paper_synchronously(paper):
             print("[Sync] Extracting and matching citations")
             matched_citations = extract_and_match_citations(
                 paper=paper,
-                threshold=0.75,
-                top_k=5
+                threshold=0.15,  # Only save matches above 15% similarity
+                min_similarity=0.1  # Don't even consider below 10%
             )
-            
             paper.matched_count_cached = len(matched_citations)
             
             paper.citation_count_cached = MatchedCitation.objects.filter(
@@ -609,16 +594,12 @@ def extract_metadata(request):
         elif ext == ".chm":
             print("[Extract Metadata] CHM detected, merging CHM...")  # DEBUG
             
-            try:  # <-- Properly indented inside the elif block
-                merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
-                print(f"[Extract Metadata] CHM merged to {merged_html_path}")  # DEBUG
-                metadata = extract_metadata_from_abstract(merged_html_path)
-                print(f"[Extract Metadata] CHM metadata extracted: {metadata}")  # DEBUG
-            except Exception as chm_error:
-                print(f"[Extract Metadata CHM ERROR] {type(chm_error).__name__}: {chm_error}")
-                import traceback
-                traceback.print_exc()
-                raise Exception(f"CHM extraction failed: {str(chm_error)}") from chm_error
+            # --- This will now assign to the variable defined outside the try block ---
+            merged_html_path, _ = merge_chm_to_html(temp_path, settings.MEDIA_ROOT)
+            
+            print(f"[Extract Metadata] CHM merged to {merged_html_path}")  # DEBUG
+            metadata = extract_metadata_from_abstract(merged_html_path)
+            print(f"[Extract Metadata] CHM metadata extracted: {metadata}")  # DEBUG
 
         # Normalize college/program
         raw_college = metadata.get("college", "")
