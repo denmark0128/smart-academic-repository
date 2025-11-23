@@ -10670,3 +10670,50 @@ SyntaxError: invalid syntax
 [2025-11-23 03:49:09 +0000] [10547] [INFO] Booting worker with pid: 10547
 [2025-11-23 03:49:09 +0000] [10548] [INFO] Booting worker with pid: 10548
 [2025-11-23 03:49:09 +0000] [10549] [INFO] Booting worker with pid: 10549
+[2025-11-23 03:58:37 +0000] [10545] [INFO] Handling signal: term
+[2025-11-23 03:58:37 +0000] [10548] [INFO] Worker exiting (pid: 10548)
+[2025-11-23 03:58:37 +0000] [10547] [INFO] Worker exiting (pid: 10547)
+[2025-11-23 03:58:37 +0000] [10549] [INFO] Worker exiting (pid: 10549)
+[2025-11-23 03:58:39 +0000] [10545] [INFO] Shutting down: Master
+[2025-11-23 03:58:39 +0000] [10665] [INFO] Starting gunicorn 23.0.0
+[2025-11-23 03:58:39 +0000] [10665] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (10665)
+[2025-11-23 03:58:39 +0000] [10665] [INFO] Using worker: sync
+[2025-11-23 03:58:39 +0000] [10667] [INFO] Booting worker with pid: 10667
+[2025-11-23 03:58:39 +0000] [10668] [INFO] Booting worker with pid: 10668
+[2025-11-23 03:58:39 +0000] [10669] [INFO] Booting worker with pid: 10669
+[2025-11-23 04:05:14 +0000] [10667] [INFO] Worker exiting (pid: 10667)
+[2025-11-23 04:05:14 +0000] [10665] [INFO] Handling signal: term
+[2025-11-23 04:05:14 +0000] [10668] [INFO] Worker exiting (pid: 10668)
+[2025-11-23 04:05:14 +0000] [10669] [INFO] Worker exiting (pid: 10669)
+[2025-11-23 04:05:15 +0000] [10665] [INFO] Shutting down: Master
+[2025-11-23 04:05:15 +0000] [10703] [INFO] Starting gunicorn 23.0.0
+[2025-11-23 04:05:15 +0000] [10703] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (10703)
+[2025-11-23 04:05:15 +0000] [10703] [INFO] Using worker: sync
+[2025-11-23 04:05:15 +0000] [10704] [INFO] Booting worker with pid: 10704
+[2025-11-23 04:05:15 +0000] [10705] [INFO] Booting worker with pid: 10705
+[2025-11-23 04:05:15 +0000] [10706] [INFO] Booting worker with pid: 10706
+[2025-11-23 17:09:50 +0000] [10703] [INFO] Handling signal: term
+[2025-11-23 17:09:50 +0000] [10704] [INFO] Worker exiting (pid: 10704)
+[2025-11-23 17:09:50 +0000] [10706] [INFO] Worker exiting (pid: 10706)
+[2025-11-23 17:09:50 +0000] [10705] [INFO] Worker exiting (pid: 10705)
+[2025-11-23 17:09:51 +0000] [10703] [INFO] Shutting down: Master
+[2025-11-23 17:09:51 +0000] [12223] [INFO] Starting gunicorn 23.0.0
+[2025-11-23 17:09:51 +0000] [12223] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (12223)
+[2025-11-23 17:09:51 +0000] [12223] [INFO] Using worker: sync
+[2025-11-23 17:09:51 +0000] [12226] [INFO] Booting worker with pid: 12226
+[2025-11-23 17:09:51 +0000] [12227] [INFO] Booting worker with pid: 12227
+[2025-11-23 17:09:51 +0000] [12228] [INFO] Booting worker with pid: 12228
+[2025-11-23 17:21:01 +0000] [12226] [INFO] Worker exiting (pid: 12226)
+[2025-11-23 17:21:01 +0000] [12227] [INFO] Worker exiting (pid: 12227)
+[2025-11-23 17:21:01 +0000] [12228] [INFO] Worker exiting (pid: 12228)
+[2025-11-23 17:21:01 +0000] [12223] [INFO] Handling signal: term
+[2025-11-23 17:21:01 +0000] [12223] [ERROR] Worker (pid:12228) was sent SIGTERM!
+[2025-11-23 17:21:01 +0000] [12223] [ERROR] Worker (pid:12227) was sent SIGTERM!
+[2025-11-23 17:21:01 +0000] [12223] [ERROR] Worker (pid:12226) was sent SIGTERM!
+[2025-11-23 17:21:01 +0000] [12223] [INFO] Shutting down: Master
+[2025-11-23 17:21:01 +0000] [12271] [INFO] Starting gunicorn 23.0.0
+[2025-11-23 17:21:01 +0000] [12271] [INFO] Listening at: unix:/home/ubuntu/django-thesis/gunicorn.sock (12271)
+[2025-11-23 17:21:01 +0000] [12271] [INFO] Using worker: sync
+[2025-11-23 17:21:01 +0000] [12272] [INFO] Booting worker with pid: 12272
+[2025-11-23 17:21:01 +0000] [12273] [INFO] Booting worker with pid: 12273
+[2025-11-23 17:21:01 +0000] [12274] [INFO] Booting worker with pid: 12274

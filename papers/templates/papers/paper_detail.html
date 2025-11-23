@@ -91,29 +91,6 @@
           <a href="{{ paper.file.url }}" download class="btn btn-soft bg-blue-600 text-white dark:bg-blue-950 text-center">Download PDF</a>
           {% endif %}
           
-          <!-- Save Button (Lazy Load) -->
-          <div id="save-button-container"
-              {% if user.is_authenticated %}
-              hx-get="{% url 'paper_detail_partials' paper.pk %}"
-              hx-trigger="load"
-              hx-select="#save-button-section"
-              hx-swap="innerHTML"
-              {% endif %}>
-              
-            {% if user.is_authenticated %}
-              <div class="animate-pulse">
-                <div class="h-10 w-full sm:w-32 bg-gray-200 dark:bg-gray-800/70 rounded"></div>
-              </div>
-            {% else %}
-                <div class="text-center">
-                <a href="{% url 'account_login' %}?next={% url 'paper_detail' paper.pk %}" class="text-sm text-blue-600 hover:underline">
-                  Log in to save this paper
-                </a>
-              </div>
-
-            {% endif %}
-          </div>
-          
           <!-- PDF Viewer Buttons (Lazy Load) -->
           <div id="pdf-viewer-container"
               hx-get="{% url 'paper_detail_partials' paper.pk %}"

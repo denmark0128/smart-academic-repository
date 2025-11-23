@@ -9,12 +9,14 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from utils.tagging import get_embedding_model, extract_tags
 import re
+from django.contrib.admin.views.decorators import staff_member_required
 
+@staff_member_required
 def staff_table_partial(request):
     papers = Paper.objects.order_by('-uploaded_at')[:5]
     return render(request, "staff/partials/paper_table.html", {"papers": papers})
 
-
+@staff_member_required
 def staff_stats_partial(request):
     pending = Paper.objects.filter(is_registered=False).count()
     registered = Paper.objects.filter(is_registered=True).count()
@@ -27,14 +29,14 @@ def staff_stats_partial(request):
     }
 
     return render(request, 'staff/partials/stats_partial.html', {'stats': stats})
-
+@staff_member_required
 def staff_dashboard_partial(request):
     return render(request, 'staff/partials/dashboard.html')
-
+@staff_member_required
 def staff_tags_partial(request):
     """Main tags management page"""
     return render(request, 'staff/partials/tags_partial.html')
-
+@staff_member_required
 def staff_tags_table(request):
     """Tags table partial with search and filtering"""
     query = request.GET.get('q', '').strip()
@@ -79,7 +81,7 @@ def staff_tags_table(request):
     }
 
     return render(request, 'staff/partials/tags_table_partial.html', context)
-
+@staff_member_required
 def staff_tags_create(request):
     """Create new tag"""
     if request.method == 'POST':
@@ -102,7 +104,7 @@ def staff_tags_create(request):
     
     return staff_tags_table(request)
 
-
+@staff_member_required
 def staff_tags_update(request, tag_id):
     """Update tag name"""
     if request.method == 'POST':
@@ -121,7 +123,7 @@ def staff_tags_update(request, tag_id):
                 messages.success(request, f'Tag renamed from "{old_name}" to "{new_name}"')
     
     return staff_tags_table(request)
-
+@staff_member_required
 def staff_tags_toggle(request, tag_id):
     """Toggle tag active status"""
     tag = get_object_or_404(Tag, id=tag_id)
@@ -133,7 +135,7 @@ def staff_tags_toggle(request, tag_id):
     messages.success(request, f'Tag "{tag.name}" {status}')
     
     return staff_tags_table(request)
-
+@staff_member_required
 def staff_tags_delete(request, tag_id):
 
     """Delete tag"""
@@ -145,7 +147,7 @@ def staff_tags_delete(request, tag_id):
     messages.success(request, f'Tag "{tag_name}" deleted successfully')
     
     return staff_tags_table(request)
-
+@staff_member_required
 def staff_tags_generate_embedding(request, tag_id):
     """Generate embedding for a single tag using the tag description"""
     if request.method == 'POST':
@@ -175,10 +177,10 @@ def staff_tags_generate_embedding(request, tag_id):
     
     # Return the existing partial table
     return staff_tags_table(request)
-
+@staff_member_required
 def staff_papers_partial(request):
     return render(request, 'staff/partials/papers_partial.html')
-
+@staff_member_required
 def staff_papers_table_partial(request, extra_context=None):
     """Main tags management page"""
     papers = Paper.objects.all()
@@ -186,7 +188,7 @@ def staff_papers_table_partial(request, extra_context=None):
     if extra_context:
         context.update(extra_context)
     return render(request, 'staff/partials/papers_table_partial.html', context)
-
+@staff_member_required
 
 def staff_paper_regenerate_tags(request, paper_id):
     """Regenerate tags for a paper using AI (optimized)"""
@@ -258,7 +260,7 @@ def staff_paper_regenerate_tags(request, paper_id):
             break
     
     return render(request, 'staff/partials/papers_table_partial.html', {'papers': papers_list})
-
+@staff_member_required
 def _get_paper_text_for_tagging(paper):
     """Helper to safely extract text from paper for tagging"""
     text_parts = []
@@ -277,7 +279,7 @@ def _get_paper_text_for_tagging(paper):
     
     return " ".join(text_parts)
 
-
+@staff_member_required
 def search_settings_view(request):
     """View for managing search settings"""
     settings = SearchSettings.get_settings()
@@ -305,7 +307,7 @@ def search_settings_view(request):
     })
 
 # staff/views.py (add this function to the same file)
-
+@staff_member_required
 def llama_settings_view(request):
     """View for managing Llama settings"""
     settings = LlamaSettings.get_settings()
