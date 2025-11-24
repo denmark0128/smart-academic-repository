@@ -1,8 +1,8 @@
-<div id="save-btn-{{ paper.id }}" >
+<div id="save-btn-{{ paper.pk }}" >
     {% if is_saved %}
     <form 
         hx-post="{% url 'unsave_paper_list' paper.pk %}" 
-        hx-target="#save-btn-{{ paper.id }}" 
+        hx-target="#save-btn-{{ paper.pk }}" 
         hx-swap="outerHTML"
         hx-on="htmx:afterRequest: 
                htmx.ajax('GET', '{% url 'toast' %}?message=Paper removed!', '#toast-container')"
@@ -17,7 +17,7 @@
     {% else %}
     <form 
         hx-post="{% url 'save_paper_list' paper.pk %}" 
-        hx-target="#save-btn-{{ paper.id }}" 
+        hx-target="#save-btn-{{ paper.pk }}" 
         hx-swap="outerHTML"
         hx-on="htmx:afterRequest: 
                htmx.ajax('GET', '{% url 'toast' %}?message=Paper saved!', '#toast-container')"

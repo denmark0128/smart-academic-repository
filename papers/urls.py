@@ -21,7 +21,7 @@ urlpatterns = [
     path('insights/', views.paper_insights, name='paper_insights'),
     path('save/<int:pk>/', views.save_paper, name='save_paper'),
     path('unsave/<int:pk>/', views.unsave_paper, name='unsave_paper'),
-    path('saveList/<int:paper_id>/', views.save_paper_list, name='save_paper_list'),
+    path('saveList/<int:pk>/', views.save_paper_list, name='save_paper_list'),
     path('unsaveList/<int:pk>/', views.unsave_paper_list, name='unsave_paper_list'),
     path('toast/', views.toast, name='toast'),
     path("upload/tab/", views.upload_tab, name="upload_tab"),
@@ -40,5 +40,4 @@ urlpatterns = [
     path('paper/<int:pk>/get-answer/', views.get_answer, name='get_answer'),
     path('insights/chart/<str:chart_type>/', insights_partial, name='insights_partial'), 
 ]
-
 
