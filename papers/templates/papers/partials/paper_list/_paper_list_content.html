@@ -82,11 +82,15 @@
         </div>
         <div class="mt-auto flex gap-2">
           {% if item.paper %}
+          {% if request.user.is_staff or request.user.is_superuser or request.user.email|slice:"-14:" == "plpasig.edu.ph" %}
             <a href="{{ item.paper.file.url }}" download class="btn btn-xs btn-outline text-red-600">PDF</a>
+            
+            {% endif %}
             <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-xs btn-outline dark:text-gray-300 dark:hover:gray-200">View</a>
             {% if item.paper.merged_html %}
               <a href="{{ item.paper.merged_html.url }}" target="_blank" class="btn btn-xs btn-outline dark:text-gray-300 dark:hover:gray-200">HTML</a>
-            {% endif %}
+            
+            {% endif %} 
           {% endif %}
         </div>
       </div>
@@ -235,13 +239,16 @@
     <!-- Buttons -->
         <div class="flex flex-row justify-end mt-4 gap-2 w-full items-center">
           {% if ".pdf" in item.paper.file.name %}
-            <a href="{{ item.paper.file.url }}" download class="btn btn-soft border bg-white font-light border-gray-200 btn-sm dark:bg-gray-800 dark:border-gray-800 dark:text-gray-300">
-              Download PDF
-            </a>
-            <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-soft btn-sm font-light border bg-red-600 text-white  border-gray-200 bg-white dark:bg-red-950/50 dark:border-red-800">
-              PDF 
-            </a>
-          {% endif %}
+            {% if request.user.is_staff or request.user.is_superuser or request.user.email|slice:"-14:" == "plpasig.edu.ph" %}
+                <a href="{{ item.paper.file.url }}" download class="btn btn-soft border bg-white font-light border-gray-200 btn-sm dark:bg-gray-800 dark:border-gray-800 dark:text-gray-300">
+                  Download PDF
+                </a>
+              {% endif %}
+                <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-soft btn-sm font-light border bg-red-600 text-white  border-gray-200 bg-white dark:bg-red-950/50 dark:border-red-800">
+                  PDF 
+                </a>
+            {% endif %}
+          
           {% if item.paper.merged_html %}
             <a href="{{ item.paper.merged_html.url }}" target="_blank" class="btn btn-soft btn-sm font-light border border-gray-200 bg-blue-600 text-white dark:bg-blue-950/50 dark:border-blue-800">HTML</a>
           {% endif %}

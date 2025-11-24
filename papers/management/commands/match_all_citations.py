@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from papers.models import Paper, MatchedCitation
 from utils.citation_matcher import run_reference_matching
-from sentence_transformers import SentenceTransformer
+
 
 class Command(BaseCommand):
     help = "Scans all papers, extracts citations, matches them via FAISS, and stores the matches."
