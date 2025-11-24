@@ -10,6 +10,7 @@ router.register(r'api/papers', PaperViewSet)
 router.register(r'api/savedpapers', SavedPaperViewSet)
 
 urlpatterns = [
+    path("protected-media/<path:path>", views.protected_media, name="protected_media"),
     path('', views.paper_list, name='paper_list'),
     path('papers/<int:pk>/', views.paper_detail, name='paper_detail'),
     path('autocomplete/', views.autocomplete, name='autocomplete'),
@@ -39,4 +40,5 @@ urlpatterns = [
     path('paper/<int:pk>/get-answer/', views.get_answer, name='get_answer'),
     path('insights/chart/<str:chart_type>/', insights_partial, name='insights_partial'), 
 ]
+
 

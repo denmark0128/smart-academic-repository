@@ -15,6 +15,8 @@ from django.dispatch import receiver
 from django.views.decorators.cache import cache_page
 import re
 import os
+from django.http import FileResponse, HttpResponseForbidden, Http404
+from django.conf import settings
 import fitz
 import json
 import random
@@ -37,6 +39,23 @@ from utils.summarize import generate_summary_with_api
 from django.template.response import TemplateResponse
 import traceback
 from utils.single_paper_rag import query_rag # <-- Make sure this imports your modified function
+
+
+
+
+def protected_media(request, path):
+    # Check domain
+    email = (request.user.email or "").lower()
+    if not email.endswith("@plp.edu.ph"):
+        return HttpResponseForbidden("Not allowed.")
+
+    # Construct path
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+
+    if not os.path.exists(file_path):
+        raise Http404()
+
+    return FileResponse(open(file_path, "rb"))
 
 def rag_chat_view(request):
     return TemplateResponse(request, "papers/partials/chat_messages.html")
