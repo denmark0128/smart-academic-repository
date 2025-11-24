@@ -1,6 +1,11 @@
 # Ignore Python bytecode
 __pycache__/
 *.py[cod]
+venv/
+*/venv/
+logs/
+*.log
+
 
 # Ignore uploaded papers
 /media/papers/
