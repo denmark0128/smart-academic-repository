@@ -28,9 +28,11 @@
 <div id="pdf-viewer-section">
     <div class="flex gap-2">
       {% if paper.file %}
-      <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ paper.file.url }}" target="_blank" class="btn btn-soft bg-white dark:bg-gray-800">
-        View PDF
-      </a>
+     <a href="{{ paper.file.url }}" 
+   target="_blank"
+   class="btn btn-soft btn-sm font-light border bg-red-600 text-white border-gray-200 bg-white dark:bg-red-950/50 dark:border-red-800">
+    PDF
+</a>
       {% endif %}
       {% if paper.merged_html %}
       <a href="{{ paper.merged_html.url }}" target="_blank" class="btn btn-soft bg-white dark:bg-gray-800">

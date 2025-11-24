@@ -86,7 +86,11 @@
             <a href="{{ item.paper.file.url }}" download class="btn btn-xs btn-outline text-red-600">PDF</a>
             
             {% endif %}
-            <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-xs btn-outline dark:text-gray-300 dark:hover:gray-200">View</a>
+            <a href="{{ item.paper.file.url }}" 
+   target="_blank"
+   class="btn btn-soft btn-sm font-light border bg-red-600 text-white border-gray-200 bg-white dark:bg-red-950/50 dark:border-red-800">
+    PDF 
+</a>
             {% if item.paper.merged_html %}
               <a href="{{ item.paper.merged_html.url }}" target="_blank" class="btn btn-xs btn-outline dark:text-gray-300 dark:hover:gray-200">HTML</a>
             
@@ -244,9 +248,11 @@
                   Download PDF
                 </a>
               {% endif %}
-                <a href="{% static 'pdfjs/web/viewer.html' %}?file={{ item.paper.file.url }}" target="_blank" class="btn btn-soft btn-sm font-light border bg-red-600 text-white  border-gray-200 bg-white dark:bg-red-950/50 dark:border-red-800">
-                  PDF 
-                </a>
+                <a href="{{ item.paper.file.url }}" 
+   target="_blank"
+   class="btn btn-soft btn-sm font-light border bg-red-600 text-white border-gray-200 bg-white dark:bg-red-950/50 dark:border-red-800">
+    PDF
+</a>
             {% endif %}
           
           {% if item.paper.merged_html %}
