@@ -46,7 +46,7 @@
 <div id="abstract-section">
   <div class="bg-white/80 backdrop-blur-sm border border-gray-200 p-6 rounded-lg dark:bg-gray-700/30 dark:border-gray-800">
     <h2 class="text-lg font-semibold">Abstract</h2>
-    <p class="text-gray-800 leading-relaxed dark:text-gray-300">{{ paper.abstract }}</p>
+    <p class="text-gray-800 leading-relaxed text-justify dark:text-gray-300">{{ paper.abstract }}</p>
   </div>
 </div>
 
@@ -55,7 +55,7 @@
   {% if paper.summary %}
   <div class="border border-gray-200 p-6 rounded-lg bg-yellow-50 border-yellow-400 dark:bg-gray-700/30 dark:border-gray-800">
     <h3 class="text-lg font-semibold text-yellow-800 mb-2 dark:text-yellow-300">Summary with AI</h3>
-    <pre class="text-gray-800 whitespace-pre-wrap font-sans dark:text-yellow-300">
+    <pre class="text-gray-800 whitespace-pre-wrap font-sans text-justify dark:text-yellow-300">
 {{ paper.summary }}
 </pre>
   </div>

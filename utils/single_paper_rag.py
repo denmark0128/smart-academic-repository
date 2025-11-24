@@ -246,7 +246,7 @@ Always reference page numbers when providing specific information.
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
+            model="gemma-3-27b-it",
             contents=prompt,
             config={
                 "temperature": temperature,
@@ -288,7 +288,7 @@ def multi_query_rag(paper_id: int, user_query: str):
 Return only the 3 questions, numbered 1-3, nothing else."""
         
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
+            model="gemma-3-27b-it",
             contents=variation_prompt
         )
         
@@ -347,7 +347,7 @@ Return only the 3 questions, numbered 1-3, nothing else."""
 **ANSWER:**"""
         
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
+            model="gemma-3-27b-it",
             contents=prompt,
             config={"temperature": 0.3, "max_output_tokens": 2048}
         )
