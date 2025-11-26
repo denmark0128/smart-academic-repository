@@ -2,7 +2,6 @@ import re
 import os
 import fitz 
 import numpy as np
-# ❌ REMOVE: from sentence_transformers import SentenceTransformer 
 from papers.models import Paper, PaperChunk
 from django.db.models import Func, FloatField, Value
 from pgvector.django import CosineDistance
@@ -12,22 +11,13 @@ from staff.utils import get_search_settings
 from google import genai
 from google.genai import types
 
-# -------------------------------
-# Settings (MODIFIED)
-# -------------------------------
-
-# ❌ REMOVE: _model = None
-# ❌ REMOVE: _embedding_model_name_loaded = None  # Track the name of the loaded model
-
-# ✅ Define the GenAI embedding model you want to use
-GENAI_EMBEDDING_MODEL = 'gemini-embedding-001' # Or 'gemini-2.5-flash' if supported for embedding
+GENAI_EMBEDDING_MODEL = 'gemini-embedding-001' 
 
 def get_model():
   """
   Returns the GenAI Client instance.
   """
   try:
-    # The client will automatically pick up the API key from environment variables (e.g., GEMINI_API_KEY)
     client = genai.Client()
     print("✅ GenAI Client loaded.")
     return client
@@ -43,7 +33,6 @@ def embed_paper_title(paper):
         print(f"[Embed] Paper {paper.id} has no title, skipping")
         return False
     
-    # ✅ FIX 1: Get the GenAI Client
     client = get_model()
     if not client:
         print(f"[Embed] GenAI client is not available for paper {paper.id}, skipping title embedding")
@@ -52,12 +41,10 @@ def embed_paper_title(paper):
     try:
         print(f"[Embed] Generating title embedding for paper {paper.id}...")
         
-        # ✅ FIX 2: Call embed_texts with a list, and take the first (and only) embedding
         embeddings = embed_texts(client, [paper.title])
         
         if embeddings.any():
-            # embeddings will be a 2D array: [[...embedding vector...]]
-            paper.title_embedding = embeddings[0].tolist()  # Convert to list for pgvector
+            paper.title_embedding = embeddings[0].tolist()  
             paper.save(update_fields=['title_embedding'])
             print(f"[Embed] ✅ Title embedding saved for paper {paper.id}")
             return True
@@ -124,13 +111,10 @@ def embed_texts(client, texts, model_name=GENAI_EMBEDDING_MODEL):
         config=types.EmbedContentConfig(task_type="RETRIEVAL_DOCUMENT", output_dimensionality=768),
     )
     
-    # Debug: print the response structure
     print(f"Response type: {type(response)}")
     print(f"Response attributes: {dir(response)}")
     print(f"Response: {response}")
     
-    # Try accessing embeddings - common patterns:
-    # Option 1: Check if it's a list of embedding objects
     if hasattr(response, 'embeddings'):
       embeddings = [emb.values for emb in response.embeddings]
       return np.array(embeddings)
@@ -147,11 +131,6 @@ def embed_texts(client, texts, model_name=GENAI_EMBEDDING_MODEL):
     import traceback
     traceback.print_exc()
     return np.array([])
-
-
-# -------------------------------
-# PDF extraction & chunking (NO CHANGE)
-# -------------------------------
 
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -424,9 +403,6 @@ def semantic_search(query, top_k=None, min_score=None, bm25_weight=None, vector_
   return sorted(paper_best.values(), key=lambda x: x["score"], reverse=True)[:top_k]
 
 
-# -------------------------------
-# Keyword Search (NO CHANGE)
-# -------------------------------
 def keyword_search(query, top_k=None):
   """
   Simple keyword search across chunks.
@@ -449,7 +425,6 @@ def keyword_search(query, top_k=None):
   print(f"  - top_k: {top_k}")
   print(f"  - max_chunks_scan: {search_settings.max_chunks_scan}")
 
-  # Aggregate occurrences by paper
   pattern = re.compile(re.escape(query), re.IGNORECASE)
   per_paper = {}
   for c in qs:
@@ -472,7 +447,6 @@ def keyword_search(query, top_k=None):
     if not per_paper[pid]["snippet"]:
       per_paper[pid]["snippet"] = highlight_query(text, query)
 
-  # Convert to list and sort by occurrence count
   results = sorted(per_paper.values(), key=lambda x: x["count"], reverse=True)
 
   output = []
@@ -483,7 +457,6 @@ def keyword_search(query, top_k=None):
       "authors": r["authors"],
       "page": r.get("page"),
       "text": r.get("snippet", ""),
-      # use score to communicate number of occurrences (as float for compatibility)
       "score": float(r["count"]),
       "match_type": "keyword",
     })
@@ -491,9 +464,6 @@ def keyword_search(query, top_k=None):
   return output
 
 
-# -------------------------------
-# Helpers (NO CHANGE)
-# -------------------------------
 def highlight_query(text, query):
   pattern = re.compile(re.escape(query), re.IGNORECASE)
   return pattern.sub(r"<mark>\g<0></mark>", text)
