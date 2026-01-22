@@ -15,3 +15,5 @@ jwt
 google-genai
 langchain
 langchain-text-splitters
+pillow
+whitenoise
