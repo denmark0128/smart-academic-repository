@@ -1,8 +1,4 @@
-{% extends 'layouts/base.html' %}
 
-{% block title %}Paper List{% endblock %}
-
-{% block content %}
 <div class="grid grid-cols-1 md:grid-cols-[2.5fr_1.5fr] gap-6 min-h-[60vh] mt-6" x-data="{ view: localStorage.getItem('paperView') || 'card', filterOpen: JSON.parse(localStorage.getItem('filterOpen') ?? 'false') }" x-init="$watch('view', v => localStorage.setItem('paperView', v)); $watch('filterOpen', value => localStorage.setItem('filterOpen', JSON.stringify(value)))">
 
     <!-- Main Paper List and Controls -->
@@ -175,5 +171,3 @@
 
 
 </div>
-
-  {% endblock %}

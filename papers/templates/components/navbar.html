@@ -148,28 +148,33 @@
 
       <ul class="hidden sm:flex gap-3 justify-center items-center">
         <li >
-          <a href="{% url 'saved_papers' %}" class=" border-gray-300 flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 border rounded-full" title="Library">
+          <a hx-get="/papers/saved" hx-target="#content" hx-push-url="true" class="cursor-pointer border-gray-300 flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 border rounded-full" title="Library">
             <svg class="h-5 w-5 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
             </svg>
           </a>
         </li>
         <li>
-          <a href="{% url 'paper_insights' %}" class=" border-gray-300 flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 border rounded-full" title="Overview">
+          <a hx-get="/papers/insights" hx-target="#content" hx-push-url="true" class="cursor-pointer border-gray-300 flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 border rounded-full" title="Overview">
             <svg class="h-5 w-5 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
           </a>
         </li>
         <li>
-          <a href="{% url 'paper_list' %}" class=" border-gray-300 flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 border border rounded-full" title="Papers">
+          <a hx-get="/papers/" hx-target="#content" hx-push-url="true" class="cursor-pointer border-gray-300 flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 border border rounded-full" title="Papers">
             <svg class="h-5 w-5 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
           </a>
         </li>
         <li>
-          <a href="{% url 'paper_upload' %}" class=" border-gray-300 flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 border rounded-full" title="Upload">
+          <a hx-get="/papers/46" hx-target="#content" hx-push-url="true">
+            46
+          </a>
+        </li>
+        <li>
+          <a hx-get="/papers/upload/" hx-target="#content" hx-push-url="true" class="cursor-pointer border-gray-300 flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 border rounded-full" title="Upload">
             <svg class="h-5 w-5 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
             </svg>

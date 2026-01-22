@@ -37,7 +37,7 @@ from utils.summarize import generate_summary_with_api
 from django.template.response import TemplateResponse
 import traceback
 from utils.single_paper_rag import query_rag # <-- Make sure this imports your modified function
-
+    
 def rag_chat_view(request):
     return TemplateResponse(request, "papers/partials/chat_messages.html")
 
@@ -86,7 +86,7 @@ def get_answer(request, pk):
 
 
 def home(request):
-    return render(request, "home.html")
+    return render(request, "papers/home_container.html")
 
 
 def papers_view(request):
@@ -262,7 +262,10 @@ def paper_list(request):
     }
 
     # The **full page** just contains filters, container, skeleton, etc.
-    return render(request, "papers/paper_list.html", context)
+    if request.headers.get("HX-Request") == "true":
+        return render(request, "papers/paper_list.html", context)
+        
+    return render(request, "papers/paper_list_container.html", context)
 
 
 #@cache_page(30 * 1, key_prefix='paper_detail_public')  # Cache for all users
@@ -287,12 +290,15 @@ def paper_detail(request, pk):
         ),
         pk=pk
     )
-    
+    print(f"Title: {paper.title}, PK: {paper.pk}, Authors: {paper.authors}")
     context = {
         'paper': paper,
     }
     
-    return render(request, 'papers/paper_detail.html', context)
+    if request.headers.get("HX-Request") == "true":
+        return render(request, "papers/paper_detail.html", context)
+        
+    return render(request, "papers/paper_detail_container.html", context)
 
 def process_paper_synchronously(paper):
     """
@@ -467,12 +473,17 @@ def paper_upload(request):
 
     status = request.GET.get("status")
     print(f"[16] Rendering template with status: {status}")
-    return render(request, "papers/paper_upload.html", {
+    context = {
         "form": form,
         "status": status,
         "papers": papers,
         "years": years,
-    })
+    }
+        
+    if request.headers.get("HX-Request") == "true":
+        return render(request, "papers/paper_upload.html", context)
+        
+    return render(request, "papers/paper_upload_container.html", context)
 
 def _get_paper_text_for_tagging(paper):
     """Helper to safely extract text from paper for tagging"""
@@ -555,7 +566,11 @@ def toast(request):
 
 @login_required
 def saved_papers(request):
-    return render(request, 'profile/saved_papers.html')
+
+    if request.headers.get("HX-Request") == "true":
+        return render(request, "papers/paper_library.html")
+        
+    return render(request, "papers/paper_library_container.html")
 
 def pdf_viewer(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
@@ -745,14 +760,21 @@ def paper_insights(request):
             if title:
                 top_cited.append({'paper_id': pid, 'title': title, 'count': r.get('c', 0)})
 
-    return render(request, 'papers/paper_insights.html', {
+    context = {
         'tag_counts': tag_counts,
-        'insights_json': json.dumps(insights),
+        'insights_json': json.dumps(insights), # <--- This is what your charts need
         'top_cited_papers': top_cited,
         'total_papers': Paper.objects.count(),
         'total_citations': Paper.objects.aggregate(Sum('citation_count_cached'))['citation_count_cached__sum'] or 0,
         'top_cited_paper': Paper.objects.order_by('-citation_count_cached').first(),
-    })
+    }
+
+    # LOGIC CHANGE: Check for HTMX
+    if request.headers.get("HX-Request") == "true":
+        return render(request, "papers/paper_insights.html", context)
+    
+    # If full page load, render the container which includes base.html
+    return render(request, "papers/paper_insights_container.html", context)
 
 
 def upload_tab(request):

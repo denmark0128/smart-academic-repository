@@ -2,7 +2,9 @@
 
 <!-- Paper List Container - This is what gets swapped -->
 <div id="paper-list-container">
+  
   <div id="list-content">
+     
     <!-- OOB swap for Active Filters -->
     <div id="active-filters" hx-swap-oob="true">
       {% include "papers/partials/paper_list/_active_filters.html" %}
@@ -47,7 +49,11 @@
       {% if item.paper.college == 'ccs' %}border-l-4 border-l-slate-800 dark:border-l-gray-400{% elif item.paper.college == 'cba' %}border-l-4  border-l-yellow-400{% endif %}">
 
         {% if item.paper %}
-          <a href="{% url 'paper_detail' item.paper.pk %}" class="font-semibold text-base text-gray-950 tracking-tight hover:underline mb-1 dark:text-gray-300">{{ item.paper.title }}</a>
+          <a href="{% url 'paper_detail' item.paper.pk %}" 
+   hx-get="{% url 'paper_detail' item.paper.pk %}"
+   hx-boost="true"
+   hx-target="#content"
+   hx-push-url="true" class="font-semibold text-base text-gray-950 tracking-tight hover:underline mb-1 dark:text-gray-300">{{ item.paper.title }}</a>
           {% if item.score and item.score != '-' %}
             <div class="text-xs text-gray-500 mb-1 dark:text-gray-400">
               Similarity: {{ item.score }}
